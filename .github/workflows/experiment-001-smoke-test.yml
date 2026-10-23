@@ -1,0 +1,75 @@
+name: Experiment 001 cloud feasibility smoke test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sumo-smoke-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Install SUMO
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y sumo sumo-tools
+          sumo --version
+      - name: Create synthetic road network and trips
+        run: |
+          mkdir -p results
+          netgenerate --grid --grid.number 4 --grid.length 200 --output-file results/network.net.xml
+          python3 - <<'PY'
+          import os, random, xml.etree.ElementTree as ET
+          import sys
+          sys.path.insert(0, '/usr/share/sumo/tools')
+          import sumolib
+          random.seed(1001)
+          net = sumolib.net.readNet('results/network.net.xml')
+          edges = [e for e in net.getEdges() if not e.isSpecial() and e.allows('passenger')]
+          root = ET.Element('trips')
+          for i in range(100):
+              for attempt in range(1000):
+                  a, b = random.sample(edges, 2)
+                  path, cost = net.getShortestPath(a, b, vClass='passenger')
+                  if path and len(path) >= 2:
+                      break
+              else:
+                  raise RuntimeError('Could not find connected origin-destination pair')
+              ET.SubElement(root, 'trip', id=f'veh{i:03d}', depart=str(i * 2), **{'from':a.getID(), 'to':b.getID()})
+          ET.ElementTree(root).write('results/trips.xml', encoding='utf-8', xml_declaration=True)
+          print('Generated 100 reproducible synthetic trips')
+          PY
+      - name: Route vehicles and run baseline
+        run: |
+          duarouter --net-file results/network.net.xml --route-files results/trips.xml --output-file results/routes.rou.xml --seed 1001 --no-step-log true
+          sumo --net-file results/network.net.xml --route-files results/routes.rou.xml --tripinfo-output results/tripinfo.xml --summary-output results/summary.xml --seed 1001 --no-step-log true
+      - name: Summarize observed trips
+        run: |
+          python3 - <<'PY'
+          import csv, statistics, xml.etree.ElementTree as ET
+          trips = ET.parse('results/tripinfo.xml').getroot().findall('tripinfo')
+          if len(trips) != 100:
+              raise RuntimeError(f'Expected 100 completed trips, got {len(trips)}')
+          durations = [float(t.attrib['duration']) for t in trips]
+          waiting = [float(t.attrib['waitingTime']) for t in trips]
+          rows = [
+              ('metric','value'),
+              ('experiment','001 baseline smoke test only'),
+              ('vehicles_completed',len(trips)),
+              ('mean_trip_duration_seconds',round(statistics.mean(durations),3)),
+              ('mean_waiting_time_seconds',round(statistics.mean(waiting),3)),
+              ('seed',1001),
+              ('network','synthetic 4x4 grid'),
+          ]
+          with open('results/report.csv','w',newline='') as f:
+              csv.writer(f).writerows(rows)
+          for k,v in rows: print(f'{k}: {v}')
+          PY
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: experiment-001-baseline-smoke-test
+          path: results/
+          retention-days: 14
