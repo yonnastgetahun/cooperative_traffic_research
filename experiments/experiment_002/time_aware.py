@@ -12,7 +12,7 @@ def build_graph(net):
         nxt = []
         for connection in edge.getOutgoing():
             e = connection.getTo()
-            if e.getID() in edges and any(c.getVClass() is None or True for c in [connection]):
+            if e.getID() in edges:
                 # getOutgoing returns legal network connections; filter passenger legality below.
                 if connection.getFromLane().allows("passenger") and connection.getToLane().allows("passenger"):
                     nxt.append(e.getID())
