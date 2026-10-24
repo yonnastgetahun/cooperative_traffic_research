@@ -9,12 +9,11 @@ permissions:
 jobs:
   sumo-smoke-test:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
-      - name: Install SUMO
+      - name: Install SUMO (skip slow package index refresh)
         run: |
-          sudo apt-get update
-          sudo apt-get install -y sumo sumo-tools
+          sudo DEBIAN_FRONTEND=noninteractive timeout 240 apt-get install -y --no-install-recommends sumo sumo-tools
           sumo --version
       - name: Create synthetic road network and trips
         run: |
