@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       post_text:
-        description: "Approved X post text (leave blank for Experiment 001 milestone)"
+        description: "Approved X post text (leave blank for latest traffic research findings)"
         required: false
         type: string
 
@@ -29,7 +29,7 @@ jobs:
           from urllib.request import Request, urlopen
           from urllib.error import HTTPError, URLError
 
-          post = os.getenv("POST_TEXT", "").strip() or "Experiment 001 design is complete. Can coordinated routing reduce traffic without unfairly delaying other drivers? Next: simulation and visualization. Follow along: https://github.com/yonnastgetahun/cooperative_traffic_research"
+          post = os.getenv("POST_TEXT", "").strip() or "We simulated 1,000 vehicles coordinating routes. They got slower. Across 3 congestion levels, independent routing beat both cooperative approaches we tested. Now we're investigating why. Research & results: https://github.com/yonnastgetahun/cooperative_traffic_research"
           if len(post) > 280:
               sys.exit("Post exceeds 280 characters")
           keys = ("X_API_KEY", "X_API_SECRET", "X_ACCESS_TOKEN", "X_ACCESS_TOKEN_SECRET")
