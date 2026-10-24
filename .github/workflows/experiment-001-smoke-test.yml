@@ -2,6 +2,15 @@ name: Experiment 001 cloud feasibility smoke test
 
 on:
   workflow_dispatch:
+    inputs:
+      grid_size:
+        description: 'Grid size (4 or 10)'
+        required: true
+        default: '4'
+        type: choice
+        options:
+          - '4'
+          - '10'
 
 permissions:
   contents: read
@@ -21,7 +30,7 @@ jobs:
       - name: Create synthetic road network and trips
         run: |
           mkdir -p results
-          netgenerate --grid --grid.number 4 --grid.length 200 --output-file results/network.net.xml
+          netgenerate --grid --grid.number "${{ inputs.grid_size }}" --grid.length 200 --output-file results/network.net.xml
           python3 - <<'PY'
           import os, random, xml.etree.ElementTree as ET
           import sys
@@ -31,7 +40,7 @@ jobs:
           net = sumolib.net.readNet('results/network.net.xml')
           edges = [e for e in net.getEdges() if not e.isSpecial() and e.allows('passenger')]
           root = ET.Element('trips')
-          for i in range(100):
+          for i in range(1000):
               for attempt in range(1000):
                   a, b = random.sample(edges, 2)
                   path, cost = net.getShortestPath(a, b, vClass='passenger')
@@ -39,9 +48,9 @@ jobs:
                       break
               else:
                   raise RuntimeError('Could not find connected origin-destination pair')
-              ET.SubElement(root, 'trip', id=f'veh{i:03d}', depart=str(i * 2), **{'from':a.getID(), 'to':b.getID()})
+              ET.SubElement(root, 'trip', id=f'veh{i:03d}', depart=str(i * 0.2), **{'from':a.getID(), 'to':b.getID()})
           ET.ElementTree(root).write('results/trips.xml', encoding='utf-8', xml_declaration=True)
-          print('Generated 100 reproducible synthetic trips')
+          print('Generated 1000 reproducible synthetic trips')
           PY
       - name: Route vehicles and run baseline
         run: |
@@ -52,18 +61,18 @@ jobs:
           python3 - <<'PY'
           import csv, statistics, xml.etree.ElementTree as ET
           trips = ET.parse('results/tripinfo.xml').getroot().findall('tripinfo')
-          if len(trips) != 100:
-              raise RuntimeError(f'Expected 100 completed trips, got {len(trips)}')
+          if len(trips) != 1000:
+              raise RuntimeError(f'Expected 1000 completed trips, got {len(trips)}')
           durations = [float(t.attrib['duration']) for t in trips]
           waiting = [float(t.attrib['waitingTime']) for t in trips]
           rows = [
               ('metric','value'),
-              ('experiment','001 baseline smoke test only'),
+              ('experiment','001 1000-vehicle scaling baseline'),
               ('vehicles_completed',len(trips)),
               ('mean_trip_duration_seconds',round(statistics.mean(durations),3)),
               ('mean_waiting_time_seconds',round(statistics.mean(waiting),3)),
               ('seed',1001),
-              ('network','synthetic 4x4 grid'),
+              ('network','synthetic grid selected at dispatch'),
           ]
           with open('results/report.csv','w',newline='') as f:
               csv.writer(f).writerows(rows)
@@ -72,6 +81,6 @@ jobs:
       - name: Upload results
         uses: actions/upload-artifact@v4
         with:
-          name: experiment-001-baseline-smoke-test
+          name: experiment-001-baseline-1000-grid-${{ inputs.grid_size }}
           path: results/
           retention-days: 14
