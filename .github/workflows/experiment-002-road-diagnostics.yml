@@ -27,7 +27,7 @@ jobs:
           import xml.etree.ElementTree as ET
           for arm in ('independent','cooperative'):
               root=ET.Element('additional')
-              ET.SubElement(root,'edgeData',id='road_measurements',file=arm+'-edge-data.xml',freq='3600',excludeEmpty='true')
+              ET.SubElement(root,'edgeData',id='road_measurements',file='results/'+arm+'-edge-data.xml',freq='3600',excludeEmpty='true')
               ET.ElementTree(root).write('results/'+arm+'-additional.xml',encoding='utf-8',xml_declaration=True)
           PY
           for arm in independent cooperative; do
