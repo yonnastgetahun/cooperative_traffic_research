@@ -1,0 +1,93 @@
+name: Experiment 002 three-regime coverage backfill
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compare:
+    strategy:
+      fail-fast: false
+      matrix:
+        window: [200, 600, 1200]
+        seed: [1001, 1002, 1003]
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    container:
+      image: ghcr.io/eclipse-sumo/sumo:latest
+    env:
+      SUMO_HOME: /usr/share/sumo
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate fixed matched demand
+        env:
+          WINDOW: ${{ matrix.window }}
+          SEED: ${{ matrix.seed }}
+        run: |
+          set -eu
+          mkdir -p results
+          sumo --version > results/sumo-version.txt
+          netgenerate --grid --grid.number 10 --grid.length 200 --output-file results/network.net.xml
+          python3 - <<'PY'
+          import random,os,sys,json,xml.etree.ElementTree as ET
+          sys.path.insert(0,os.path.join(os.environ.get('SUMO_HOME','/usr/share/sumo'),'tools'))
+          import sumolib
+          seed=int(os.environ['SEED']);window=int(os.environ['WINDOW'])
+          random.seed(seed)
+          net=sumolib.net.readNet('results/network.net.xml')
+          edges=[e for e in net.getEdges() if not e.isSpecial() and e.allows('passenger')]
+          root=ET.Element('trips')
+          for i in range(1000):
+              for _ in range(1000):
+                  a,b=random.sample(edges,2)
+                  path,_=net.getShortestPath(a,b,vClass='passenger')
+                  if path and len(path)>=2:break
+              else:raise RuntimeError('No connected OD')
+              ET.SubElement(root,'trip',id=f'veh{i:04d}',depart=f'{i*window/1000:.3f}',**{'from':a.getID(),'to':b.getID()})
+          ET.ElementTree(root).write('results/trips.xml',encoding='utf-8',xml_declaration=True)
+          json.dump({'grid':10,'vehicles':1000,'window':window,'seed':seed,'strategies':['independent','edge-count-0.02','time-aware'],'purpose':'coverage backfill; no parameter tuning'},open('results/manifest.json','w'),indent=2)
+          PY
+          sha256sum results/network.net.xml results/trips.xml > results/input-hashes.txt
+      - name: Assign all strategies
+        run: |
+          set -eu
+          duarouter -n results/network.net.xml -r results/trips.xml -o results/independent.rou.xml --seed ${{ matrix.seed }} --no-step-log true
+          python3 experiments/experiment_002/cooperative.py --net results/network.net.xml --trips results/trips.xml --out results/edge-count.rou.xml --metrics results/edge-count.json --penalty 0.02
+          python3 experiments/experiment_002/time_aware.py --net results/network.net.xml --trips results/trips.xml --out results/time-aware.rou.xml --audit results/time-aware-audit.csv --manifest results/time-aware.json
+      - name: Validate and simulate
+        run: |
+          set -eu
+          python3 - <<'PY'
+          import xml.etree.ElementTree as ET
+          expected={t.get('id') for t in ET.parse('results/trips.xml').getroot().findall('trip')}
+          assert len(expected)==1000
+          for arm in ('independent','edge-count','time-aware'):
+              vehicles=ET.parse(f'results/{arm}.rou.xml').getroot().findall('vehicle')
+              if len(vehicles)!=1000 or {v.get('id') for v in vehicles}!=expected:raise RuntimeError(arm+' route IDs invalid')
+          PY
+          for arm in independent edge-count time-aware; do
+            sumo -n results/network.net.xml -r results/${arm}.rou.xml --tripinfo-output results/${arm}-tripinfo.xml --seed ${{ matrix.seed }} --no-step-log true
+          done
+      - name: Paired outcomes and coverage validation
+        run: |
+          python3 - <<'PY'
+          import csv,statistics,xml.etree.ElementTree as ET
+          arms=('independent','edge-count','time-aware')
+          data={a:{t.get('id'):t for t in ET.parse(f'results/{a}-tripinfo.xml').getroot().findall('tripinfo')} for a in arms}
+          base=data['independent']
+          with open('results/comparison.csv','w',newline='') as f:
+              w=csv.writer(f);w.writerow(['strategy','completed','unfinished','mean_duration_s','mean_wait_s','p95_duration_s','mean_paired_delta_s','drivers_harmed'])
+              for arm in arms:
+                  ts=data[arm]
+                  if len(ts)!=1000 or set(ts)!=set(base):raise RuntimeError(arm+' incomplete/mismatched')
+                  ds=sorted(float(t.get('duration')) for t in ts.values())
+                  waits=[float(t.get('waitingTime')) for t in ts.values()]
+                  deltas=[float(ts[k].get('duration'))-float(base[k].get('duration')) for k in base]
+                  w.writerow([arm,len(ts),0,statistics.mean(ds),statistics.mean(waits),ds[int(.95*(len(ds)-1))],statistics.mean(deltas),sum(x>0 for x in deltas)])
+          PY
+      - name: Upload scenario evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp002-coverage-window-${{ matrix.window }}-seed-${{ matrix.seed }}
+          path: results/
+          retention-days: 30
