@@ -1,0 +1,65 @@
+name: Experiment 002 road-level traffic diagnostics
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  road-diagnostics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    container:
+      image: ghcr.io/eclipse-sumo/sumo:latest
+    env:
+      SUMO_HOME: /usr/share/sumo
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate identical demand and paired routes
+        run: |
+          set -eu
+          mkdir -p results
+          netgenerate --grid --grid.number 10 --grid.length 200 --output-file results/network.net.xml
+          python3 experiments/experiment_002/diagnostics.py
+          sha256sum results/network.net.xml results/trips.xml > results/input-hashes.txt
+      - name: Measure observed traffic on each road
+        run: |
+          set -eu
+          python3 - <<'PY'
+          import xml.etree.ElementTree as ET
+          for arm in ('independent','cooperative'):
+              root=ET.Element('additional')
+              ET.SubElement(root,'edgeData',id='road_measurements',file=arm+'-edge-data.xml',freq='3600',excludeEmpty='true')
+              ET.ElementTree(root).write('results/'+arm+'-additional.xml',encoding='utf-8',xml_declaration=True)
+          PY
+          for arm in independent cooperative; do
+            sumo --net-file results/network.net.xml --route-files results/${arm}.rou.xml --additional-files results/${arm}-additional.xml --tripinfo-output results/${arm}-observed-tripinfo.xml --seed 1001 --no-step-log true
+            test -s results/${arm}-edge-data.xml
+          done
+      - name: Summarize road-level differences
+        run: |
+          python3 - <<'PY'
+          import csv,xml.etree.ElementTree as ET
+          measurements={}
+          for arm in ('independent','cooperative'):
+              root=ET.parse('results/'+arm+'-edge-data.xml').getroot()
+              rows=root.findall('.//edge')
+              measurements[arm]={e.get('id'):e for e in rows}
+          with open('results/road-level-comparison.csv','w',newline='') as f:
+              w=csv.writer(f)
+              w.writerow(['edge','baseline_speed_mps','cooperative_speed_mps','delta_speed_mps','baseline_wait_s','cooperative_wait_s','delta_wait_s','baseline_sampled_seconds','cooperative_sampled_seconds'])
+              for edge in sorted(set(measurements['independent'])|set(measurements['cooperative'])):
+                  a=measurements['independent'].get(edge)
+                  b=measurements['cooperative'].get(edge)
+                  def val(x,k):
+                      return float(x.get(k)) if x is not None and x.get(k) is not None else None
+                  av,bv=val(a,'speed'),val(b,'speed')
+                  aw,bw=val(a,'waitingTime'),val(b,'waitingTime')
+                  w.writerow([edge,av,bv,bv-av if av is not None and bv is not None else '',aw,bw,bw-aw if aw is not None and bw is not None else '',val(a,'sampledSeconds'),val(b,'sampledSeconds')])
+          print('Measured roads:',len(set(measurements['independent'])|set(measurements['cooperative'])))
+          PY
+      - name: Upload road diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: experiment-002-road-level-diagnostics-seed-1001-window-200
+          path: results/
+          retention-days: 30
