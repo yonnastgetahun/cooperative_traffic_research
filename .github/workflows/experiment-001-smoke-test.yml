@@ -9,12 +9,15 @@ permissions:
 jobs:
   sumo-smoke-test:
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/eclipse-sumo/sumo:latest
     timeout-minutes: 20
     steps:
-      - name: Install SUMO (skip slow package index refresh)
+      - name: Verify prebuilt SUMO tools
         run: |
-          sudo DEBIAN_FRONTEND=noninteractive timeout 240 apt-get install -y --no-install-recommends sumo sumo-tools
           sumo --version
+          netgenerate --version
+          duarouter --version
       - name: Create synthetic road network and trips
         run: |
           mkdir -p results
@@ -22,7 +25,7 @@ jobs:
           python3 - <<'PY'
           import os, random, xml.etree.ElementTree as ET
           import sys
-          sys.path.insert(0, '/usr/share/sumo/tools')
+          sys.path.insert(0, os.path.join(os.environ.get('SUMO_HOME', '/usr/share/sumo'), 'tools'))
           import sumolib
           random.seed(1001)
           net = sumolib.net.readNet('results/network.net.xml')
