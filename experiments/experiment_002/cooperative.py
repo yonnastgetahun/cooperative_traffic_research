@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Experimental advance-demand cooperative routing, not real-time rerouting."""
 import argparse, collections, heapq, json, math, xml.etree.ElementTree as ET
+import os, sys
+sys.path.insert(0, os.path.join(os.environ.get('SUMO_HOME', '/usr/share/sumo'), 'tools'))
 import sumolib
 
 def path_for(net, origin, dest, load, penalty):
