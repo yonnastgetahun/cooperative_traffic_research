@@ -10,12 +10,11 @@ def build_graph(net):
     adj = {}
     for eid, edge in edges.items():
         nxt = []
-        for connection in edge.getOutgoing():
-            e = connection.getTo()
-            if e.getID() in edges:
-                # getOutgoing returns legal network connections; filter passenger legality below.
-                if connection.getFromLane().allows("passenger") and connection.getToLane().allows("passenger"):
-                    nxt.append(e.getID())
+        for next_edge, connections in edge.getOutgoing().items():
+            if next_edge.getID() not in edges:
+                continue
+            if any(conn.getFromLane().allows("passenger") and conn.getToLane().allows("passenger") for conn in connections):
+                nxt.append(next_edge.getID())
         adj[eid] = sorted(set(nxt))
     return edges, adj
 
