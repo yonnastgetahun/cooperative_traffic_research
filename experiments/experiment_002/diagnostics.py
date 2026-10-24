@@ -3,12 +3,13 @@ sys.path.insert(0,os.path.join(os.environ.get('SUMO_HOME','/usr/share/sumo'),'to
 import sumolib
 net='results/network.net.xml'
 random.seed(1001)
-edges=[e for e in sumolib.net.readNet(net).getEdges() if not e.isSpecial() and e.allows('passenger')]
+network=sumolib.net.readNet(net)
+edges=[e for e in network.getEdges() if not e.isSpecial() and e.allows('passenger')]
 root=ET.Element('trips')
 for i in range(1000):
     for _ in range(1000):
         a,b=random.sample(edges,2)
-        p,_=sumolib.net.readNet(net).getShortestPath(a,b,vClass='passenger')
+        p,_=network.getShortestPath(a,b,vClass='passenger')
         if p and len(p)>=2:break
     else:raise RuntimeError('Disconnected trip')
     ET.SubElement(root,'trip',id=f'veh{i:04d}',depart=f'{i*.2:.3f}',**{'from':a.getID(),'to':b.getID()})
