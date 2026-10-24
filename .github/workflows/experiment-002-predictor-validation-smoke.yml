@@ -49,7 +49,7 @@ jobs:
       - name: Observe simulation
         run: |
           set -eu
-          sumo -n results/network.net.xml -r results/time-aware.rou.xml --fcd-output results/observed-fcd.xml --fcd-output.period 1 --tripinfo-output results/observed-tripinfo.xml --seed 2001 --no-step-log true
+          sumo -n results/network.net.xml -r results/time-aware.rou.xml --fcd-output results/observed-fcd.xml --device.fcd.period 1 --fcd-output.attributes lane,speed --tripinfo-output results/observed-tripinfo.xml --seed 2001 --no-step-log true
           python3 - <<'PY'
           import xml.etree.ElementTree as ET
           n=len(ET.parse('results/observed-tripinfo.xml').getroot().findall('tripinfo'))
