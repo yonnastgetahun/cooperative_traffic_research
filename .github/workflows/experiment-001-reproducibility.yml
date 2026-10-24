@@ -1,0 +1,68 @@
+name: Experiment 001 reproducibility (3 windows x 3 seeds)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  calibrate:
+    strategy:
+      fail-fast: false
+      matrix:
+        departure_window_seconds: [200, 600, 1200]
+        seed: [1001, 1002, 1003]
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/eclipse-sumo/sumo:latest
+    timeout-minutes: 30
+    steps:
+      - name: Generate network and fixed OD demand
+        env:
+          WINDOW: ${{ matrix.departure_window_seconds }}
+          SEED: ${{ matrix.seed }}
+        run: |
+          set -eu
+          mkdir -p results
+          netgenerate --grid --grid.number 10 --grid.length 200 --output-file results/network.net.xml
+          python3 - <<'PY'
+          import os, random, xml.etree.ElementTree as ET, json, sys
+          sys.path.insert(0, os.path.join(os.environ.get('SUMO_HOME', '/usr/share/sumo'), 'tools'))
+          import sumolib
+          seed=int(os.environ['SEED']); window=int(os.environ['WINDOW'])
+          random.seed(seed)
+          net=sumolib.net.readNet('results/network.net.xml')
+          edges=[e for e in net.getEdges() if not e.isSpecial() and e.allows('passenger')]
+          root=ET.Element('trips')
+          for i in range(1000):
+              for attempt in range(1000):
+                  a,b=random.sample(edges,2)
+                  path,_=net.getShortestPath(a,b,vClass='passenger')
+                  if path and len(path)>=2: break
+              else: raise RuntimeError('No connected OD pair')
+              ET.SubElement(root,'trip',id=f'veh{i:04d}',depart=f'{i*window/1000:.3f}',**{'from':a.getID(),'to':b.getID()})
+          ET.ElementTree(root).write('results/trips.xml',encoding='utf-8',xml_declaration=True)
+          with open('results/manifest.json','w') as f: json.dump({'grid_size':10,'vehicles':1000,'departure_window_seconds':window,'seed':seed,'routing':'static duarouter baseline','scope':'calibration only'},f,indent=2)
+          PY
+      - name: Route and simulate
+        run: |
+          set -eu
+          duarouter --net-file results/network.net.xml --route-files results/trips.xml --output-file results/routes.rou.xml --seed ${{ matrix.seed }} --no-step-log true
+          sumo --net-file results/network.net.xml --route-files results/routes.rou.xml --tripinfo-output results/tripinfo.xml --summary-output results/summary.xml --seed ${{ matrix.seed }} --no-step-log true
+      - name: Validate and report
+        run: |
+          python3 - <<'PY'
+          import csv, statistics, xml.etree.ElementTree as ET
+          ts=ET.parse('results/tripinfo.xml').getroot().findall('tripinfo')
+          if len(ts)!=1000: raise RuntimeError(f'Incomplete trips: {len(ts)} of 1000')
+          dur=sorted(float(t.get('duration')) for t in ts)
+          wait=[float(t.get('waitingTime')) for t in ts]
+          rows=[('metric','value'),('completed',len(ts)),('unfinished',1000-len(ts)),('mean_duration_seconds',statistics.mean(dur)),('median_duration_seconds',statistics.median(dur)),('p95_duration_seconds',dur[int(.95*(len(dur)-1))]),('mean_waiting_seconds',statistics.mean(wait)),('total_duration_seconds',sum(dur))]
+          with open('results/report.csv','w',newline='') as f: csv.writer(f).writerows(rows)
+          for k,v in rows: print(k,v)
+          PY
+      - name: Upload calibration results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: calibration-grid10-window-${{ matrix.departure_window_seconds }}-seed-${{ matrix.seed }}
+          path: results/
+          retention-days: 30
