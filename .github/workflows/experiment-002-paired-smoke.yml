@@ -1,0 +1,89 @@
+name: Experiment 002 paired routing smoke test
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  paired-smoke:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/eclipse-sumo/sumo:latest
+    timeout-minutes: 30
+    env:
+      SUMO_HOME: /usr/share/sumo
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate immutable common demand
+        run: |
+          set -eu
+          mkdir -p results
+          netgenerate --grid --grid.number 10 --grid.length 200 --output-file results/network.net.xml
+          python3 - <<'PY'
+          import random,xml.etree.ElementTree as ET,sys,os
+          sys.path.insert(0,os.path.join(os.environ.get('SUMO_HOME','/usr/share/sumo'),'tools'))
+          import sumolib
+          random.seed(1001)
+          net=sumolib.net.readNet('results/network.net.xml')
+          edges=[e for e in net.getEdges() if not e.isSpecial() and e.allows('passenger')]
+          root=ET.Element('trips')
+          for i in range(1000):
+              for _ in range(1000):
+                  a,b=random.sample(edges,2)
+                  path,_=net.getShortestPath(a,b,vClass='passenger')
+                  if path and len(path)>=2:break
+              else:raise RuntimeError('No connected OD')
+              ET.SubElement(root,'trip',id=f'veh{i:04d}',depart=f'{i*200/1000:.3f}',**{'from':a.getID(),'to':b.getID()})
+          ET.ElementTree(root).write('results/trips.xml',encoding='utf-8',xml_declaration=True)
+          PY
+          sha256sum results/network.net.xml results/trips.xml > results/input-hashes.txt
+      - name: Assign routes independently and cooperatively
+        run: |
+          set -eu
+          duarouter --net-file results/network.net.xml --route-files results/trips.xml --output-file results/independent.rou.xml --seed 1001 --no-step-log true
+          python3 experiments/experiment_002/cooperative.py --net results/network.net.xml --trips results/trips.xml --out results/cooperative.rou.xml --metrics results/cooperative-algorithm.json
+      - name: Validate and simulate paired arms
+        run: |
+          set -eu
+          python3 - <<'PY'
+          import xml.etree.ElementTree as ET
+          a=ET.parse('results/independent.rou.xml').getroot()
+          b=ET.parse('results/cooperative.rou.xml').getroot()
+          def routes(root):
+              out={}
+              for v in root.findall('vehicle'):
+                  route=v.find('route')
+                  if route is not None:out[v.get('id')]=route.get('edges')
+              for r in root.findall('route'):
+                  if r.get('id'):out[r.get('id')]=r.get('edges')
+              return out
+          # duarouter normally emits vehicles; ensure the same IDs are present.
+          ar=routes(a);br=routes(b)
+          if len(ar)!=1000 or len(br)!=1000 or set(ar)!=set(br):
+              raise RuntimeError(f'Route IDs differ: {len(ar)} vs {len(br)}')
+          changed=sum(ar[k]!=br[k] for k in ar)
+          print('Changed routes:',changed)
+          if changed==0:raise RuntimeError('Cooperative treatment did not change routes')
+          open('results/changed-routes.txt','w').write(str(changed)+'\n')
+          PY
+          sumo --net-file results/network.net.xml --route-files results/independent.rou.xml --tripinfo-output results/independent-tripinfo.xml --seed 1001 --no-step-log true
+          sumo --net-file results/network.net.xml --route-files results/cooperative.rou.xml --tripinfo-output results/cooperative-tripinfo.xml --seed 1001 --no-step-log true
+      - name: Compare outcomes
+        run: |
+          python3 - <<'PY'
+          import csv,statistics,xml.etree.ElementTree as ET
+          with open('results/comparison.csv','w',newline='') as f:
+              w=csv.writer(f);w.writerow(['arm','completed','mean_duration_seconds','mean_waiting_seconds','p95_duration_seconds'])
+              for arm in ('independent','cooperative'):
+                  ts=ET.parse(f'results/{arm}-tripinfo.xml').getroot().findall('tripinfo')
+                  if len(ts)!=1000:raise RuntimeError(f'{arm}: {len(ts)} completed, expected 1000')
+                  d=sorted(float(t.get('duration')) for t in ts)
+                  waits=[float(t.get('waitingTime')) for t in ts]
+                  w.writerow([arm,len(ts),statistics.mean(d),statistics.mean(waits),d[int(.95*(len(d)-1))]])
+          PY
+      - name: Upload paired smoke outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: experiment-002-paired-smoke-seed-1001-window-200
+          path: results/
+          retention-days: 30
