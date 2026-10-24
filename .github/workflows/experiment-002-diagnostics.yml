@@ -1,0 +1,24 @@
+name: Experiment 002 diagnostic rerun
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  diagnostics:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/eclipse-sumo/sumo:latest
+    env:
+      SUMO_HOME: /usr/share/sumo
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate paired diagnostics
+        run: |
+          mkdir -p results
+          netgenerate --grid --grid.number 10 --grid.length 200 --output-file results/network.net.xml
+          python3 experiments/experiment_002/diagnostics.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: experiment-002-diagnostics
+          path: results/
