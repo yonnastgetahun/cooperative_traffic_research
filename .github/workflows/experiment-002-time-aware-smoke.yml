@@ -1,0 +1,85 @@
+name: Experiment 002 time-aware routing smoke
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    container:
+      image: ghcr.io/eclipse-sumo/sumo:latest
+    env:
+      SUMO_HOME: /usr/share/sumo
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate fixed network and 1000 trips
+        run: |
+          set -eu
+          mkdir -p results
+          sumo --version > results/sumo-version.txt
+          netgenerate --grid --grid.number 10 --grid.length 200 --output-file results/network.net.xml
+          python3 - <<'PY'
+          import random, os, sys, xml.etree.ElementTree as ET
+          sys.path.insert(0, os.path.join(os.environ.get('SUMO_HOME','/usr/share/sumo'),'tools'))
+          import sumolib
+          random.seed(1001)
+          net=sumolib.net.readNet('results/network.net.xml')
+          edges=[e for e in net.getEdges() if not e.isSpecial() and e.allows('passenger')]
+          root=ET.Element('trips')
+          for i in range(1000):
+              for attempt in range(1000):
+                  a,b=random.sample(edges,2)
+                  path,_=net.getShortestPath(a,b,vClass='passenger')
+                  if path and len(path)>=2:break
+              else:raise RuntimeError('No valid OD')
+              ET.SubElement(root,'trip',id=f'veh{i:04d}',depart=f'{i*.2:.3f}',**{'from':a.getID(),'to':b.getID()})
+          ET.ElementTree(root).write('results/trips.xml',encoding='utf-8',xml_declaration=True)
+          PY
+          sha256sum results/network.net.xml results/trips.xml > results/input-hashes.txt
+      - name: Generate three route assignment strategies
+        run: |
+          set -eu
+          duarouter --net-file results/network.net.xml --route-files results/trips.xml --output-file results/independent.rou.xml --seed 1001 --no-step-log true
+          python3 experiments/experiment_002/cooperative.py --net results/network.net.xml --trips results/trips.xml --out results/edge-count.rou.xml --metrics results/edge-count-manifest.json --penalty 0.02
+          python3 experiments/experiment_002/time_aware.py --net results/network.net.xml --trips results/trips.xml --out results/time-aware.rou.xml --audit results/time-aware-audit.csv --manifest results/time-aware-manifest.json
+      - name: Validate route IDs and run SUMO
+        run: |
+          set -eu
+          python3 - <<'PY'
+          import xml.etree.ElementTree as ET
+          expected={t.get('id') for t in ET.parse('results/trips.xml').getroot().findall('trip')}
+          assert len(expected)==1000
+          for arm in ('independent','edge-count','time-aware'):
+              root=ET.parse(f'results/{arm}.rou.xml').getroot()
+              vehicles=root.findall('vehicle')
+              actual={v.get('id') for v in vehicles}
+              if actual != expected or len(vehicles)!=1000:raise RuntimeError(f'{arm}: missing or duplicate route IDs')
+          PY
+          for arm in independent edge-count time-aware; do
+            sumo --net-file results/network.net.xml --route-files results/${arm}.rou.xml --tripinfo-output results/${arm}-tripinfo.xml --seed 1001 --no-step-log true
+          done
+      - name: Summarize completed and harmed drivers
+        run: |
+          python3 - <<'PY'
+          import csv, statistics, xml.etree.ElementTree as ET
+          all_trips={}
+          for arm in ('independent','edge-count','time-aware'):
+              all_trips[arm]={t.get('id'):t for t in ET.parse(f'results/{arm}-tripinfo.xml').getroot().findall('tripinfo')}
+          with open('results/summary.csv','w',newline='') as f:
+              w=csv.writer(f);w.writerow(['arm','completed','unfinished','mean_duration_s','mean_wait_s','p95_duration_s','mean_delta_vs_independent_s','drivers_harmed'])
+              for arm, ts in all_trips.items():
+                  ds=sorted(float(t.get('duration')) for t in ts.values())
+                  waits=[float(t.get('waitingTime')) for t in ts.values()]
+                  base=all_trips['independent']
+                  paired=[float(t.get('duration'))-float(base[k].get('duration')) for k,t in ts.items() if k in base]
+                  w.writerow([arm,len(ts),1000-len(ts),statistics.mean(ds) if ds else '',statistics.mean(waits) if waits else '',ds[int(.95*(len(ds)-1))] if ds else '',statistics.mean(paired) if paired else '',sum(d>0 for d in paired)])
+                  if len(ts)!=1000:raise RuntimeError(f'{arm} incomplete: {len(ts)}')
+          PY
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: experiment-002-time-aware-smoke-seed1001-window200
+          path: results/
+          retention-days: 30
