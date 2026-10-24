@@ -1,6 +1,22 @@
-# Experiment 002 — Predictor Validation Plan v0.1
+# Experiment 002 — Predictor Validation Plan v0.2
 
-**Status: Proposed for review. Not approved for implementation or execution.**
+**Status: Revised for review after three-regime coverage backfill. Not approved for implementation or execution.**
+
+## Updated evidence: three-regime coverage backfill
+
+The earlier 200-second single-seed smoke result below is retained as historical context. Subsequently, [GitHub Actions run 40072443736](https://github.com/yonnastgetahun/cooperative_traffic_research/actions/runs/40072443736) successfully executed the **full 3 × 3 congestion-window/seed matrix**, comparing all three strategies using the same 1,000 vehicles and 10×10 network within each matched scenario. The windows were 200, 600 and 1,200 seconds; seeds were 1001, 1002 and 1003. All nine jobs and their paired simulations passed the workflow's trip-completion checks.
+
+Mean trip duration in seconds, averaged across the three seeds for each window:
+
+| Congestion | Independent | Original cooperative (penalty 0.02) | Time-aware cooperative |
+|---|---:|---:|---:|
+| High (200 s) | 198.20 | 204.02 | 212.09 |
+| Moderate (600 s) | 146.97 | 148.54 | 151.40 |
+| Low (1,200 s) | 138.63 | 140.47 | 140.94 |
+
+**Interpretation:** Independent routing had the lowest mean duration in each of these three tested regimes. This closes the *initial scenario coverage gap*, but it does **not** establish predictor accuracy, statistical significance, or external validity. Three seeds per regime are not the held-out validation design below; seed 1001 and these other inspected seeds are now exploratory/development evidence and should not be presented as untouched evaluation data.
+
+**Implications for this plan:** Keep all three congestion regimes, use new disjoint calibration and held-out seeds, preserve existing algorithms while instrumenting forecasts, and evaluate forecast error and system-level objectives separately. Do not launch another penalty sweep or revise routing parameters based solely on these nine outcomes.
 
 ## Decision and motivation
 
