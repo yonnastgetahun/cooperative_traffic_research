@@ -1,0 +1,66 @@
+name: Experiment 001 - three-regime video trajectories
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  capture:
+    strategy:
+      fail-fast: false
+      matrix:
+        window: [200, 600, 1200]
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    container:
+      image: ghcr.io/eclipse-sumo/sumo:latest
+    env:
+      SUMO_HOME: /usr/share/sumo
+    steps:
+      - name: Generate real SUMO baseline trajectories
+        env:
+          WINDOW: ${{ matrix.window }}
+        run: |
+          set -eu
+          mkdir -p output
+          sumo --version > output/sumo-version.txt
+          netgenerate --grid --grid.number 10 --grid.length 200 --output-file output/network.net.xml
+          python3 - <<'PY'
+          import random,os,sys,json,xml.etree.ElementTree as ET
+          sys.path.insert(0,os.path.join(os.environ.get('SUMO_HOME','/usr/share/sumo'),'tools'))
+          import sumolib
+          seed=1001;window=int(os.environ['WINDOW'])
+          random.seed(seed)
+          net=sumolib.net.readNet('output/network.net.xml')
+          edges=[e for e in net.getEdges() if not e.isSpecial() and e.allows('passenger')]
+          root=ET.Element('trips')
+          for i in range(1000):
+              for _ in range(1000):
+                  a,b=random.sample(edges,2)
+                  path,_=net.getShortestPath(a,b,vClass='passenger')
+                  if path and len(path)>=2:break
+              else:raise RuntimeError('No connected OD')
+              ET.SubElement(root,'trip',id=f'veh{i:04d}',depart=f'{i*window/1000:.3f}',**{'from':a.getID(),'to':b.getID()})
+          ET.ElementTree(root).write('output/trips.xml',encoding='utf-8',xml_declaration=True)
+          with open('output/manifest.json','w') as f:
+              json.dump({'grid':10,'vehicles':1000,'seed':seed,'window_seconds':window,
+              'routing':'independent duarouter baseline','purpose':'actual SUMO trajectory visualization, not cooperative routing results',
+              'clip_simulated_seconds':300},f,indent=2)
+          PY
+          duarouter -n output/network.net.xml -r output/trips.xml -o output/routes.rou.xml --seed 1001 --no-step-log true
+          sumo -n output/network.net.xml -r output/routes.rou.xml --fcd-output output/fcd.xml --device.fcd.period 2 --tripinfo-output output/tripinfo.xml --seed 1001 --no-step-log true
+          python3 - <<'PY'
+          import os,xml.etree.ElementTree as ET
+          completed=len(ET.parse('output/tripinfo.xml').getroot().findall('tripinfo'))
+          if completed!=1000:raise RuntimeError(f'{completed}/1000 completed')
+          vehicle=next((e for event,e in ET.iterparse('output/fcd.xml',events=('end',)) if e.tag=='vehicle'),None)
+          if vehicle is None or vehicle.get('x') is None or vehicle.get('y') is None:
+              raise RuntimeError('SUMO FCD output missing position x/y')
+          print('Validated 1000 complete trips and actual positions for departure window',os.environ['WINDOW'])
+          PY
+          sha256sum output/network.net.xml output/trips.xml > output/input-hashes.txt
+      - name: Upload trajectories for video creation
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp001-visualization-window-${{ matrix.window }}
+          path: output/
+          retention-days: 30
