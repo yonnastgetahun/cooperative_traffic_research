@@ -1,0 +1,93 @@
+name: Experiment 002 G3 J3 - targeted junction and search replay
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - experiments/experiment_002/g3_j3_trigger_2026_10_26.txt
+permissions:
+  contents: read
+  actions: read
+jobs:
+  targeted:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    container:
+      image: ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb
+    env:
+      SUMO_HOME: /usr/share/sumo
+    steps:
+      - uses: actions/checkout@v4
+      - name: Retrieve already evaluated high-congestion M2 scenario
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 40446073958
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          name: exp002-occupancy-M2-window-200-seed2103
+          path: source
+      - name: Original policy, observation OFF; exact route-audit hash comparison
+        run: |
+          set -eu
+          mkdir -p j3
+          python3 experiments/experiment_002/time_aware.py \
+            --net source/network.net.xml --trips source/trips.xml \
+            --out j3/control.rou.xml --audit j3/control-audit.csv \
+            --manifest j3/control-manifest.json
+          cmp j3/control.rou.xml source/original.rou.xml
+          cmp j3/control-audit.csv source/original-audit.csv
+      - name: Direct search-time lookup evidence, same seed and network
+        run: |
+          set -eu
+          python3 experiments/experiment_002/g3_live_search_capture_v01.py \
+            --net source/network.net.xml --trips source/trips.xml \
+            --out j3/observed.rou.xml --audit j3/observed-audit.csv \
+            --manifest j3/observed-manifest.json \
+            --events j3/search-lookups.jsonl.gz --summary j3/search-event-summary.json
+          cmp j3/observed.rou.xml j3/control.rou.xml
+          cmp j3/observed-audit.csv j3/control-audit.csv
+          python3 experiments/experiment_002/g3_search_event_audit_v01.py \
+            --events j3/search-lookups.jsonl.gz \
+            --routes j3/observed.rou.xml \
+            --report j3/search-event-integrity.json
+      - name: Native simulation exit times with internal links; no policy changes
+        run: |
+          set -eu
+          sumo --version > j3/sumo-version.txt
+          sumo -n source/network.net.xml -r source/original.rou.xml \
+            --vehroute-output j3/native-vehroute.xml \
+            --vehroute-output.exit-times true \
+            --vehroute-output.internal true \
+            --tripinfo-output j3/observed-tripinfo.xml \
+            --seed 2103 --no-step-log true
+          python3 experiments/experiment_002/g3_native_vehroute_v01.py \
+            --vehroute j3/native-vehroute.xml \
+            --planned-routes source/original.rou.xml \
+            --tripinfo j3/observed-tripinfo.xml \
+            --events j3/native-movement-events.csv \
+            --report j3/native-event-report.json
+          python3 experiments/experiment_002/g3_tripinfo_invariance_v01.py \
+            --baseline source/observed-tripinfo.xml \
+            --observed j3/observed-tripinfo.xml \
+            --report j3/simulation-invariance.json
+      - name: Verify preselected C6C7 vehicle and native/FCD junction evidence
+        run: |
+          set -eu
+          python3 experiments/experiment_002/g3_junction_anchor_audit_v01.py \
+            --events j3/native-movement-events.csv \
+            --fcd source/observed-fcd.xml \
+            --native-edge-data source/native-external.xml \
+            --observed-bins source/observed-edge-bins.csv \
+            --report j3/c6c7-anchor-observation.json
+          echo "Original M2 run: 40446073958; original seed2103/window200" > j3/source-evidence.txt
+          echo "$GITHUB_SHA" > j3/observation-code-commit.txt
+          echo "ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb" > j3/image-digest.txt
+          sha256sum source/trips.xml source/network.net.xml source/original.rou.xml > j3/input-hashes.txt
+          sha256sum j3/native-movement-events.csv j3/search-lookups.jsonl.gz j3/c6c7-anchor-observation.json > j3/observation-hashes.txt
+      - name: Preserve evidence even on failed scientific checks
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp002-G3-J3-targeted-C6C7-seed2103-high
+          path: j3/
+          retention-days: 30
