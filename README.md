@@ -4,13 +4,27 @@ Every day, drivers sit in traffic despite having powerful navigation apps. Those
 
 **What if we could bring some of the collective intelligence of tomorrow's autonomous transportation networks to today's human-driven roads?**
 
+## Current research status — October 26, 2026
+
+We have completed Experiment 001 congestion calibration and the initial Experiment 002 comparison in a 10×10 synthetic SUMO network (1,000 vehicles; departure windows of 200, 600, and 1,200 seconds). In the three-seed development comparison, **independent routing produced shorter average trips than both cooperative-routing prototypes** in every congestion regime. This is an early negative result, not a claim about real-world traffic.
+
+The next question is whether the time-aware traffic predictor is accurate enough to guide coordination. Our [three-regime development trace](docs/EXPERIMENT_002_ACTUAL_PREDICTOR_TRACE_2026-10-26.md) is complete. It is more accurate than free-flow timing in all three tested scenarios but **still significantly underpredicts congestion-related delays**, and is not held-out validation.
+
+- [Research progress report — Experiments 001–002](docs/RESEARCH_PROGRESS_REPORT_2026-10-24.md)
+- [Approved Experiment 002 Predictor Validation Plan v0.2](docs/EXPERIMENT_002_PREDICTOR_VALIDATION_PLAN.md)
+- [Actual predictor trace: development findings and limitations](docs/EXPERIMENT_002_ACTUAL_PREDICTOR_TRACE_2026-10-26.md)
+- [Successful three-regime decision-trace workflow and artifacts](https://github.com/yonnastgetahun/cooperative_traffic_research/actions/runs/40443562182)
+- [Proposed separate Experiment 003: voluntary departure scheduling](docs/EXPERIMENT_003_DEPARTURE_SCHEDULING_ROADMAP.md)
+
+**Research boundary:** No statistically validated cooperative-routing benefit, deployment readiness, or real-world safety improvement has been established.
+
 ## The idea
 
 Explore whether drivers could voluntarily share travel intentions and accept limited, coordinated route recommendations to reduce *total* congestion. This isn't a claim that today's maps do no coordination, or that autonomous cars automatically cooperate. It's a question we can test.
 
-## Experiment 001: design milestone
+## Original Experiment 001 design goals (historical)
 
-The initial experiment design is established; implementation and results are still ahead.
+The bullets below preserve the original research design and hypotheses. Some planned participation and baseline-comparison scenarios are not yet implemented; see the current-status section above for what has actually been tested.
 
 - **Question:** Can voluntary coordination among some drivers reduce network-wide congestion without unfairly burdening participants or other drivers?
 - **Baseline:** Independent, traffic-aware route choices.
@@ -38,7 +52,7 @@ The initial experiment design is established; implementation and results are sti
 3. A minority of participating drivers might influence the wider network; the effect and required participation are unknown.
 4. Benefits must be evaluated against capable traffic-aware navigation, not an artificially weak baseline.
 
-**Status:** Experiment 001 design complete; no simulation results yet.
+**Status:** This initial design milestone is historical; calibration and routing experiments have now been run. See the current-status section above for measured results and remaining gaps.
 
 ## Further reading
 
