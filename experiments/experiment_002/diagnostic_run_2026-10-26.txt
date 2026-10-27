@@ -1,0 +1,5 @@
+Approved development predictor diagnostic smoke: 2026-10-26 (America/Los_Angeles).
+Scopes: 200/600/1200-second departure windows; seed 2001 (development only).
+One-time push trigger for .github/workflows/experiment-002-predictor-decision-trace.yml.
+Trace original time-aware policy and compare frozen chosen route forecasts with SUMO FCD.
+No tuning, no held-out claims, no policy changes.
