@@ -9,7 +9,16 @@ permissions:
   contents: read
   actions: read
 jobs:
+  fixtures:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify ordered native/FCD timing bridge and syntax
+        run: |
+          python3 -m unittest discover -s experiments/experiment_002 -p 'test_g3_timing_bridge_v01.py' -v
+          python3 -m py_compile experiments/experiment_002/g3_timing_bridge_aggregate_v01.py
   verify:
+    needs: fixtures
     runs-on: ubuntu-latest
     timeout-minutes: 45
     strategy:
@@ -93,4 +102,28 @@ jobs:
         with:
           name: exp002-G3-R1R2-window-${{ matrix.window }}-seed2101
           path: evidence/
+          retention-days: 30
+
+  aggregate:
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Retrieve prespecified seed2101 three-regime evidence
+        uses: actions/download-artifact@v4
+        with:
+          pattern: exp002-G3-R1R2-window-*
+          path: three-regimes
+          merge-multiple: false
+      - name: Aggregate seed-level timing and actual search-read integrity
+        run: |
+          python3 experiments/experiment_002/g3_timing_bridge_aggregate_v01.py \
+            --root three-regimes --out g3-summary
+          echo "$GITHUB_SHA" > g3-summary/reconciliation-code-commit.txt
+          sha256sum g3-summary/*.csv g3-summary/*.json > g3-summary/output-hashes.txt
+      - name: Preserve aggregate results
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp002-G3-R1R2-three-regime-development-summary
+          path: g3-summary/
           retention-days: 30
