@@ -1,0 +1,1 @@
+Approved R3 and R4 completed successfully in GitHub Actions 40459207060: R3 seed2101 across all 3 regimes shows native teleports.total=0, full tripinfo invariance and classified empty/partial bins; R4 seed-level development analysis passed guardrails using seeds2101–2103. Publish permanent verified report files, WITHOUT freezing M3 or running held-out seeds.
