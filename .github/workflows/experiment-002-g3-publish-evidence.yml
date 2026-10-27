@@ -1,0 +1,76 @@
+name: Experiment 002 G3 - persist reconciliation evidence
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - experiments/experiment_002/g3_persist_evidence_trigger_2026-10-26.txt
+permissions:
+  contents: write
+  actions: read
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Fetch completed offline G3 first-pass evidence
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 40448102464
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          name: exp002-G3-offline-reconciliation-first-pass
+          path: firstpass
+      - name: Fetch completed vehicle-level cross-edge evidence
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 40448538736
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          name: exp002-G3-cross-edge-vehicle-evidence
+          path: crossedge
+      - name: Validate provenance and scientific status before persistent commit
+        run: |
+          python3 - <<'PY'
+          import json
+          f=json.load(open('firstpass/g3-integrity.json'))
+          g=json.load(open('crossedge/g3-cross-edge-summary.json'))
+          assert f['scenarios']==9 and f['vehicles_completed']==9000
+          assert f['heldout_3101_to_3110_untouched']
+          assert f['decision_gates']['G3-4_freeze_ready']=='NO'
+          assert g['selected_unique_negative_difference_bins']>0 and g['no_holdout_seeds']
+          assert g['input_m2_run']==f['original_actions_run']==40446073958
+          print('Development provenance verified; G3 not frozen or validated.')
+          PY
+      - name: Commit durable first-pass and vehicle-level evidence to repository
+        run: |
+          set -eu
+          mkdir -p docs/results/exp002_g3_2026_10_26
+          cp firstpass/G3_RECONCILIATION_REPORT.md docs/results/exp002_g3_2026_10_26/
+          cp firstpass/g3-*.csv firstpass/g3-integrity.json docs/results/exp002_g3_2026_10_26/
+          cp crossedge/g3-cross-edge-ledger.csv crossedge/g3-cross-edge-summary.json docs/results/exp002_g3_2026_10_26/
+          cat > docs/results/exp002_g3_2026_10_26/README.md <<'MD'
+          # G3 Measurement Reconciliation — Archived Development Evidence
+
+          **Status:** Offline G3 reconciliation and cross-edge case inspection completed. **G3 is NOT closed. M3 freeze is NOT authorized.**
+          
+          - [Reconciliation report](G3_RECONCILIATION_REPORT.md) and [gate ledger](g3-integrity.json)
+          - [Stratified native/FCD road-bin differences](g3-occupancy-strata.csv)
+          - [Ranked outlier road bins](g3-top-edge-bin-outliers.csv) and [front-near-junction vehicle evidence](g3-cross-edge-ledger.csv)
+          - [Cross-edge case summary](g3-cross-edge-summary.json)
+          - [Junction sampling uncertainty](g3-junction-uncertainty.csv)
+          - [Per-scenario integrity](g3-per-scenario.csv)
+
+          Original SUMO [M2 run 40446073958](https://github.com/yonnastgetahun/cooperative_traffic_research/actions/runs/40446073958); [G3 audit run 40448102464](https://github.com/yonnastgetahun/cooperative_traffic_research/actions/runs/40448102464); [cross-edge evidence run 40448538736](https://github.com/yonnastgetahun/cooperative_traffic_research/actions/runs/40448538736).
+
+          **Scope:** Nine existing M2 development scenarios only. No additional routing runs or holdout usage. Observing a vehicle's front near the start of a downstream internal lane is **consistent with** vehicle extent extending over the prior road boundary, but is **not an exact reconstruction of SUMO native per-vehicle sampledSeconds**. Do not present this observation as proof of a calibrated traffic predictor or a cooperative-routing benefit.
+          MD
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/results/exp002_g3_2026_10_26/
+          git diff --cached --quiet && { echo "Evidence already committed"; exit 0; }
+          git commit -m "Archive G3 occupancy reconciliation and vehicle-level junction boundary evidence"
+          git push origin HEAD:main
