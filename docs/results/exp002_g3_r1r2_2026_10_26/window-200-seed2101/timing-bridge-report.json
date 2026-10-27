@@ -1,0 +1,33 @@
+{
+  "planned_edges": 8393,
+  "matched": 8393,
+  "missing_vehicle_ids": [],
+  "observed_delta_counts": {
+    "0.0": 8393
+  },
+  "native_timeaware": {
+    "n": 8393,
+    "bias_s": 51.22123570820922,
+    "mae_s": 51.31636448743
+  },
+  "native_freeflow": {
+    "n": 8393,
+    "bias_s": 56.643927109972594,
+    "mae_s": 56.649802416061
+  },
+  "FCD_timeaware": {
+    "n": 8393,
+    "bias_s": 51.22123570820922,
+    "mae_s": 51.31636448743
+  },
+  "FCD_freeflow": {
+    "n": 8393,
+    "bias_s": 56.643927109972594,
+    "mae_s": 56.649802416061
+  },
+  "first_edge_count": 1000,
+  "FCD_later_over_one_step": 0,
+  "FCD_earlier_over_one_step": 0,
+  "provenance": "simulation-step native predecessor exit; first FCD front sample; development only",
+  "interpretation": "two observation conventions on same realized chosen route; not occupancy calibration"
+}

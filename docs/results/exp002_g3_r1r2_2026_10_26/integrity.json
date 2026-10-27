@@ -1,0 +1,18 @@
+{
+  "status": "DEVELOPMENT_R1_R2_COMPLETE_M3_NOT_FROZEN",
+  "regimes": [
+    200,
+    600,
+    1200
+  ],
+  "seed": 2101,
+  "scenarios": 3,
+  "matched_edges": 25179,
+  "search_reads": 1994952,
+  "all_trips_reproduced": true,
+  "route_and_audit_invariance": true,
+  "native_event_invariance": true,
+  "heldout_used": false,
+  "context": "Native entry is a step-level inferred event. FCD is a front-position observation. No physical occupancy forecast model evaluated.",
+  "next_gate": "G3 measurement contract and M3 preregistration still require explicit separate scientific review"
+}

@@ -1,0 +1,4 @@
+seed,window_seconds,matched_edges,search_reads,counter_updates,internal_native_events,native_timeaware_MAE_s,native_timeaware_bias_s,native_freeflow_MAE_s,FCD_timeaware_MAE_s,FCD_freeflow_MAE_s,FCD_later_over_one_step,FCD_earlier_over_one_step
+2101,200,8393,664400,8393,8338,51.31636,51.22124,56.6498,51.31636,56.6498,0,0
+2101,600,8393,664761,8393,8384,18.72871,18.58986,22.62609,18.72871,22.62609,0,0
+2101,1200,8393,665791,8393,8363,13.41194,13.15203,16.83432,13.41194,16.83432,0,0

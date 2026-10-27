@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "event_counts": {
+    "decision_start": 1000,
+    "search_start": 1000,
+    "heap_pop": 179125,
+    "edge_lookup": 664761,
+    "destination_reached": 1000,
+    "search_end": 1000,
+    "guardrail_decision": 1000,
+    "assignment_update": 8393,
+    "decision_end": 1000
+  },
+  "vehicles": 1000,
+  "assigned_edges": 8393,
+  "distinct_occupied_edge_time_bins": 5590,
+  "edge_cost_reads_observed": 664761,
+  "first_errors": [],
+  "limits": [
+    "Original search-time prior assignment counts are not measured physical occupancy.",
+    "This checks counter values and unchanged route assignment, not learned traffic forecast accuracy.",
+    "Unchosen candidate routes have no simulated counterfactual travel outcomes."
+  ]
+}
