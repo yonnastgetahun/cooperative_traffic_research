@@ -6,6 +6,10 @@ Every day, drivers sit in traffic despite having powerful navigation apps. Those
 
 ## Current research status — October 26, 2026
 
+**Latest pre-freeze milestone (Oct 26):** R3 completed native teleport/collision/partial-bin audits in **three invariant development replays**, with **0 reported teleports** across the three cases. R4 implemented and tested **seed-level paired** forecast-error analysis using already inspected development seeds, while keeping all 3101–3110 evaluation seeds untouched. [R3–R4 findings](docs/EXPERIMENT_002_G3_R3_R4_EXECUTION_RESULTS_2026-10-26.md) · [full durable evidence](docs/results/exp002_g3_r3_r4_2026_10_26/README.md). An [M3 protocol freeze proposal](docs/EXPERIMENT_002_M3_PROTOCOL_FREEZE_PROPOSAL_V0_1.md) is published **for review only; neither the freeze nor held-out execution is authorized**.
+
+
+
 We have completed Experiment 001 congestion calibration and the initial Experiment 002 comparison in a 10×10 synthetic SUMO network (1,000 vehicles; departure windows of 200, 600, and 1,200 seconds). In the three-seed development comparison, **independent routing produced shorter average trips than both cooperative-routing prototypes** in every congestion regime. This is an early negative result, not a claim about real-world traffic.
 
 The next question is whether the time-aware traffic predictor is accurate enough to guide coordination. Our [three-regime development trace](docs/EXPERIMENT_002_ACTUAL_PREDICTOR_TRACE_2026-10-26.md) is complete. It is more accurate than free-flow timing in all three tested scenarios but **still significantly underpredicts congestion-related delays**, and is not held-out validation.
