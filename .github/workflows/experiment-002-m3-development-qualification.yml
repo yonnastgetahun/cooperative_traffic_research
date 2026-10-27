@@ -1,0 +1,106 @@
+name: Experiment 002 M3 - frozen science runner DEVELOPMENT qualification ONLY
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - experiments/experiment_002/m3_qualification/development_trigger_2026_10_27.txt
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  guard-and-unit-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: be2e8d27c78c8b6de4891115d6d951edc877ac6e
+          path: frozen
+      - name: Verify active heldout seed rejection and the pinned frozen source hashes
+        run: |
+          set -eu
+          python3 -m unittest discover \
+            -s experiments/experiment_002/m3_qualification \
+            -p 'test_m3_qualification_v01.py' -v
+          python3 -m compileall -q experiments/experiment_002/m3_qualification
+          python3 experiments/experiment_002/m3_qualification/guard_v01.py \
+            --seed 2101 --window 200 --frozen-root frozen \
+            --report frozen-qualification-contract.json
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('experiments/experiment_002/m3_qualification/run_development_v01.sh').read_text()
+          assert 'test "$SEED" = "2101"' in p
+          assert 'frozen/experiments/experiment_002/time_aware.py' in p
+          assert 'frozen/experiments/experiment_002/g3_r3_exception_audit_v01.py' in p
+          print('No evaluation seed values are in active qualification workflow matrix.')
+          PY
+
+  development-only-rehearsal:
+    needs: guard-and-unit-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        window: [200, 600, 1200]
+    container:
+      image: ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb
+    env:
+      SUMO_HOME: /usr/share/sumo
+      SEED: 2101
+      WINDOW: ${{ matrix.window }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: be2e8d27c78c8b6de4891115d6d951edc877ac6e
+          path: frozen
+      - name: Download preinspected M2 development inputs ONLY
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 40446073958
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          name: exp002-occupancy-M2-window-${{ matrix.window }}-seed2101
+          path: source
+      - name: Qualify frozen M3 generator, search, native observation, exceptions and scoring
+        run: |
+          sh experiments/experiment_002/m3_qualification/run_development_v01.sh
+      - name: Preserve detailed evidence even if a scientific gate fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp002-M3-QUALIFY-window-${{ matrix.window }}-seed2101
+          path: results/
+          retention-days: 30
+
+  verify-cross-regime:
+    needs: development-only-rehearsal
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Retrieve all three development-only qualification outputs
+        uses: actions/download-artifact@v4
+        with:
+          pattern: exp002-M3-QUALIFY-window-*
+          path: qualification
+          merge-multiple: false
+      - name: Verify against the original frozen pre-explored seed2101 results
+        run: |
+          python3 experiments/experiment_002/m3_qualification/aggregate_v01.py \
+            --root qualification \
+            --reference docs/results/exp002_g3_r1r2_2026_10_26/three-regime-timing-bridge.csv \
+            --out qualification-summary
+          echo "$GITHUB_SHA" > qualification-summary/adapter-commit.txt
+          echo 'be2e8d27c78c8b6de4891115d6d951edc877ac6e' > qualification-summary/scientific-commit.txt
+          sha256sum qualification-summary/*.csv qualification-summary/*.json > qualification-summary/output-hashes.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: exp002-M3-QUALIFICATION-three-development-regimes
+          path: qualification-summary/
+          retention-days: 30
