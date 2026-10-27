@@ -1,0 +1,61 @@
+# INACTIVE REVIEW TEMPLATE. GitHub ignores .yml.disabled outside .github/workflows.
+# DO NOT MOVE/ACTIVATE without new explicit user authorization.
+# This file is not a runnable evaluation: missing independently reviewed
+# execution adapters, manual activation evidence, and protected environment.
+name: Experiment 002 M3 HELDOUT EVALUATION - INACTIVE TEMPLATE
+
+on:
+  workflow_dispatch:
+    inputs:
+      activation_review_id:
+        description: "Approved heldout execution review ID (must be verified externally)"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  explicit-activation-approval:
+    # Hard-disabled even if moved to .github/workflows, until a separate
+    # scientific execution authorization and reviewed runner are committed.
+    if: false
+    runs-on: ubuntu-latest
+    environment: m3-holdout-reviewers
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: be2e8d27c78c8b6de4891115d6d951edc877ac6e
+          path: frozen
+      - name: Validate immutable freeze and separately authorized execution
+        run: |
+          echo "BLOCKED: no final production seed/event/analysis adapter is approved"
+          exit 1
+
+  evaluate:
+    if: false
+    needs: explicit-activation-approval
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        window: [200, 600, 1200]
+        seed: [3101, 3102, 3103, 3104, 3105, 3106, 3107, 3108, 3109, 3110]
+    container:
+      image: ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb
+    steps:
+      - name: Unimplemented heldout production adapter
+        run: |
+          echo "BLOCKED: no reserved seed may be generated or run"
+          exit 1
+
+  aggregate-if-all-eligible:
+    if: false
+    needs: evaluate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prespecified paired seed-level analysis
+        run: |
+          echo "BLOCKED: a separate approval and reviewed aggregation adapter are required"
+          exit 1
