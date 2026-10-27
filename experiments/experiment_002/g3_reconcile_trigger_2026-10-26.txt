@@ -1,0 +1,1 @@
+Approved G3 offline measurement reconciliation; source run 40446073958; nine already-calibrated M2 development artifacts only. No SUMO simulation, no new seeds, no routing parameter changes, no held-out experiment. GitHub Actions one-time push trigger.
