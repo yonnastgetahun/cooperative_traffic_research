@@ -1,10 +1,12 @@
 # Experiment 002 — Physical Occupancy & Junction Delay Measurement Plan v0.1
 
 **Date:** October 26, 2026 (Pacific)  
-**Status:** **M0–M2 executed successfully as development instrumentation (October 26, 2026); G3 native/FCD interpretation remains open; M3 held-out freeze/evaluation NOT approved or started.**  
+**Status:** **M0–M2 completed; G3 offline reconciliation executed with supported cross-edge vehicle-position mechanism, but remaining source/phase measurement uncertainties keep G3 open. M3 held-out freeze/evaluation NOT approved or started.**  
 **Parent protocol:** [Approved Predictor Validation Plan v0.2](EXPERIMENT_002_PREDICTOR_VALIDATION_PLAN.md)  
 **Evidence:** [Actual predictor trace, October 26](EXPERIMENT_002_ACTUAL_PREDICTOR_TRACE_2026-10-26.md) · [successful three-regime development run](https://github.com/yonnastgetahun/cooperative_traffic_research/actions/runs/40443562182)  
-**Execution and measured results:** [M0/M1 12 passing contract tests + 3 successful SUMO cases](https://github.com/yonnastgetahun/cooperative_traffic_research/actions/runs/40445882827) · [M2 nine-scenario + aggregate success](https://github.com/yonnastgetahun/cooperative_traffic_research/actions/runs/40446073958) · [Durable M2 findings and gates](EXPERIMENT_002_OCCUPANCY_M2_DEVELOPMENT_RESULTS_2026-10-26.md). All new runs used development seeds only and maintained original route-policy invariance.\n\n**Scope:** Improve *measurement*, not routing policy, routing penalties, or optimization objectives. This is an additive design for the next milestone; it does not supersede the parent protocol.
+**Execution and measured results:** [M0/M1 12 passing contract tests + 3 successful SUMO cases](https://github.com/yonnastgetahun/cooperative_traffic_research/actions/runs/40445882827) · [M2 nine-scenario + aggregate success](https://github.com/yonnastgetahun/cooperative_traffic_research/actions/runs/40446073958) · [Durable M2 findings and gates](EXPERIMENT_002_OCCUPANCY_M2_DEVELOPMENT_RESULTS_2026-10-26.md). All new runs used development seeds only and maintained original route-policy invariance.
+
+**Scope:** Improve *measurement*, not routing policy, routing penalties, or optimization objectives. This is an additive design for the next milestone; it does not supersede the parent protocol.
 
 ## 1. Decision to resolve
 
@@ -133,5 +135,7 @@ After M2, produce a **nine-scenario cross-seed report** with figures and limitat
 - **Not in scope:** changing the time-aware route generator policy, adding penalty sweeps, using live driver data, declaring safety, launching Experiment 003, publishing a cooperative-routing success claim or using reserved holdout seeds.
 - **Evidence preservation:** never rewrite the prior October 26 development results or original experiment workflows. Any measurement-method change after calibration starts must be versioned with its rationale and, where relevant, re-run consistently on development seeds.
 - **Current status (Oct 26):** M0 fixtures and new measurement tools were implemented, M1 seed 2001 ran successfully across all three regimes, and M2 nine-scenario development calibration ran successfully with an immutable SUMO image digest per run. The original measurement design is retained for historical reference. **G3 native/FCD differences still require investigation; M3 freeze and all reserved holdouts remain untouched.**
+
+**G3 evidence:** [Reconciliation findings and pending gates](EXPERIMENT_002_G3_RECONCILIATION_FINDINGS_2026-10-26.md). 
 
 **Approval record:** The user approved M0–M2 execution October 26, 2026. M0–M2 are now complete as developmental measurement milestones. **A separate approval is required for M3 protocol freeze and any held-out seed execution.**
