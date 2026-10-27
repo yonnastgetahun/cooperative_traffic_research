@@ -1,0 +1,51 @@
+name: Experiment 002 G3-C - offline cross-edge outlier inspection
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - experiments/experiment_002/g3_cross_edge_trigger_2026-10-26.txt
+permissions:
+  contents: read
+  actions: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check observation-only Python script
+        run: |
+          python3 -m py_compile experiments/experiment_002/g3_cross_edge_cases_v01.py
+      - name: Retrieve original M2 development simulations, not new seeds
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 40446073958
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          pattern: exp002-occupancy-M2-window-*
+          path: g3-m2
+          merge-multiple: false
+      - name: Retrieve predetermined ranked G3 external-edge outlier ledger
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 40448102464
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          name: exp002-G3-offline-reconciliation-first-pass
+          path: g3-firstpass
+      - name: Audit FCD near-boundary vehicle positions on original dataset
+        run: |
+          python3 experiments/experiment_002/g3_cross_edge_cases_v01.py \
+            --root g3-m2 \
+            --ledger g3-firstpass/g3-top-edge-bin-outliers.csv \
+            --output g3-case-reports/g3-cross-edge-ledger.csv
+          echo "$GITHUB_SHA" > g3-case-reports/reconciliation-code-commit.txt
+          sha256sum g3-case-reports/*.csv g3-case-reports/*.json > g3-case-reports/output-hashes.txt
+      - name: Preserve G3-C event evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp002-G3-cross-edge-vehicle-evidence
+          path: g3-case-reports/
+          retention-days: 30
