@@ -1,0 +1,43 @@
+name: Experiment 002 M0-M1 physical occupancy measurement smoke
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - experiments/experiment_002/measurement_smoke_2026-10-26.txt
+permissions:
+  contents: read
+jobs:
+  fixture-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: M0 pure-Python fixtures
+        run: |
+          python3 -m unittest discover -s experiments/experiment_002 -p 'test_measurement_v01.py' -v
+  smoke:
+    needs: fixture-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        window: [200, 600, 1200]
+    container:
+      image: ghcr.io/eclipse-sumo/sumo:latest
+    env:
+      SUMO_HOME: /usr/share/sumo
+      WINDOW: ${{ matrix.window }}
+      SEED: 2001
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run original routes with independently captured occupancy and junction samples
+        run: |
+          sh experiments/experiment_002/run_measurement_v01.sh
+      - name: Retain evidence even when measurement fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp002-occupancy-M1-window-${{ matrix.window }}-seed2001
+          path: results/
+          retention-days: 30
