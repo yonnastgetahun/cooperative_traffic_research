@@ -1,0 +1,17 @@
+{
+  "status": "development_only_search_trace",
+  "search_events": {
+    "decision_start": 1000,
+    "search_start": 1000,
+    "heap_pop": 182618,
+    "edge_lookup": 677507,
+    "destination_reached": 1000,
+    "search_end": 1000,
+    "guardrail_decision": 1000,
+    "assignment_update": 8367,
+    "decision_end": 1000
+  },
+  "total_events": 874492,
+  "exact_event_source": "original_time_aware_search_default_off_sink_enabled",
+  "observed_quantity": "prior route assignment count, not physical occupancy"
+}
