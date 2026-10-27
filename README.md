@@ -20,12 +20,16 @@ The next question is whether the time-aware traffic predictor is accurate enough
 - [Latest G3 reconciliation: occupancy semantics, 211 vehicle-level cases and remaining gates](docs/EXPERIMENT_002_G3_RECONCILIATION_FINDINGS_2026-10-26.md)
 - [**New G3 J0–J3 native junction and exact search-time event findings**](docs/EXPERIMENT_002_G3_EVENT_INSTRUMENTATION_RESULTS_2026-10-26.md)
 - [Archived G3 event integrity reports and C6C7 target case](docs/results/exp002_g3_events_2026_10_26/README.md)
+- [**G3 observation sufficiency decision: what can be measured and what cannot**](docs/EXPERIMENT_002_G3_OBSERVATION_SUFFICIENCY_REVIEW_2026-10-26.md)
+- [G3 limits and blockers before M3 freeze — 14-item register](docs/EXPERIMENT_002_G3_MEASUREMENT_LIMITATIONS_REGISTER_2026-10-26.csv)
 - [G3 junction exit times and actual route-search lookup design (executed on development scenarios)](docs/EXPERIMENT_002_G3_EVENT_INSTRUMENTATION_DESIGN_V0_1.md)
 - [Archived G3 evidence and CSV tables](docs/results/exp002_g3_2026_10_26/README.md)
 - [Successful three-regime decision-trace workflow and artifacts](https://github.com/yonnastgetahun/cooperative_traffic_research/actions/runs/40443562182)
 - [Proposed separate Experiment 003: voluntary departure scheduling](docs/EXPERIMENT_003_DEPARTURE_SCHEDULING_ROADMAP.md)
 
 **Latest diagnostic insight:** G3 reconciliation suggests much of the native road/FCD discrepancy comes from vehicle front-position versus cross-edge physical-presence semantics. In 211 preselected discrepant bins, vehicle fronts were observed near downstream internal junction boundaries. **The interpretation is not exact native per-vehicle attribution, the G3 gate remains open, and held-out seeds are untouched.**
+
+**Latest G3 sufficiency review:** SUMO-native step-level road/junction timing and native aggregate road load are conditionally sufficient for a *narrow simulation-only timing diagnostic*. Route assignment counts are not physical occupancy forecasts; internal-junction residence is not causal delay. The [pre-freeze review](docs/EXPERIMENT_002_G3_OBSERVATION_SUFFICIENCY_REVIEW_2026-10-26.md) records cross-regime reference-join and provenance checks that must still be completed; **M3 has not been frozen and the evaluation seeds remain untouched.**
 
 **Research boundary:** No statistically validated cooperative-routing benefit, deployment readiness, or real-world safety improvement has been established.
 
