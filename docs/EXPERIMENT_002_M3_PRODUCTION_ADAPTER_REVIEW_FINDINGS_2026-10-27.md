@@ -42,6 +42,8 @@ The existing evaluation template, [`docs/templates/experiment-002-m3-heldout-eva
 
 **Remaining material operational blocker:** A GitHub protected environment with required reviewers for `m3-holdout-reviewers` has **not been independently verified or configured by this work**. A file saying `approved=true` would not be an adequate independent authorization mechanism. Separate approved environment setup and GitHub access review are required before an evaluation workflow can be activated. The review adapters are **pure implementation building blocks**, not a completed, deployed 30-scenario production experiment pipeline.
 
+**Subsequent GitHub operational audit:** The [October 27 safeguards decision](EXPERIMENT_002_M3_OPERATIONAL_READINESS_REVIEW_2026-10-27.md) discovered a previously unrestricted historical calibration seed input; it is now guarded against 3101–3110. GitHub's current `main` branch is **not protected**, and `m3-holdout-reviewers` is **not verified** (HTTP 404). These settings block activation even though the production adapters passed offline checks.
+
 ## Decision register
 
 | Gate | Result |
