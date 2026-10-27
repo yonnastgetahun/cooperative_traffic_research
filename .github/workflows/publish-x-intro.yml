@@ -1,6 +1,9 @@
 name: Publish research update to X
 
 on:
+  push:
+    branches: [main]
+    paths: ['social/x-update-2026-10-26.txt']
   workflow_dispatch:
     inputs:
       post_text:
@@ -13,6 +16,7 @@ permissions:
 
 jobs:
   publish:
+    if: github.run_attempt == 1
     runs-on: ubuntu-latest
     steps:
       - name: Publish approved introduction
@@ -29,7 +33,7 @@ jobs:
           from urllib.request import Request, urlopen
           from urllib.error import HTTPError, URLError
 
-          post = os.getenv("POST_TEXT", "").strip() or "We simulated 1,000 vehicles coordinating routes. They got slower. Across 3 congestion levels, independent routing beat both cooperative approaches we tested. Now we're investigating why. Research & results: https://github.com/yonnastgetahun/cooperative_traffic_research"
+          post = os.getenv("POST_TEXT", "").strip() or "1,000 trips. Three congestion levels. Both cooperative routing prototypes were slower than independent routing. Next: validate our predictor against observed SUMO traffic, then rethink coordination. Research: https://github.com/yonnastgetahun/cooperative_traffic_research"
           if len(post) > 280:
               sys.exit("Post exceeds 280 characters")
           keys = ("X_API_KEY", "X_API_SECRET", "X_ACCESS_TOKEN", "X_ACCESS_TOKEN_SECRET")
