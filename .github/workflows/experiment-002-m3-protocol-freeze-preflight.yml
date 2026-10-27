@@ -1,0 +1,75 @@
+name: Experiment 002 M3 protocol-freeze preflight (no simulation)
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - experiments/experiment_002/m3_freeze_preflight_2026_10_27.txt
+permissions:
+  contents: read
+jobs:
+  freeze-preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Re-run measurement and seed-unit contract tests without SUMO
+        run: |
+          set -eu
+          for pattern in test_g3_native_vehroute_v01.py test_g3_search_hooks_v01.py test_g3_timing_bridge_v01.py test_g3_r3_exception_audit_v01.py test_g3_r4_seed_analysis_v01.py; do
+            python3 -m unittest discover -s experiments/experiment_002 -p "$pattern" -v
+          done
+          python3 -m compileall -q experiments/experiment_002
+      - name: Check analysis seed guards and register frozen source fingerprints
+        run: |
+          set -eu
+          mkdir -p freeze-preflight
+          python3 - <<'PY'
+          import json,sys
+          sys.path.insert(0,'experiments/experiment_002')
+          import g3_r4_seed_analysis_v01 as stats
+          assert stats.DEVELOPMENT_SEEDS==(2101,2102,2103)
+          assert stats.REGIMES==(200,600,1200)
+          assert stats.HOLDOUT_COUNT_TARGET==10
+          assert all(x not in stats.DEVELOPMENT_SEEDS for x in range(3101,3111))
+          try:stats.mean_ci_if_ten([1,2,3])
+          except ValueError:pass
+          else:raise AssertionError('10-seed confidence interval guard failed')
+          report={
+              'status':'PASSED_PROTOCOL_FREEZE_PREFLIGHT_ONLY',
+              'developer_input_seeds':[2101,2102,2103],
+              'future_reserved_seed_range':[3101,3110],
+              'future_heldout_executed':False,
+              'heldout_execution_authorized':False,
+              'evaluation_workflow_prepared':False,
+              'sumo_or_network_simulations_run':False,
+              'native_reference':'ordered external-edge entry from preceding native link exit at 1s step',
+              'primary_regime_s':200,'secondary_regimes_s':[600,1200],
+              'seed_level_interval_target_n':10,
+              'sumo_immutable_image':'ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb'}
+          with open('freeze-preflight/preflight.json','w') as f:json.dump(report,f,indent=2)
+          PY
+          git rev-parse HEAD > freeze-preflight/inspected-source-commit.txt
+          sha256sum \
+            docs/EXPERIMENT_002_M3_PROTOCOL_FREEZE_PROPOSAL_V0_1.md \
+            docs/EXPERIMENT_002_R3_EXCEPTION_AND_MISSINGNESS_CONTRACT_V0_1.md \
+            docs/EXPERIMENT_002_R4_SEED_LEVEL_ANALYSIS_AND_REPRODUCIBILITY_V0_1.md \
+            docs/EXPERIMENT_002_G3_OBSERVATION_SUFFICIENCY_REVIEW_2026-10-26.md \
+            experiments/experiment_002/time_aware.py \
+            experiments/experiment_002/trace_actual_predictor.py \
+            experiments/experiment_002/g3_live_search_capture_v01.py \
+            experiments/experiment_002/g3_search_event_audit_v01.py \
+            experiments/experiment_002/g3_native_vehroute_v01.py \
+            experiments/experiment_002/g3_timing_bridge_v01.py \
+            experiments/experiment_002/g3_tripinfo_invariance_v01.py \
+            experiments/experiment_002/g3_r3_exception_audit_v01.py \
+            experiments/experiment_002/g3_r4_seed_analysis_v01.py \
+            experiments/experiment_002/fixed_demand_v01.py \
+            > freeze-preflight/source-sha256.txt
+      - name: Preserve no-simulation preflight hashes and code snapshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp002-m3-freeze-preflight-no-holdout
+          path: freeze-preflight/
+          retention-days: 30
