@@ -1,0 +1,110 @@
+name: Experiment 002 M3 - archive qualified DEVELOPMENT harness evidence
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - experiments/experiment_002/m3_qualification/publish_trigger_2026_10_27.txt
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get approved dev-only frozen-source rehearsal summary
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 40570158400
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          name: exp002-M3-QUALIFICATION-three-development-regimes
+          path: summary
+      - name: Get original per-regime development-only execution evidence
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 40570158400
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          pattern: exp002-M3-QUALIFY-window-*
+          path: dev
+          merge-multiple: false
+      - name: Independently verify every qualification gate before publication
+        run: |
+          python3 - <<'PY'
+          import json,pathlib
+          def read(p):return json.loads(pathlib.Path(p).read_text())
+          obj=read('summary/qualification-integrity.json')
+          assert obj['status']=='READY_FOR_SEPARATE_HELDOUT_RUNNER_REVIEW_NOT_AUTHORIZED'
+          assert obj['frozen_scientific_commit']=='be2e8d27c78c8b6de4891115d6d951edc877ac6e'
+          assert obj['development_seed']==2101 and obj['verified_regimes']==[200,600,1200]
+          assert obj['matched_edges']==25179 and obj['actual_search_reads']==1994952
+          assert obj['heldout_data_touched'] is False and obj['runnable_heldout_workflow_enabled'] is False
+          for w in (200,600,1200):
+              p=pathlib.Path('dev')/f'exp002-M3-QUALIFY-window-{w}-seed2101'
+              s=read(p/'seed-level-metrics.json')
+              t=read(p/'r3-exception-audit.json')
+              a=read(p/'search-lookup-integrity.json')
+              n=read(p/'native-event-integrity.json')
+              i=read(p/'seed-and-topology-integrity.json')
+              f=read(p/'frozen-source-integrity.json')
+              assert s['seed']==2101 and s['window_seconds']==w
+              assert s['vehicles']==1000 and s['edge_traversals']==8393
+              assert s['matches_preexisting_M2_forecast_errors']
+              assert t['exception_gate']=='PASS_FOR_THIS_REPLAY'
+              assert t['reported_teleports']['teleport_state']=='ZERO_CONFIRMED'
+              assert a['status']=='PASS' and a['assigned_edges']==8393
+              assert n['vehicles_with_parsed_events']==1000
+              assert i['status']=='PASS' and i['seed_specific_od_and_depart_schedule_equal']
+              assert f['frozen_sha']==obj['frozen_scientific_commit']
+              assert (p/'policy-invariance.txt').is_file()
+          print('All three frozen-source development rehearsal artifacts verified')
+          PY
+      - name: Publish durable evidence without temporary raw event archives
+        run: |
+          set -eu
+          D=docs/results/exp002_m3_qualification_2026_10_27
+          mkdir -p "$D"
+          cp summary/QUALIFICATION_REPORT.md "$D/"
+          cp summary/qualification-by-regime.csv "$D/"
+          cp summary/qualification-integrity.json "$D/"
+          cp summary/scientific-commit.txt "$D/"
+          cp summary/adapter-commit.txt "$D/"
+          cp summary/output-hashes.txt "$D/"
+          for w in 200 600 1200; do
+            SRC="dev/exp002-M3-QUALIFY-window-$w-seed2101"
+            DIR="$D/window-$w-seed2101"
+            mkdir -p "$DIR"
+            cp "$SRC/paired-road-entry.csv" "$DIR/"
+            cp "$SRC/seed-level-metrics.json" "$SRC/r3-exception-audit.json" "$DIR/"
+            cp "$SRC/search-lookup-integrity.json" "$SRC/native-event-integrity.json" "$DIR/"
+            cp "$SRC/frozen-source-integrity.json" "$SRC/seed-and-topology-integrity.json" "$DIR/"
+            cp "$SRC/paired-reference-report.json" "$SRC/tripinfo-invariance.json" "$DIR/"
+            cp "$SRC/archived-source-hashes.txt" "$SRC/qualification-output-hashes.txt" "$DIR/"
+            cp "$SRC/policy-invariance.txt" "$SRC/qualifier-provenance.txt" "$DIR/"
+            cp "$SRC/sumo-version.txt" "$DIR/"
+          done
+          cat > "$D/README.md" <<'MD'
+          # Experiment 002 — M3 Frozen-Protocol Harness Development Qualification
+
+          **All three dev-only qualification scenarios passed. No held-out evaluation is active or authorized.**
+
+          - [Three-regime review report](QUALIFICATION_REPORT.md) and [scenario CSV](qualification-by-regime.csv)
+          - [Integrity manifest](qualification-integrity.json)
+          - Per-window folders contain **all original development-road entry comparisons**, frozen-code hash checks, generator/topology/OD matching, native simulation timing and telemetry audits, explicit teleport/exception status, verified search-counter events summary and matched outcome proof
+          - [Original successful frozen-source qualification workflow](https://github.com/yonnastgetahun/cooperative_traffic_research/actions/runs/40570158400#artifacts)
+          - [Scientific protocol freeze commit](https://github.com/yonnastgetahun/cooperative_traffic_research/commit/be2e8d27c78c8b6de4891115d6d951edc877ac6e)
+          - [Inactive heldout runner readiness blueprint](../../EXPERIMENT_002_M3_HELDOUT_RUNNER_READINESS_BLUEPRINT_V0_1.md)
+
+          Full compressed search events, native vehroute XML, original SUMO FCD and other bulk evidence remain in the **time-limited** workflow artifacts and can be regenerated from pinned source; this archive retains key hashes and compact, per-edge results. No seed 3101–3110 was generated, simulated or observed; these IDs are reserved for an explicitly authorized later study. The active workflow is unable to run a heldout seed, and does not demonstrate real-world safety or coordinated traffic benefits.
+          MD
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add "$D"
+          git diff --cached --quiet && exit 0
+          git commit -m 'Archive frozen M3 development runner qualification with source and seed-level evidence'
+          git push origin HEAD:main
