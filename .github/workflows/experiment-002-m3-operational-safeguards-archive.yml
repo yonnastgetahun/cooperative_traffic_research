@@ -1,0 +1,77 @@
+name: Experiment 002 M3 - preserve read-only operational gate evidence
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - experiments/experiment_002/m3_production_review/operational_archive_trigger_2026_10_27.txt
+permissions:
+  contents: write
+  actions: read
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Retrieve completed read-only GitHub safeguards audit
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 40581795907
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          name: exp002-m3-operational-safeguards-readonly
+          path: audit
+      - name: Check source evidence and explicit execution blockage
+        run: |
+          python3 - <<'PY'
+          import json,pathlib
+          f=pathlib.Path('audit/operational-safeguards.json')
+          m=json.loads(f.read_text())
+          assert m['schema']=='exp002-m3-operational-readiness-v0.1'
+          assert m['scientific_commit']=='be2e8d27c78c8b6de4891115d6d951edc877ac6e'
+          assert m['status']=='REVIEW_COMPLETE_EXECUTION_BLOCKED'
+          assert m['heldout_execution_authorized'] is False
+          assert m['heldout_seeds_generated_or_run'] is False
+          assert m['evaluation_activation_ready'] is False
+          w=m['active_workflows']
+          assert w['status']=='ACTIVE_REPO_M3_HELDOUT_PATH_GUARDED'
+          assert not w['active_heldout_workflows'] and not w['unguarded_user_seed_workflows']
+          assert w['inactive_template_check']['disabled_job_count']==3
+          assert all(w['legacy_seed_guard_test'][str(x)]=='rejected' for x in range(3101,3111))
+          assert m['environment']['status']!='VERIFIED_STRONG_PROTECTION'
+          assert m['main_branch']['status']=='NOT_PROTECTED'
+          assert pathlib.Path('audit/source-hashes.txt').is_file()
+          print('Safeguards audit validated. No user authorization or protected environment is implied.')
+          PY
+      - name: Preserve permanent report without activating M3
+        run: |
+          set -eu
+          D=docs/results/exp002_m3_operational_review_2026_10_27
+          mkdir -p "$D"
+          cp audit/operational-safeguards.json "$D/"
+          cp audit/source-hashes.txt "$D/"
+          cp audit/safeguard-source-commit.txt "$D/"
+          cp audit/frozen-science.txt "$D/"
+          cat > "$D/README.md" <<'MD'
+          # M3 Operational Safeguards — Read-Only GitHub Security Audit
+
+          **Review completed. Execution BLOCKED. No reserved seeds generated, inspected or simulated.**
+
+          - [Machine-readable environment, branch, seed-path and activation audit](operational-safeguards.json)
+          - [SHA-256 source guard fingerprints](source-hashes.txt)
+          - [Successful read-only Actions run](https://github.com/yonnastgetahun/cooperative_traffic_research/actions/runs/40581795907)
+          - [Operational scientific decision report](../../EXPERIMENT_002_M3_OPERATIONAL_READINESS_REVIEW_2026-10-27.md)
+
+          A legacy calibration workflow formerly allowed an arbitrary manually supplied seed. It now blocks the M3 reserved seed range **3101–3110 before any network or OD generation** and quotes user-supplied values. Six non-simulation adversarial checks passed.
+
+          GitHub API returned HTTP 404 for environment \`m3-holdout-reviewers\`: required reviewers, self-review prevention and admin-bypass restrictions are **not verified**, and no environment has been created or modified by this audit. The main branch was explicitly reported as **not protected**. These remain separate human GitHub administration actions before any held-out execution can be considered.
+
+          No evaluation workflow has been deployed or activated. The frozen scientific commit is \`be2e8d27c78c8b6de4891115d6d951edc877ac6e\`.
+          MD
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add "$D"
+          git diff --cached --quiet && exit 0
+          git commit -m 'Archive M3 operational safeguard audit with reviewer and branch protection blockers'
+          git push origin HEAD:main
