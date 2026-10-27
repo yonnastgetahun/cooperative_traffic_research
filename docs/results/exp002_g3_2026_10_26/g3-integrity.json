@@ -1,0 +1,48 @@
+{
+  "status": "G3_FIRST_PASS_COMPLETE_G3_STILL_OPEN",
+  "original_actions_run": 40446073958,
+  "scenarios": 9,
+  "vehicles_completed": 9000,
+  "immutable_sumo_image": "ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb",
+  "seed_scope": [
+    2101,
+    2102,
+    2103
+  ],
+  "regimes": [
+    200,
+    600,
+    1200
+  ],
+  "busy_road_discrepancies": {
+    "200": {
+      "n": 6700,
+      "wape": 0.045424,
+      "maximum_absolute_bin_difference_s": 30.0
+    },
+    "600": {
+      "n": 4844,
+      "wape": 0.048684,
+      "maximum_absolute_bin_difference_s": 30.0
+    },
+    "1200": {
+      "n": 2290,
+      "wape": 0.043505,
+      "maximum_absolute_bin_difference_s": 30.0
+    }
+  },
+  "internal_sampled_transitions": 66853,
+  "transitions_missing_internal_samples": 317,
+  "total_internal_lower_bound_s": 51116.0,
+  "total_internal_upper_bound_s": 185139.0,
+  "outliers_need_individual_vehicle_attribution": true,
+  "native_partial_final_bins_not_silently_counted_as_zeros": true,
+  "heldout_3101_to_3110_untouched": true,
+  "decision_gates": {
+    "G3-0_source_integrity": "PASS",
+    "G3-1_occupancy_mechanisms": "OPEN",
+    "G3-2_junction_sampling_bounds": "PARTIAL",
+    "G3-3_live_search_time_lookup_capture": "OPEN",
+    "G3-4_freeze_ready": "NO"
+  }
+}
