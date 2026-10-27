@@ -86,6 +86,8 @@ The target was selected **before replay** from the original G3 discrepancy ledge
 
 No predictor-accuracy threshold was retroactively chosen, and no routing efficacy or physical safety improvement is established.
 
+**Follow-on observation sufficiency review (October 26):** [G3 Sufficiency Review and Pre-Freeze Decision](EXPERIMENT_002_G3_OBSERVATION_SUFFICIENCY_REVIEW_2026-10-26.md) and [14-item Limitations Register](EXPERIMENT_002_G3_MEASUREMENT_LIMITATIONS_REGISTER_2026-10-26.csv) conclude that native SUMO movement events are appropriate for step-level chosen-route timing, and native edge data are appropriate for simulated aggregate road presence, but these are not the same estimand as the planner's route-assignment counter. Native-entry joins and search-input provenance need moderate/low regime verification before proposing a freeze. **This is a review, not a freeze or held-out authorization.**
+
 ## Recommended next narrow decision
 
 1. **Observation contract:** Treat native SUMO road `sampledSeconds` / occupancy and trajectory-front FCD as **different targets**. Use the native aggregate for physical-road presence, and native `vehroute.exitTimes` for step-resolved ordered movement. Do not directly subtract search assignment counts from native road occupancy percentages.
