@@ -1,0 +1,11 @@
+{
+  "status": "FROZEN_SOURCE_VERIFIED",
+  "frozen_sha": "be2e8d27c78c8b6de4891115d6d951edc877ac6e",
+  "protocol_document_commit": "deba2b1c1df7660e57cc9f69a3c9ca3ded356aca",
+  "fingerprint_files_verified": 14,
+  "heldout_authorized": false,
+  "image": "ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb",
+  "seed": 2101,
+  "window_seconds": 600,
+  "purpose": "development_harness_qualification_ONLY"
+}

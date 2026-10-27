@@ -1,0 +1,126 @@
+{
+  "status": "DEVELOPMENT_QUALIFICATION_ONLY_NOT_HELDOUT",
+  "vehicles": 1000,
+  "edge_traversals": 8393,
+  "paired_MAE_benefit_ff_minus_timeaware_s": 3.42238,
+  "timing_metrics": {
+    "FCD_minus_native": {
+      "n": 8393,
+      "mae_s": 0.0,
+      "bias_s": 0.0,
+      "rmse_s": 0.0,
+      "abs_p90_s": 0.0,
+      "abs_p95_s": 0.0
+    },
+    "freeflow": {
+      "n": 8393,
+      "mae_s": 16.83432,
+      "bias_s": 16.77437,
+      "rmse_s": 23.26858,
+      "abs_p90_s": 38.62837,
+      "abs_p95_s": 49.01656
+    },
+    "freeflow_first": {
+      "n": 1000,
+      "mae_s": 0.518,
+      "bias_s": 0.518,
+      "rmse_s": 0.77717,
+      "abs_p90_s": 0.8,
+      "abs_p95_s": 1.4
+    },
+    "freeflow_route_1_2": {
+      "n": 1991,
+      "mae_s": 6.3879,
+      "bias_s": 6.37007,
+      "rmse_s": 7.80069,
+      "abs_p90_s": 11.67574,
+      "abs_p95_s": 14.27574
+    },
+    "freeflow_route_3_5": {
+      "n": 2643,
+      "mae_s": 15.70109,
+      "bias_s": 15.67101,
+      "rmse_s": 18.04233,
+      "abs_p90_s": 26.78934,
+      "abs_p95_s": 31.38935
+    },
+    "freeflow_route_6plus": {
+      "n": 2759,
+      "mae_s": 31.37229,
+      "bias_s": 31.23162,
+      "rmse_s": 35.93153,
+      "abs_p90_s": 54.37869,
+      "abs_p95_s": 63.94082
+    },
+    "timeaware": {
+      "n": 8393,
+      "mae_s": 13.41194,
+      "bias_s": 13.15203,
+      "rmse_s": 19.0994,
+      "abs_p90_s": 31.14082,
+      "abs_p95_s": 41.37869
+    },
+    "timeaware_departure_aligned": {
+      "n": 8393,
+      "mae_s": 12.91149,
+      "bias_s": 12.63059,
+      "rmse_s": 18.71577,
+      "abs_p90_s": 30.55148,
+      "abs_p95_s": 40.74082
+    },
+    "timeaware_first": {
+      "n": 1000,
+      "mae_s": 0.518,
+      "bias_s": 0.518,
+      "rmse_s": 0.77717,
+      "abs_p90_s": 0.8,
+      "abs_p95_s": 1.4
+    },
+    "timeaware_route_1_2": {
+      "n": 1991,
+      "mae_s": 5.84086,
+      "bias_s": 5.79741,
+      "rmse_s": 7.18857,
+      "abs_p90_s": 10.83787,
+      "abs_p95_s": 13.27574
+    },
+    "timeaware_route_3_5": {
+      "n": 2643,
+      "mae_s": 12.61853,
+      "bias_s": 12.43934,
+      "rmse_s": 15.16154,
+      "abs_p90_s": 23.01152,
+      "abs_p95_s": 27.55148
+    },
+    "timeaware_route_6plus": {
+      "n": 2759,
+      "mae_s": 24.30898,
+      "bias_s": 23.72133,
+      "rmse_s": 29.18871,
+      "abs_p90_s": 45.91447,
+      "abs_p95_s": 54.33664
+    }
+  },
+  "departure_lag_s": {
+    "n": 1000,
+    "mae_s": 0.518,
+    "bias_s": 0.518,
+    "rmse_s": 0.77717,
+    "abs_p90_s": 0.8,
+    "abs_p95_s": 1.4
+  },
+  "observed_reference": "SUMO native external entry inferred from preceding native link exit, step=1s",
+  "FCD_reference": "first front location per 1s FCD external edge; checked separately",
+  "primary_statistical_unit": "independent seed; not each road edge",
+  "limits": [
+    "No occupancy prediction from prior-route count",
+    "No unchosen route realized outcome",
+    "Internal residence not causal junction delay",
+    "No network/systemwide traffic benefit claim"
+  ],
+  "seed": 2101,
+  "window_seconds": 1200,
+  "frozen_scientific_commit": "be2e8d27c78c8b6de4891115d6d951edc877ac6e",
+  "matches_preexisting_M2_forecast_errors": true,
+  "native_vs_FCD_entry_step_all_equal": true
+}

@@ -1,0 +1,4 @@
+seed,window_seconds,frozen_commit,completed_vehicles,matched_edges,actual_search_reads,assigned_edges,timeaware_MAE_s,freeflow_MAE_s,paired_benefit_s,lateness_bias_s,native_FCD_entry_step_difference_MAE_s,reported_teleports,native_internal_link_events,invariant_original_routes,invariant_trips,scenario_gate
+2101,200,be2e8d27c78c8b6de4891115d6d951edc877ac6e,1000,8393,664400,8393,51.31636,56.6498,5.33344,51.22124,0.0,0,8338,True,True,PASS_DEVELOPMENT_ONLY
+2101,600,be2e8d27c78c8b6de4891115d6d951edc877ac6e,1000,8393,664761,8393,18.72871,22.62609,3.89738,18.58986,0.0,0,8384,True,True,PASS_DEVELOPMENT_ONLY
+2101,1200,be2e8d27c78c8b6de4891115d6d951edc877ac6e,1000,8393,665791,8393,13.41194,16.83432,3.42238,13.15203,0.0,0,8363,True,True,PASS_DEVELOPMENT_ONLY

@@ -1,0 +1,2 @@
+bad251767b6abfdc1098d0d58a543c8eb4135f881a372d5cab2e872e67fddc21  qualification-summary/qualification-by-regime.csv
+8aecf431d509711ce14d4195da8f71a854129f395b55a6ece1051e712c39136a  qualification-summary/qualification-integrity.json

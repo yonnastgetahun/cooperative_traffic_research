@@ -1,0 +1,56 @@
+{
+  "status": "R3_DEVELOPMENT_OBSERVATION_POLICY_APPLIED",
+  "seed": 2101,
+  "window_seconds": 600,
+  "matched_trip_count": 1000,
+  "route_population_invariant": true,
+  "tripinfo_invariant": true,
+  "reported_teleports": {
+    "teleport_state": "ZERO_CONFIRMED",
+    "teleports_total": 0,
+    "teleports_breakdown": {
+      "total": "0",
+      "jam": "0",
+      "yield": "0",
+      "wrongLane": "0"
+    },
+    "vehicles": {
+      "loaded": "1000",
+      "inserted": "1000",
+      "running": "0",
+      "waiting": "0"
+    },
+    "safety": {
+      "collisions": "0",
+      "emergencyStops": "0",
+      "emergencyBraking": "0"
+    }
+  },
+  "reported_FCD": {
+    "timestep_count": 870,
+    "distinct_observed_vehicles": 1000,
+    "structural_anomalies": {},
+    "vehicles_with_within_trip_disappearance": [],
+    "within_trip_disappearance_count": 0
+  },
+  "native_edge_bins": {
+    "native_bins": 10440,
+    "native_intervals": 29,
+    "status_counts": {
+      "FULL_30_SECOND_BIN": 10440,
+      "DISPLAYED_ZERO_SAMPLED_SECONDS": 3801,
+      "EMPTY_NATIVE_EDGE_NO_SAMPLES": 3801,
+      "POSITIVE_NATIVE_SAMPLE_SECONDS": 6639
+    },
+    "missing_required_first20": [],
+    "zero_sample_bins_with_other_values": 0
+  },
+  "scientific_exception_counts": {},
+  "exception_gate": "PASS_FOR_THIS_REPLAY",
+  "missing_policy": "absent optional native values are NOT zero; zero sampledSeconds may be rounded; teleports require explicit statistic",
+  "claims_blocked": [
+    "real-world safety",
+    "causal intersection delay",
+    "physical occupancy prediction by route assignment counter"
+  ]
+}

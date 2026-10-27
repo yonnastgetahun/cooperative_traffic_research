@@ -1,0 +1,15 @@
+{
+  "vehicles_with_parsed_events": 1000,
+  "planned_vehicles": 1000,
+  "tripinfo_vehicles": 1000,
+  "native_event_rows": 16731,
+  "internal_event_rows": 8338,
+  "missing_vehicles": [],
+  "unexpected_vehicles": [],
+  "external_route_mismatch": [],
+  "depart_arrival_mismatch": [],
+  "parse_issues": [],
+  "event_time_semantics": "SUMO simulation-step exit time; entering next link is inferred from prior exit, not an independent crossing measurement",
+  "source": "vehroute-output.exit-times + vehroute-output.internal",
+  "status": "diagnostic_not_holdout"
+}
