@@ -25,8 +25,15 @@ jobs:
           fi
           echo "image=ghcr.io/eclipse-sumo/sumo@$digest" >> "$GITHUB_OUTPUT"
           echo "Calibration SUMO image: ghcr.io/eclipse-sumo/sumo@$digest"
+  fixture-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: M0 contract fixtures for frozen M2 measurement code
+        run: |
+          python3 -m unittest discover -s experiments/experiment_002 -p 'test_measurement_v01.py' -v
   calibration:
-    needs: pin-image
+    needs: [pin-image, fixture-tests]
     runs-on: ubuntu-latest
     timeout-minutes: 50
     strategy:
@@ -56,4 +63,26 @@ jobs:
         with:
           name: exp002-occupancy-M2-window-${{ matrix.window }}-seed${{ matrix.seed }}
           path: results/
+          retention-days: 30
+
+  aggregate:
+    needs: calibration
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Retrieve nine evidence packages
+        uses: actions/download-artifact@v4
+        with:
+          pattern: exp002-occupancy-M2-window-*
+          path: m2-artifacts
+          merge-multiple: false
+      - name: Compare outcomes across independently generated development seeds
+        run: |
+          python3 experiments/experiment_002/aggregate_measurement_v01.py \
+            --root m2-artifacts --out m2-summary
+      - name: Publish calibration-level summary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp002-occupancy-M2-aggregate
+          path: m2-summary/
           retention-days: 30
