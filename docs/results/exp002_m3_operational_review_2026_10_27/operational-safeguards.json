@@ -1,0 +1,61 @@
+{
+  "schema": "exp002-m3-operational-readiness-v0.1",
+  "status": "REVIEW_COMPLETE_EXECUTION_BLOCKED",
+  "scientific_commit": "be2e8d27c78c8b6de4891115d6d951edc877ac6e",
+  "active_workflows": {
+    "status": "ACTIVE_REPO_M3_HELDOUT_PATH_GUARDED",
+    "active_workflow_count": 33,
+    "active_heldout_workflows": [],
+    "user_seed_input_workflows": [
+      "experiment-001-calibration.yml"
+    ],
+    "unguarded_user_seed_workflows": [],
+    "legacy_seed_guard_test": {
+      "3101": "rejected",
+      "3102": "rejected",
+      "3103": "rejected",
+      "3104": "rejected",
+      "3105": "rejected",
+      "3106": "rejected",
+      "3107": "rejected",
+      "3108": "rejected",
+      "3109": "rejected",
+      "3110": "rejected",
+      "1001": "accepted_dev",
+      "2101": "accepted_dev",
+      "2103": "accepted_dev",
+      "bad;text": "rejected"
+    },
+    "inactive_template_check": {
+      "status": "INACTIVE_NOT_AUTHORIZED",
+      "frozen_scientific_commit": "be2e8d27c78c8b6de4891115d6d951edc877ac6e",
+      "heldout_execution_enabled": false,
+      "manual_event_required": "workflow_dispatch",
+      "proposed_protected_environment": "m3-holdout-reviewers",
+      "protected_environment_reviewers_verified": false,
+      "template_job_count": 3,
+      "disabled_job_count": 3,
+      "caveat": "Template is outside active Actions directory. Protected environment has not been configured or independently verified."
+    },
+    "source_scan_limit": "Static source audit plus executable legacy guard test; cannot constrain admins manually editing workflows or running scripts elsewhere."
+  },
+  "environment": {
+    "status": "NOT_VERIFIED",
+    "http_status": 404,
+    "required_reviewers_verified": false,
+    "prevent_self_review_verified": false,
+    "admin_bypass_disabled_verified": false,
+    "reviewer_count": 0,
+    "protected_branch_policy_verified": false
+  },
+  "main_branch": {
+    "status": "NOT_PROTECTED",
+    "http_status": 200,
+    "protected": false
+  },
+  "heldout_execution_authorized": false,
+  "heldout_seeds_generated_or_run": false,
+  "evaluation_activation_ready": false,
+  "actions_taken": "GET repository settings and static guard checks only. No environment created or workflow dispatched.",
+  "next_step": "Require human-configured protected environment/reviewers and branch protection, then independently verify before future execution authorization"
+}
