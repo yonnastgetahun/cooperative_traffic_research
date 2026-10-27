@@ -1,9 +1,11 @@
 # Experiment 002 — G3 Measurement Reconciliation Protocol v0.1
 
-**Status:** Approved for a measurement-only reconciliation of existing M2 development artifacts; **not approval for held-out evaluation**.  
+**Status:** **Approved and executed through offline G3-A/B/C evidence passes, October 26, 2026. G3 remains PARTIAL/OPEN; M3 held-out evaluation is not authorized.**  
 **Scope:** Previously recorded seed 2101/2102/2103 × 200/600/1200-second SUMO datasets only. No new route selection, parameter tuning, seed generation, or SUMO simulations required for the first pass.  
 **Parent documents:** [Measurement plan](EXPERIMENT_002_OCCUPANCY_JUNCTION_MEASUREMENT_PLAN_V0_1.md) · [M2 findings and known limits](EXPERIMENT_002_OCCUPANCY_M2_DEVELOPMENT_RESULTS_2026-10-26.md) · [Predictor-validation plan](EXPERIMENT_002_PREDICTOR_VALIDATION_PLAN.md)  
 **Immutable source run:** [M2 calibration artifacts, workflow 40446073958](https://github.com/yonnastgetahun/cooperative_traffic_research/actions/runs/40446073958).
+
+**Execution outcome:** [G3 reconciliation findings and scientific gate memo](EXPERIMENT_002_G3_RECONCILIATION_FINDINGS_2026-10-26.md), [durable outlier and cross-edge CSV evidence](results/exp002_g3_2026_10_26/README.md). The original protocol/questions below are retained. Case-level evidence supports a vehicle-boundary occupancy explanation, but exact native accumulation and intersection causality remain unresolved.
 
 ## 1. Problem and frozen diagnostic questions
 
