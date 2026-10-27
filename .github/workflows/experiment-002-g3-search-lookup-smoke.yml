@@ -1,0 +1,73 @@
+name: Experiment 002 G3 J2 - original search-time counter reads
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - experiments/experiment_002/g3_j2_trigger_2026_10_26.txt
+permissions:
+  contents: read
+  actions: read
+jobs:
+  fixtures:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check default-off search observation invariance with deterministic graph fixtures
+        run: |
+          python3 -m unittest discover -s experiments/experiment_002 -p 'test_g3_search_hooks_v01.py' -v
+          python3 -m py_compile experiments/experiment_002/g3_live_search_capture_v01.py experiments/experiment_002/g3_search_event_audit_v01.py
+  compare:
+    needs: fixtures
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    container:
+      image: ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb
+    env:
+      SUMO_HOME: /usr/share/sumo
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download original DEVELOPMENT scenario, previously inspected
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 40443562182
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          name: exp002-actual-predictor-trace-window-200-seed2001
+          path: source
+      - name: Original search with observation hook completely OFF
+        run: |
+          set -eu
+          mkdir -p j2
+          python3 experiments/experiment_002/time_aware.py \
+            --net source/network.net.xml --trips source/trips.xml \
+            --out j2/control.rou.xml --audit j2/control-audit.csv \
+            --manifest j2/control-manifest.json
+          cmp source/original-time-aware.rou.xml j2/control.rou.xml
+          cmp source/original-audit.csv j2/control-audit.csv
+      - name: Instrument each live occupancy lookup and assignment with default-off hook ON
+        run: |
+          set -eu
+          python3 experiments/experiment_002/g3_live_search_capture_v01.py \
+            --net source/network.net.xml --trips source/trips.xml \
+            --out j2/observed.rou.xml --audit j2/observed-audit.csv \
+            --manifest j2/observed-manifest.json \
+            --events j2/search-lookups.jsonl.gz --summary j2/search-event-summary.json
+          cmp j2/control.rou.xml j2/observed.rou.xml
+          cmp j2/control-audit.csv j2/observed-audit.csv
+          echo "BYTE_IDENTICAL_ROUTE_AND_AUDIT_VS_ORIGINAL_AND_ARCHIVED_BASELINE" > j2/policy-invariance.txt
+          python3 experiments/experiment_002/g3_search_event_audit_v01.py \
+            --events j2/search-lookups.jsonl.gz \
+            --routes j2/observed.rou.xml \
+            --report j2/search-event-integrity.json
+          echo "Pinned SUMO image: ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb" > j2/container-image.txt
+          echo "$GITHUB_SHA" > j2/observation-code-commit.txt
+          sha256sum source/network.net.xml source/trips.xml source/original-time-aware.rou.xml > j2/source-hashes.txt
+          sha256sum j2/observed.rou.xml j2/search-lookups.jsonl.gz j2/search-event-integrity.json > j2/observation-hashes.txt
+      - name: Persist evidence even if instrumentation diverges
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp002-G3-J2-actual-search-time-events-seed2001-window200
+          path: j2/
+          retention-days: 30
