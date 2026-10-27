@@ -9,6 +9,6 @@
 
 A legacy calibration workflow formerly allowed an arbitrary manually supplied seed. It now blocks the M3 reserved seed range **3101–3110 before any network or OD generation** and quotes user-supplied values. Six non-simulation adversarial checks passed.
 
-GitHub API returned HTTP 404 for environment \`m3-holdout-reviewers\`: required reviewers, self-review prevention and admin-bypass restrictions are **not verified**, and no environment has been created or modified by this audit. The main branch was explicitly reported as **not protected**. These remain separate human GitHub administration actions before any held-out execution can be considered.
+GitHub API returned HTTP 404 for environment `m3-holdout-reviewers`: required reviewers, self-review prevention and admin-bypass restrictions are **not verified**, and no environment has been created or modified by this audit. The main branch was explicitly reported as **not protected**. These remain separate human GitHub administration actions before any held-out execution can be considered.
 
-No evaluation workflow has been deployed or activated. The frozen scientific commit is \`be2e8d27c78c8b6de4891115d6d951edc877ac6e\`.
+No evaluation workflow has been deployed or activated. The frozen scientific commit is `be2e8d27c78c8b6de4891115d6d951edc877ac6e`.
