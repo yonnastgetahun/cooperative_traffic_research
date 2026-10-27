@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on 2026-10-27T06:08:36.141531+00:00 by Eclipse SUMO sumo 1.28.0
+<sumoConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
+
+    <input>
+        <net-file value="original/network.net.xml"/>
+        <route-files value="original/original.rou.xml"/>
+    </input>
+
+    <output>
+        <summary-output value="r3/summary.xml"/>
+        <tripinfo-output value="r3/observed-tripinfo.xml"/>
+        <collision-output value="r3/collisions.xml"/>
+        <statistic-output value="r3/statistics.xml"/>
+    </output>
+
+    <report>
+        <log value="r3/sumo.log"/>
+        <no-step-log value="true"/>
+    </report>
+
+    <random_number>
+        <seed value="2101"/>
+    </random_number>
+
+</sumoConfiguration>
+-->
+
+<collisions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/collision_file.xsd">
+</collisions>

@@ -1,0 +1,21 @@
+{
+  "status": "R3_DEVELOPMENT_AUDIT_COMPLETE",
+  "windows": [
+    200,
+    600,
+    1200
+  ],
+  "development_seed": 2101,
+  "reference_run": 40446073958,
+  "scenario_count": 3,
+  "all_original_trips_reproduced": true,
+  "teleports_zero_confirmed_all_regimes": true,
+  "exception_clear_regimes": [
+    200,
+    600,
+    1200
+  ],
+  "exception_open_regimes": [],
+  "note": "Historical M2 artifacts did not contain explicit teleport statistics; zero/positive results here describe strictly matched development reruns, not original missing metrics.",
+  "heldout_evaluated": false
+}

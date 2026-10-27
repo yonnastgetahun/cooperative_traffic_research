@@ -1,0 +1,4 @@
+seed,window_seconds,trip_completions,teleport_state,teleport_total,collisions_reported,FCD_timestep_count,FCD_missing_internal_samples,native_bins,full_native_bins,partial_native_bins,native_displayed_zero_samples,native_empty_edge_no_metrics,native_positive_with_missing_metric,exception_gate
+2101,200,1000,ZERO_CONFIRMED,0,0,631,0,7920,7560,360,3268,3268,0,PASS_FOR_THIS_REPLAY
+2101,600,1000,ZERO_CONFIRMED,0,0,870,0,10440,10440,0,3801,3801,0,PASS_FOR_THIS_REPLAY
+2101,1200,1000,ZERO_CONFIRMED,0,0,1438,0,17280,16920,360,8469,8468,0,PASS_FOR_THIS_REPLAY

@@ -1,0 +1,41 @@
+{
+  "status": "R4_DEVELOPMENT_DRY_RUN_NOT_M3",
+  "schema_version": "g3-r4-seed-v0.1",
+  "dataset": "existing published M2 development seeds 2101-2103 only",
+  "development_seed_list": [
+    2101,
+    2102,
+    2103
+  ],
+  "regime_windows_s": [
+    200,
+    600,
+    1200
+  ],
+  "per_seed_paired_delta_definition": "MAE_freeflow - MAE_timeaware on identical chosen routes and matched external road visits",
+  "primary_congestion_window_s": 200,
+  "secondary_windows_s": [
+    600,
+    1200
+  ],
+  "unit_of_analysis": "independent demand seed within fixed network",
+  "uncertainty_methods": {
+    "development_dryrun": "n=3 means, sample SD, median and range only; no evaluation claims",
+    "future_only_after_approval": "ten-paired-seed Student t 95% CI, df9 tcritical 2.2621571628540993",
+    "rule_for_fewer_than_ten_eligible": "do not compute planned heldout 10-seed conclusion or replace missing seeds"
+  },
+  "data_integrity": {
+    "expected_development_rows": 9,
+    "passed": true,
+    "completed_each_scenario": 1000,
+    "no_reserved_evaluation_seed_access": true,
+    "not_treating_edges_as_independent": true
+  },
+  "nonclaims": [
+    "not a traffic-routing efficacy comparison",
+    "not real-world safety",
+    "prior route-assignment count is not physical occupancy",
+    "not proof of calibrated predictor",
+    "heldout seeds remain unrun"
+  ]
+}

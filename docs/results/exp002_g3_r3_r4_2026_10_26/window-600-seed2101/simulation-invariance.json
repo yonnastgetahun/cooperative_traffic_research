@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "baseline_trips": 1000,
+  "observed_trips": 1000,
+  "checked_fields": [
+    "depart",
+    "arrival",
+    "duration",
+    "waitingTime",
+    "timeLoss",
+    "departDelay"
+  ],
+  "differing_vehicle_field_count": 0,
+  "first20_mismatches": []
+}
