@@ -27,6 +27,14 @@ class MeasurementContractTests(unittest.TestCase):
         self.assertEqual(report['status'],'matched')
         self.assertEqual([r[2] for r in out],['A','B','A'])
         self.assertEqual(sum(r[7] for r in out),2)
+    def test_consecutive_same_edge_separated_by_junction(self):
+        samples=[(0,'A','external','A_0',2,10),
+                 (1,':J','internal',':J_0',2,1),
+                 (2,'A','external','A_0',2,2)]
+        out,status=m.phase_segments('v',[{'edge':'A'},{'edge':'A'}],samples,{'arrival':3})
+        self.assertEqual(status['status'],'matched')
+        self.assertEqual([r[1] for r in out],[0,1])
+        self.assertEqual(len(out),2)
     def test_internal_delay_not_assigned_to_external(self):
         route=[{'edge':'A'},{'edge':'B'}]
         samples=[(0,'A','external','A_0',0,1),
