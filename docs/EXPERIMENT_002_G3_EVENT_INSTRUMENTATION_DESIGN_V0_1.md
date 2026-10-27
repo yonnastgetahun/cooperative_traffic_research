@@ -1,11 +1,13 @@
 # Experiment 002 — G3 Targeted Event Instrumentation Design v0.1
 
 **Date:** October 26, 2026 (Pacific)  
-**Status:** **Design for review. Not implemented or run. M3 freeze and held-out evaluation remain BLOCKED.**  
+**Status:** **Approved and executed for J0–J3 on October 26, 2026. All targeted development runs and policy-invariance checks succeeded; J4 findings published. G3 remains PARTIAL and M3 evaluation BLOCKED.**  
 **Purpose:** Resolve two remaining G3 measurement questions: (A) *when* vehicles traverse external edges and internal junction links, within the resolution of a fixed SUMO simulation; and (B) *which occupancy counter values* the time-aware route-search algorithm actually reads when evaluating every candidate, including unchosen candidates.
 
 **Parent:** [G3 Reconciliation Protocol](EXPERIMENT_002_G3_MEASUREMENT_RECONCILIATION_PROTOCOL_V0_1.md) · [G3 measured findings](EXPERIMENT_002_G3_RECONCILIATION_FINDINGS_2026-10-26.md) · [M2 development run 40446073958](https://github.com/yonnastgetahun/cooperative_traffic_research/actions/runs/40446073958).  
 **Immutable M2 SUMO image:** `ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb` (resolve/test availability before use).  
+**Verified execution:** [J0–J3 Event Instrumentation Findings and Gates](EXPERIMENT_002_G3_EVENT_INSTRUMENTATION_RESULTS_2026-10-26.md) · [durable archived integrity and anchor evidence](results/exp002_g3_events_2026_10_26/README.md). This text preserves the originally approved experimental design; its planned steps have now been executed in the limited development scope.
+
 **Research boundary:** Purely synthetic SUMO, 1,000 fixed trips on a 10×10 network. No real driver data, no optimization, no new algorithm, no route/pressure/guardrail changes, no seeds 3101–3110.
 
 ## 1. Core design decision
