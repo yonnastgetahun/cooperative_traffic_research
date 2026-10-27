@@ -10,10 +10,13 @@ We have completed Experiment 001 congestion calibration and the initial Experime
 
 The next question is whether the time-aware traffic predictor is accurate enough to guide coordination. Our [three-regime development trace](docs/EXPERIMENT_002_ACTUAL_PREDICTOR_TRACE_2026-10-26.md) is complete. It is more accurate than free-flow timing in all three tested scenarios but **still significantly underpredicts congestion-related delays**, and is not held-out validation.
 
+**Latest milestone (Oct 26):** The physical occupancy/junction measurement code passed its fixtures and ran on **three new development seeds across all three regimes (nine successful cases, 9,000 total completed trip records)**. Mean time-aware road-entry MAE remained **54.45 / 19.38 / 13.61 seconds** (200/600/1,200s) compared with a free-flow reference of **59.93 / 23.35 / 17.13 seconds** on the same chosen routes. The model still substantially underpredicts congestion delay. Native versus sampled occupancy discrepancies and subsecond junction uncertainties remain open. **No held-out seeds were run.**
+
 - [Research progress report — Experiments 001–002](docs/RESEARCH_PROGRESS_REPORT_2026-10-24.md)
 - [Approved Experiment 002 Predictor Validation Plan v0.2](docs/EXPERIMENT_002_PREDICTOR_VALIDATION_PLAN.md)
 - [Actual predictor trace: development findings and limitations](docs/EXPERIMENT_002_ACTUAL_PREDICTOR_TRACE_2026-10-26.md)
-- [Next milestone design (pending execution approval): physical occupancy & junction delay](docs/EXPERIMENT_002_OCCUPANCY_JUNCTION_MEASUREMENT_PLAN_V0_1.md)
+- [Completed M0–M2 development: physical occupancy & junction-delay findings](docs/EXPERIMENT_002_OCCUPANCY_M2_DEVELOPMENT_RESULTS_2026-10-26.md)
+- [Measurement design and M3 holdout gates](docs/EXPERIMENT_002_OCCUPANCY_JUNCTION_MEASUREMENT_PLAN_V0_1.md)
 - [Successful three-regime decision-trace workflow and artifacts](https://github.com/yonnastgetahun/cooperative_traffic_research/actions/runs/40443562182)
 - [Proposed separate Experiment 003: voluntary departure scheduling](docs/EXPERIMENT_003_DEPARTURE_SCHEDULING_ROADMAP.md)
 
