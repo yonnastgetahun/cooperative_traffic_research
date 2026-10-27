@@ -18,6 +18,9 @@ permissions:
 jobs:
   calibrate:
     runs-on: ubuntu-latest
+    env:
+      WINDOW: ${{ inputs.departure_window_seconds }}
+      SEED: ${{ inputs.seed }}
     container:
       image: ghcr.io/eclipse-sumo/sumo:latest
     timeout-minutes: 30
@@ -28,6 +31,17 @@ jobs:
           SEED: ${{ inputs.seed }}
         run: |
           set -eu
+          # Research integrity: reserved M3 validation seeds may never be used
+          # in the older manually dispatched calibration workflow.
+          python3 - <<'PY'
+          import os
+          try:
+              seed=int(os.environ['SEED'])
+          except ValueError:
+              raise RuntimeError('Calibration seed must be an integer')
+          if 3101 <= seed <= 3110:
+              raise RuntimeError('M3 held-out seed RESERVED: calibration blocked before OD generation')
+          PY
           mkdir -p results
           netgenerate --grid --grid.number 10 --grid.length 200 --output-file results/network.net.xml
           python3 - <<'PY'
@@ -52,8 +66,8 @@ jobs:
       - name: Route and simulate
         run: |
           set -eu
-          duarouter --net-file results/network.net.xml --route-files results/trips.xml --output-file results/routes.rou.xml --seed ${{ inputs.seed }} --no-step-log true
-          sumo --net-file results/network.net.xml --route-files results/routes.rou.xml --tripinfo-output results/tripinfo.xml --summary-output results/summary.xml --seed ${{ inputs.seed }} --no-step-log true
+          duarouter --net-file results/network.net.xml --route-files results/trips.xml --output-file results/routes.rou.xml --seed "$SEED" --no-step-log true
+          sumo --net-file results/network.net.xml --route-files results/routes.rou.xml --tripinfo-output results/tripinfo.xml --summary-output results/summary.xml --seed "$SEED" --no-step-log true
       - name: Validate and report
         run: |
           python3 - <<'PY'
