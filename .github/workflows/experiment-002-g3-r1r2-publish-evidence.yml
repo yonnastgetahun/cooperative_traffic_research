@@ -1,0 +1,82 @@
+name: Experiment 002 G3 R1R2 - archive development evidence
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - experiments/experiment_002/g3_r1r2_archive_trigger_2026_10_26.txt
+permissions:
+  contents: write
+  actions: read
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 40456979518
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          name: exp002-G3-R1R2-three-regime-development-summary
+          path: summary
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 40456979518
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          pattern: exp002-G3-R1R2-window-*
+          path: by-regime
+          merge-multiple: false
+      - name: Check each of three original reports
+        run: |
+          python3 - <<'PY'
+          import json,pathlib
+          s=json.loads(pathlib.Path('summary/integrity.json').read_text())
+          assert s['seed']==2101 and s['scenarios']==3 and not s['heldout_used']
+          assert s['matched_edges']==25179
+          for w in [200,600,1200]:
+              p=pathlib.Path('by-regime')/f'exp002-G3-R1R2-window-{w}-seed2101'
+              t=json.loads((p/'timing-bridge-report.json').read_text())
+              q=json.loads((p/'search-event-integrity.json').read_text())
+              x=json.loads((p/'simulation-invariance.json').read_text())
+              n=json.loads((p/'native-event-report.json').read_text())
+              assert t['matched']==t['planned_edges']==8393
+              assert list(t['observed_delta_counts'])==['0.0']
+              assert q['status']==x['status']=='PASS'
+              assert n['vehicles_with_parsed_events']==1000
+          PY
+      - name: Commit compact permanent evidence and paired road-entry CSVs
+        run: |
+          set -eu
+          D=docs/results/exp002_g3_r1r2_2026_10_26
+          mkdir -p "$D"
+          cp summary/*.csv summary/*.json summary/*.md "$D/"
+          for w in 200 600 1200; do
+            SRC="by-regime/exp002-G3-R1R2-window-$w-seed2101"
+            DIR="$D/window-$w-seed2101"
+            mkdir -p "$DIR"
+            cp "$SRC/paired-road-entry.csv" "$DIR/"
+            cp "$SRC/timing-bridge-report.json" "$SRC/search-event-integrity.json" "$DIR/"
+            cp "$SRC/native-event-report.json" "$SRC/simulation-invariance.json" "$DIR/"
+            cp "$SRC/source-hashes.txt" "$SRC/observation-hashes.txt" "$DIR/"
+            cp "$SRC/route-invariance.txt" "$SRC/image-digest.txt" "$DIR/"
+          done
+          cat > "$D/README.md" <<'MD'
+          # G3 R1–R2: Three-Regime Development Timing and Search-Read Evidence
+
+          **Development verification complete. M3 NOT frozen; no held-out evaluation.**
+
+          - [Cross-regime findings](G3_R1R2_DEVELOPMENT_REPORT.md), [CSV summary](three-regime-timing-bridge.csv), [integrity](integrity.json)
+          - Each window directory retains paired native/FCD per-road entry events, model timing errors, original search-counter integrity and SUMO trip outcome checks
+          - [Source GitHub Actions run and full temporary search-event streams](https://github.com/yonnastgetahun/cooperative_traffic_research/actions/runs/40456979518#artifacts)
+          - [Prespecified scope](../../EXPERIMENT_002_G3_R1_R2_EXECUTION_SCOPE_2026-10-26.md)
+
+          Both timing references concern vehicle fronts at SUMO's 1-second step. The predictor's prior assigned-route counts are not physical road occupancy. Seeds 3101–3110 remain untouched.
+          MD
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add "$D"
+          git diff --cached --quiet && exit 0
+          git commit -m 'Archive G3 native/FCD road entry and live search verification evidence'
+          git push origin HEAD:main
