@@ -1,1 +1,3 @@
 Approved G3 R0-R2 verification, existing M2 seed 2101 and original 200/600/1200s windows. Native ordered exit-step timing bridge against original FCD, real search-time occupancy-counter event audit, no model changes, no future holdouts. Predeclared scope docs/EXPERIMENT_002_G3_R1_R2_EXECUTION_SCOPE_2026-10-26.md.
+
+Retry fixture gate with refactored native/FCD tested parsing helpers (commit 8fbe5f2e8d3c893b6e99ed43e0da507342866ff6). Prior test failure blocked simulations.
