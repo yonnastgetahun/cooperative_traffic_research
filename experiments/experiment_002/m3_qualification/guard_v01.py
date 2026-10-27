@@ -7,6 +7,7 @@ reserved evaluation seeds. Frozen scientific source is identified by full SHA.
 import argparse, json, pathlib, hashlib
 
 FROZEN_SHA="be2e8d27c78c8b6de4891115d6d951edc877ac6e"
+FROZEN_PROTOCOL_DOCUMENT_COMMIT="deba2b1c1df7660e57cc9f69a3c9ca3ded356aca"
 FROZEN_PROTOCOL="docs/EXPERIMENT_002_M3_FROZEN_PROTOCOL_V1.md"
 FROZEN_MANIFEST="docs/EXPERIMENT_002_M3_PROTOCOL_FREEZE_MANIFEST_V1.json"
 SUMO_IMAGE="ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb"
@@ -23,7 +24,8 @@ def inspect_frozen(root):
     m=json.loads((root/FROZEN_MANIFEST).read_text())
     assert m["status"]=="SCIENTIFIC_PROTOCOL_FROZEN_HELDOUT_EXECUTION_NOT_AUTHORIZED"
     assert m["approval"]["heldout_simulations_authorized"] is False
-    assert m["immutable_references"]["source_snapshot_including_frozen_protocol_commit_sha"]==FROZEN_SHA
+    assert m["immutable_references"]["source_snapshot_including_frozen_protocol_commit_sha"]==FROZEN_PROTOCOL_DOCUMENT_COMMIT
+    assert m["immutable_references"]["frozen_protocol_git_blob_sha1"]=="ab9c52e007188e95b9162a14aa7fc1783d3e278c"
     assert m["simulator"]["image"]==SUMO_IMAGE
     assert (root/FROZEN_PROTOCOL).is_file()
     fingerprints=m["code_provenance"]["sha256_fingerprints_from_successful_no_simulation_preflight"]
@@ -36,6 +38,7 @@ def inspect_frozen(root):
     if compared<10:
         raise RuntimeError("Incomplete freeze fingerprint inventory")
     return dict(status="FROZEN_SOURCE_VERIFIED",frozen_sha=FROZEN_SHA,
+                protocol_document_commit=FROZEN_PROTOCOL_DOCUMENT_COMMIT,
                 fingerprint_files_verified=compared,heldout_authorized=False,
                 image=SUMO_IMAGE)
 
