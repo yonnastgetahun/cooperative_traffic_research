@@ -6,6 +6,9 @@ Every day, drivers sit in traffic despite having powerful navigation apps. Those
 
 ## Current research status — October 26, 2026
 
+**M3 production-adapter review (October 27):** [R3/R4 production adapters and activation safeguards passed offline review](docs/EXPERIMENT_002_M3_PRODUCTION_ADAPTER_REVIEW_FINDINGS_2026-10-27.md) with [per-scenario evidence](docs/results/exp002_m3_production_adapter_review_2026_10_27/README.md). All eight synthetic tests passed, and frozen R3 outputs were reproduced exactly from already inspected development cases. **Protected GitHub approval environment remains unverified, and reserved evaluation seeds have not run.**
+
+
 **Held-out workflow preparation (Oct 27):** The [frozen M3 development harness qualified end-to-end](docs/EXPERIMENT_002_M3_RUNNER_DEVELOPMENT_QUALIFICATION_2026-10-27.md) in all three already-inspected seed2101 congestion regimes. [Durable scenario evidence](docs/results/exp002_m3_qualification_2026_10_27/README.md) and an [explicitly inactive held-out workflow draft](docs/templates/experiment-002-m3-heldout-evaluation.yml.disabled) are published. **No held-out execution is enabled or authorized.**
 
 
