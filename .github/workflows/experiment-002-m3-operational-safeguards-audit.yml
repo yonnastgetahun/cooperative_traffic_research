@@ -1,0 +1,43 @@
+name: Experiment 002 M3 - read-only operational safeguard audit
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - experiments/experiment_002/m3_production_review/operational_trigger_2026_10_27.txt
+
+permissions:
+  contents: read
+
+jobs:
+  static-and-remote-read-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test legacy calibration guard and no live heldout evaluation workflow
+        run: |
+          python3 -m unittest discover -s experiments/experiment_002/m3_production_review \
+            -p 'test_operational_safeguards_v01.py' -v
+          python3 -m py_compile experiments/experiment_002/m3_production_review/operational_safeguards_v01.py
+      - name: Read GitHub environment and main branch protection, NEVER CREATE THEM
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p operational-review
+          python3 experiments/experiment_002/m3_production_review/operational_safeguards_v01.py \
+            --root . --repo "$GITHUB_REPOSITORY" \
+            --report operational-review/operational-safeguards.json
+          echo "$GITHUB_SHA" > operational-review/safeguard-source-commit.txt
+          echo "Approved frozen science: be2e8d27c78c8b6de4891115d6d951edc877ac6e" > operational-review/frozen-science.txt
+          sha256sum experiments/experiment_002/m3_production_review/operational_safeguards_v01.py \
+            .github/workflows/experiment-001-calibration.yml \
+            docs/templates/experiment-002-m3-heldout-evaluation.yml.disabled \
+            > operational-review/source-hashes.txt
+      - name: Upload evidence even if source integrity fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp002-m3-operational-safeguards-readonly
+          path: operational-review/
+          retention-days: 30
