@@ -1,6 +1,6 @@
 # Experiment 002 — R4 Seed-Level Analysis and Reproducibility Contract v0.1
 
-**Status:** Prespecified October 26, 2026; **development-only implementation and dry-run approved**. This document is **NOT an M3 freeze**, and the held-out evaluation seeds **3101–3110 remain reserved and unopened**.  
+**Status:** **Prespecified, implemented, tested and development dry-run completed successfully October 26, 2026.** [R3–R4 findings](EXPERIMENT_002_G3_R3_R4_EXECUTION_RESULTS_2026-10-26.md). This document is **NOT an M3 freeze**, and the held-out evaluation seeds **3101–3110 remain reserved and unopened**.  
 **Inputs:** [R3 exception contract](EXPERIMENT_002_R3_EXCEPTION_AND_MISSINGNESS_CONTRACT_V0_1.md) · [G3 sufficiency decision](EXPERIMENT_002_G3_OBSERVATION_SUFFICIENCY_REVIEW_2026-10-26.md) · [R0–R2 verified timing reference](EXPERIMENT_002_G3_R1_R2_VERIFICATION_RESULTS_2026-10-26.md).
 
 ## Research scope and frozen primary estimand
