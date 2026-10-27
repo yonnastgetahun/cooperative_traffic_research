@@ -8,6 +8,7 @@ case "$SEED" in 2001|2101|2102|2103);; *) echo "Holdout/prohibited seed" >&2;exi
 mkdir -p results
 sumo --version > results/sumo-version.txt
 echo "${GITHUB_SHA:-local-development}" > results/repository-commit.txt
+printf "%s\n" "${SUMO_IMAGE_REF:-ghcr.io/eclipse-sumo/sumo:latest (M1 development only)}" > results/container-image.txt
 netgenerate --grid --grid.number 10 --grid.length 200 --output-file results/network.net.xml
 python3 experiments/experiment_002/fixed_demand_v01.py \
   --net results/network.net.xml --out results/trips.xml \
@@ -67,6 +68,11 @@ python3 experiments/experiment_002/measurement_v01.py \
   --observed results/observed-edge-bins.csv \
   --phases results/transition-phases.csv \
   --proxy results/decision-count-proxy.csv
+
+python3 experiments/experiment_002/measurement_sensitivity_v01.py \
+  --fcd results/observed-fcd.xml \
+  --output results/sampling-sensitivity.csv \
+  --report results/sampling-sensitivity.json
 
 sha256sum results/native-external.xml results/native-with-internal.xml \
   results/observed-fcd.xml results/measurement-report.json > results/observation-hashes.txt
