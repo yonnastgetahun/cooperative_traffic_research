@@ -77,6 +77,8 @@ Before claiming physical occupancy calibration, explicitly define a comparison t
 
 **No arbitrary MAE success cutoff was added after inspecting the data. No predictor validation or cooperative-routing benefit has been established.**
 
+**Follow-on design (pending implementation approval):** [G3 Targeted Event Instrumentation v0.1](EXPERIMENT_002_G3_EVENT_INSTRUMENTATION_DESIGN_V0_1.md) specifies native `vehroute.exitTimes`, an optional read-only TraCI fallback, actual route-search-time counter lookup logging, old-development-seed replays, and policy/simulation invariance gates. The design has **not** been executed; all earlier G3 gate statuses remain unchanged.
+
 ## Next research decision
 
 **Recommend targeted G3 follow-up, not M3 held-out evaluation:**
