@@ -6,6 +6,10 @@ Every day, drivers sit in traffic despite having powerful navigation apps. Those
 
 ## Current research status — October 26, 2026
 
+**M3 protocol freeze — October 27, 2026:** **APPROVED and committed** as an exact [frozen Git snapshot](https://github.com/yonnastgetahun/cooperative_traffic_research/tree/exp002-m3-protocol-v1-frozen) (authoritative commit `be2e8d27c78c8b6de4891115d6d951edc877ac6e`). See the [scientific decision record](docs/EXPERIMENT_002_M3_FREEZE_DECISION_2026-10-27.md), [frozen protocol](https://github.com/yonnastgetahun/cooperative_traffic_research/blob/be2e8d27c78c8b6de4891115d6d951edc877ac6e/docs/EXPERIMENT_002_M3_FROZEN_PROTOCOL_V1.md) and [hash manifest](https://github.com/yonnastgetahun/cooperative_traffic_research/blob/be2e8d27c78c8b6de4891115d6d951edc877ac6e/docs/EXPERIMENT_002_M3_PROTOCOL_FREEZE_MANIFEST_V1.json). **This freezes the scientific methodology, not an executable evaluation runner. Held-out seeds 3101–3110 remain unopened and all evaluation runs require separate approval.**
+
+
+
 **Latest pre-freeze milestone (Oct 26):** R3 completed native teleport/collision/partial-bin audits in **three invariant development replays**, with **0 reported teleports** across the three cases. R4 implemented and tested **seed-level paired** forecast-error analysis using already inspected development seeds, while keeping all 3101–3110 evaluation seeds untouched. [R3–R4 findings](docs/EXPERIMENT_002_G3_R3_R4_EXECUTION_RESULTS_2026-10-26.md) · [full durable evidence](docs/results/exp002_g3_r3_r4_2026_10_26/README.md). An [M3 protocol freeze proposal](docs/EXPERIMENT_002_M3_PROTOCOL_FREEZE_PROPOSAL_V0_1.md) is published **for review only; neither the freeze nor held-out execution is authorized**.
 
 
