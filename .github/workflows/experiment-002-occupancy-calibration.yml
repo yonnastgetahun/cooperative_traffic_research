@@ -1,0 +1,59 @@
+name: Experiment 002 M2 measured occupancy - three calibration seeds
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - experiments/experiment_002/measurement_calibration_2026-10-26.txt
+permissions:
+  contents: read
+jobs:
+  pin-image:
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.resolve.outputs.image }}
+    steps:
+      - id: resolve
+        name: Resolve immutable SUMO image digest once for all nine jobs
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker buildx imagetools inspect ghcr.io/eclipse-sumo/sumo:latest > image-manifest.txt
+          digest=$(awk '/^Digest:/{print $2;exit}' image-manifest.txt)
+          if [[ ! "$digest" =~ ^sha256:[a-f0-9]{64}$ ]]; then
+            echo "No valid immutable digest found" >&2; exit 1
+          fi
+          echo "image=ghcr.io/eclipse-sumo/sumo@$digest" >> "$GITHUB_OUTPUT"
+          echo "Calibration SUMO image: ghcr.io/eclipse-sumo/sumo@$digest"
+  calibration:
+    needs: pin-image
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    strategy:
+      fail-fast: false
+      matrix:
+        window: [200, 600, 1200]
+        seed: [2101, 2102, 2103]
+    container:
+      image: ${{ needs.pin-image.outputs.image }}
+    env:
+      SUMO_HOME: /usr/share/sumo
+      SUMO_IMAGE_REF: ${{ needs.pin-image.outputs.image }}
+      WINDOW: ${{ matrix.window }}
+      SEED: ${{ matrix.seed }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Preserve immutable image reference
+        run: |
+          mkdir -p results
+          echo "$SUMO_IMAGE_REF" > results/container-image.txt
+      - name: Run M2 calibration measurement with original frozen routes
+        run: |
+          sh experiments/experiment_002/run_measurement_v01.sh
+      - name: Upload evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp002-occupancy-M2-window-${{ matrix.window }}-seed${{ matrix.seed }}
+          path: results/
+          retention-days: 30
