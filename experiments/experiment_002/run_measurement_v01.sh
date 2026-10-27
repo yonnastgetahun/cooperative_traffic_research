@@ -34,8 +34,8 @@ sha256sum results/trace.rou.xml results/chosen-decision-trace.csv \
 
 cat > results/measurement.add.xml <<'XML'
 <additional>
-  <edgeData id="external" file="results/native-external.xml" period="30" excludeEmpty="false" withInternal="false"/>
-  <edgeData id="includingInternal" file="results/native-with-internal.xml" period="30" excludeEmpty="false" withInternal="true"/>
+  <edgeData id="external" file="native-external.xml" period="30" excludeEmpty="false" withInternal="false"/>
+  <edgeData id="includingInternal" file="native-with-internal.xml" period="30" excludeEmpty="false" withInternal="true"/>
 </additional>
 XML
 
