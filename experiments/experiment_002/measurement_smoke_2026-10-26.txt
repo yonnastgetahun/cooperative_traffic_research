@@ -5,3 +5,5 @@ Do not use held-out seeds. Exact routing policy preserved. Review M1 quality gat
 Retry M0-M1 with XML attribute parser fix commit 7bd526e37ffec5a1d229aa940f86fad05b26f769.
 
 Retry M1 after SUMO native output path correction, commit d87645f8d14e09601bd04a939b6436fd231b1d03.
+
+Final verification: repeated-adjacent-road fixture, sampling sensitivity and image manifest. Runner commit 82a7e47160af5d3dc2b79de04dfb201c1f29f18c.
