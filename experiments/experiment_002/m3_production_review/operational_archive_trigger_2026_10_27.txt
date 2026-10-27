@@ -1,0 +1,1 @@
+Publish existing completed GitHub M3 operational safeguard audit (Actions run 40581795907) as permanent files. Prior live audit did not run SUMO or touch evaluation seeds. Legacy calibration seed guard tested. Environment HTTP404 (unverified) and main unprotected are blockers. Publication workflow only: no environment creation, no heldout activation.
