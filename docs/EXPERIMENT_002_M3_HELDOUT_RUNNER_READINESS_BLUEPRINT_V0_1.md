@@ -4,6 +4,9 @@
 **Approved scientific freeze:** [Frozen M3 v1.0](EXPERIMENT_002_M3_FROZEN_PROTOCOL_V1.md) · [Immutable source manifest](EXPERIMENT_002_M3_PROTOCOL_FREEZE_MANIFEST_V1.json) at Git commit `be2e8d27c78c8b6de4891115d6d951edc877ac6e`.  
 **Preparation authorization:** The user approved preparing and verifying the held-out workflow using development seeds only; this was not permission to generate or run evaluation seeds.
 
+
+**Inactive, explicitly non-executable review template:** [M3 held-out workflow draft](templates/experiment-002-m3-heldout-evaluation.yml.disabled). This is placed under `docs/templates`, *not* GitHub Actions' active `.github/workflows` directory, and has hard-disabled jobs even if copied. It does not itself implement the not-yet-approved general-seed adapters.
+
 ## Why this is not yet the executable held-out study
 
 The active GitHub workflow [M3 development-only qualification](../.github/workflows/experiment-002-m3-development-qualification.yml) runs **only seed 2101** and uses frozen scientific code checked out at the exact frozen Git SHA, under pinned SUMO image `ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb`. The first step explicitly rejects evaluation seeds before generating networks or demand.
