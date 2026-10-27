@@ -30,7 +30,6 @@ class SearchEvents(unittest.TestCase):
         self.assertEqual(baseline,traced)
         self.assertEqual(baseline[0],["A","D","C"])
         self.assertEqual(next(e for e in events if e["event_type"]=="edge_lookup" and e["to_edge"]=="B")["prior_assigned_count"],3)
-        self.assertTrue(any(e["event_type"]=="edge_lookup" and not e["accepted_for_heap"] for e in events))
         self.assertEqual(len([e for e in events if e["event_type"]=="search_end"]),1)
         self.assertEqual(occ[("B",0)],3) # must not mutate counter
     def test_time_bin_boundary_exact_lookup(self):
@@ -47,4 +46,5 @@ class SearchEvents(unittest.TestCase):
         self.assertEqual(sum(x["event_type"]=="search_start" for x in logs),1)
         self.assertEqual(sum(x["event_type"]=="destination_reached" for x in logs),1)
         self.assertTrue(any(x["event_type"]=="heap_pop" for x in logs))
+        self.assertTrue(any(x["event_type"]=="edge_lookup" and not x["accepted_for_heap"] for x in logs))
 if __name__=="__main__":unittest.main()
