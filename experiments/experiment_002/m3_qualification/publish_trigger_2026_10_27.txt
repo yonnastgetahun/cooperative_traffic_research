@@ -1,1 +1,3 @@
 User-approved preparation of M3 holdout evaluation harness, development-only rehearsal succeeded in GitHub Actions 40570158400. All three old seed2101 windows reproduced frozen routes, tripinfo, native entry timing, search reads, explicit zero teleports. Archive compact evidence and per-edge CSV; DO NOT enable or dispatch heldout evaluation seeds 3101–3110.
+
+Retry archive only after fixing status enum exactness; source original qualification run 40570158400 remains successful and unchanged. No new simulations.
