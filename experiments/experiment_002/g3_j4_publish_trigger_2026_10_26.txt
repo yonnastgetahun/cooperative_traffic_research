@@ -1,0 +1,1 @@
+J0-J3 completed successfully: native step-resolved exit times run40452285124; true original search-time occupancy reads run40452726452; targeted C6C7/veh0213 native+lookup replay run40453154885. Publish compact evidence after gated checks; do not run held-outs or alter policy.
