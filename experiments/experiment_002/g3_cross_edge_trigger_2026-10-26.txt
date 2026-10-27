@@ -1,0 +1,1 @@
+G3-C user-approved inspection of ranked native/FCD discrepant road bins with original SUMO FCD vehicle-level evidence. No new simulation, routing changes, or held-out seeds. Inputs: M2 Actions run 40446073958, G3 ledger run 40448102464.
