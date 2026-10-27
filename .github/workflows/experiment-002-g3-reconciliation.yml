@@ -1,0 +1,43 @@
+name: Experiment 002 G3 - offline M2 measurement reconciliation
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - experiments/experiment_002/g3_reconcile_trigger_2026-10-26.txt
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify G3 measurement contracts (no SUMO runs)
+        run: |
+          python3 -m unittest discover -s experiments/experiment_002 -p 'test_g3_reconcile_v01.py' -v
+      - name: Download the nine existing M2 development artifacts, not holdouts
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 40446073958
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          pattern: exp002-occupancy-M2-window-*
+          path: g3-sources
+          merge-multiple: false
+      - name: Build standalone G3 reconciliation, gate statuses, and evidence ledger
+        run: |
+          python3 experiments/experiment_002/g3_reconcile_v01.py --root g3-sources --out g3-report
+          echo "$GITHUB_SHA" > g3-report/reconciliation-code-commit.txt
+          echo "Original SUMO run: 40446073958" > g3-report/original-run-id.txt
+          sha256sum g3-report/*.csv g3-report/*.json > g3-report/output-hashes.txt
+      - name: Preserve offline G3 diagnostic results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp002-G3-offline-reconciliation-first-pass
+          path: g3-report/
+          retention-days: 30
