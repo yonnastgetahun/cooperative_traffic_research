@@ -51,8 +51,8 @@ def read_fcd(path, width, stride=1):
             vid=v.get("id")
             if not vid or not e:
                 missing[kind]+=1;continue
-            try:speed=float(v["speed"])
-            except (KeyError,ValueError):
+            try:speed=float(v.get("speed"))
+            except (TypeError,ValueError):
                 missing["no_speed"]+=1;continue
             pos=v.get("pos")
             if pos is None:missing["no_lane_position"]+=1
@@ -167,8 +167,8 @@ def analyze(a):
     trips={}
     for _,node in ET.iterparse(a.tripinfo,events=("end",)):
         if node.tag!="tripinfo":continue
-        trips[node["id"]]={"arrival":float(node["arrival"]),
-            "depart":float(node["depart"]),"duration":float(node["duration"]),
+        trips[node.get("id")]={"arrival":float(node.get("arrival")),
+            "depart":float(node.get("depart")),"duration":float(node.get("duration")),
             "waiting":float(node.get("waitingTime",0))}
         node.clear()
     tracks,bins,meta=read_fcd(a.fcd,a.bin_seconds)
