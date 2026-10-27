@@ -1,0 +1,84 @@
+name: Experiment 002 M3 - archive reviewed production adapters (no heldout)
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - experiments/experiment_002/m3_production_review/publish_trigger_2026_10_27.txt
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  preserve-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Retrieve original complete offline adapter review evidence
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 40577231235
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          name: exp002-M3-prod-adapters-offline-review-no-heldout
+          path: adapter-review
+      - name: Verify source commitments and excluded reserved seed execution
+        run: |
+          python3 - <<'PY'
+          import csv,json,pathlib
+          root=pathlib.Path('adapter-review')
+          r=json.loads((root/'production-adapter-review.json').read_text())
+          assert r['status']=='REVIEW_ONLY_PRODUCTION_ADAPTERS_PASSED_DEVELOPMENT_EQUIVALENCE'
+          assert r['original_frozen_scientific_sha']=='be2e8d27c78c8b6de4891115d6d951edc877ac6e'
+          assert r['reviewed_development_seed']==2101 and r['regimes']==[200,600,1200]
+          assert r['scenarios_passed']==3 and r['total_completed_trips']==3000
+          assert r['original_road_events']==25179
+          assert r['original_actual_search_reads']==1994952
+          assert r['R3_frozen_pure_method_reproduced_exactly'] and r['R4_seed_record_integrity_passed']
+          assert r['OD_fingerprints_match_across_regimes']
+          assert not r['heldout_access_authorized'] and not r['any_reserved_seed_generated_simulated_or_read']
+          assert r['activation_template_disabled'] and not r['protected_environment_configured']
+          with open(root/'production-adapter-development-records.csv',newline='') as f:
+              entries=list(csv.DictReader(f))
+          assert len(entries)==3 and set(int(x['window_seconds']) for x in entries)=={200,600,1200}
+          assert all(int(x['seed'])==2101 and x['status']=='ELIGIBLE_BY_FROZEN_R3_RULES' for x in entries)
+          for w in [200,600,1200]:
+              a=json.loads((root/f'r3-original-frozen-recomputed-{w}.json').read_text())
+              assert a['seed']==2101 and a['window_seconds']==w
+              assert a['reported_teleports']['teleport_state']=='ZERO_CONFIRMED'
+              assert a['exception_gate']=='PASS_FOR_THIS_REPLAY'
+          print('Verified frozen-original R3 equivalence, original M3 development-only source and no holdout authorization.')
+          PY
+      - name: Commit permanent adapter equivalence artifacts and review boundary
+        run: |
+          set -eu
+          D=docs/results/exp002_m3_production_adapter_review_2026_10_27
+          mkdir -p "$D"
+          cp adapter-review/production-adapter-review.json "$D/"
+          cp adapter-review/production-adapter-development-records.csv "$D/"
+          cp adapter-review/r3-original-frozen-recomputed-*.json "$D/"
+          cp adapter-review/production-adapter-commit.txt "$D/"
+          cp adapter-review/frozen-science-commit.txt "$D/"
+          cp adapter-review/review-hashes.txt "$D/"
+          cat > "$D/README.md" <<'MD'
+          # M3 Production-Adapter Offline Review Evidence
+
+          **Eight adversarial tests and three archived-development R3-equivalence checks passed. No held-out execution is authorized.**
+
+          - [Machine-readable review result](production-adapter-review.json)
+          - [Per-development-regime adapter records](production-adapter-development-records.csv)
+          - Recomputed frozen R3 reports for seed 2101 at each of 200, 600, and 1200 seconds
+          - Source and review code SHA references and evidence hashes
+          - [Successful original offline review run](https://github.com/yonnastgetahun/cooperative_traffic_research/actions/runs/40577231235)
+          - [Prespecified production adapter review plan](../../EXPERIMENT_002_M3_PRODUCTION_ADAPTER_REVIEW_PLAN_V0_1.md)
+          
+          Production adapters reuse the frozen R3 eligibility output and frozen R4 ten-seed Student-t interval. The ten-seed CI was tested only on fabricated dummy records; no 3101–3110 OD demands or outcomes were generated or examined. **GitHub protected-environment reviewers are not established/verified, the execution workflow stays disabled, and new user approval is required for any held-out run.**
+          MD
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add "$D"
+          git diff --cached --quiet && exit 0
+          git commit -m 'Archive M3 production eligibility and seed-statistical adapter review without heldout execution'
+          git push origin HEAD:main
