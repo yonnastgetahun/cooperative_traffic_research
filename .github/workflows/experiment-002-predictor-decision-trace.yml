@@ -1,0 +1,108 @@
+name: Experiment 002 - actual predictor trace (development smoke)
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - experiments/experiment_002/diagnostic_run_2026-10-26.txt
+permissions:
+  contents: read
+jobs:
+  validate:
+    name: window-${{ matrix.window }}-seed2001
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        window: [200, 600, 1200]
+    container:
+      image: ghcr.io/eclipse-sumo/sumo:latest
+    env:
+      SUMO_HOME: /usr/share/sumo
+      WINDOW: ${{ matrix.window }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate reproducible fixed OD demand (DEVELOPMENT seed, NOT holdout)
+        run: |
+          set -eu
+          mkdir -p results
+          sumo --version > results/sumo-version.txt
+          echo "$GITHUB_SHA" > results/repository-commit.txt
+          printf 'ghcr.io/eclipse-sumo/sumo:latest (unpinned development smoke only)\n' > results/container-image.txt
+          netgenerate --grid --grid.number 10 --grid.length 200 --output-file results/network.net.xml
+          python3 - <<'PY'
+          import os,sys,random,json,xml.etree.ElementTree as ET
+          sys.path.insert(0,os.path.join(os.environ.get('SUMO_HOME','/usr/share/sumo'),'tools'))
+          import sumolib
+          seed=2001;window=int(os.environ['WINDOW'])
+          random.seed(seed)
+          net=sumolib.net.readNet('results/network.net.xml')
+          edges=[e for e in net.getEdges() if not e.isSpecial() and e.allows('passenger')]
+          root=ET.Element('trips')
+          for i in range(1000):
+              for _ in range(1000):
+                  orig,dest=random.sample(edges,2)
+                  path,_=net.getShortestPath(orig,dest,vClass='passenger')
+                  if path and len(path)>=2:break
+              else:raise RuntimeError('No valid OD')
+              ET.SubElement(root,'trip',id=f'veh{i:04d}',depart=f'{i*window/1000:.3f}',**{'from':orig.getID(),'to':dest.getID()})
+          ET.ElementTree(root).write('results/trips.xml',encoding='utf-8',xml_declaration=True)
+          json.dump({'window_seconds':window,'seed':seed,'vehicle_count':1000,
+                     'purpose':'development trace smoke, NOT held-out predictor validation',
+                     'route_policy':'original time_aware.py, unchanged',
+                     'bin_seconds':30,'pressure':1.0,
+                     'container_immutable_digest_pinned':False},open('results/scenario.json','w'),indent=2)
+          PY
+          sha256sum results/network.net.xml results/trips.xml > results/input-hashes.txt
+      - name: Trace actual routing decisions (no policy changes)
+        run: |
+          set -eu
+          python3 experiments/experiment_002/trace_actual_predictor.py \
+            --net results/network.net.xml --trips results/trips.xml \
+            --out results/trace-time-aware.rou.xml \
+            --audit results/trace-audit.csv --manifest results/trace-manifest.json \
+            --trace results/chosen-decision-trace.csv \
+            --candidate-trace results/candidate-decision-trace.csv \
+            --decision-trace results/route-decisions.csv
+          python3 experiments/experiment_002/time_aware.py \
+            --net results/network.net.xml --trips results/trips.xml \
+            --out results/original-time-aware.rou.xml \
+            --audit results/original-audit.csv --manifest results/original-manifest.json
+          cmp results/trace-time-aware.rou.xml results/original-time-aware.rou.xml
+          cmp results/trace-audit.csv results/original-audit.csv
+          echo 'POLICY INVARIANCE VERIFIED: traced and original routes and audits identical.'
+          sha256sum results/trace-time-aware.rou.xml results/chosen-decision-trace.csv \
+            results/candidate-decision-trace.csv results/route-decisions.csv > results/forecast-hashes.txt
+      - name: Observe frozen chosen routes in SUMO
+        run: |
+          set -eu
+          sumo -n results/network.net.xml -r results/trace-time-aware.rou.xml \
+            --fcd-output results/observed-fcd.xml --device.fcd.period 1 \
+            --fcd-output.attributes lane,speed \
+            --tripinfo-output results/observed-tripinfo.xml \
+            --seed 2001 --no-step-log true
+          python3 - <<'PY'
+          import xml.etree.ElementTree as ET
+          infos=ET.parse('results/observed-tripinfo.xml').getroot().findall('tripinfo')
+          print('Completed trips:',len(infos))
+          if len(infos)!=1000:raise RuntimeError('Not all 1000 trips completed')
+          PY
+      - name: Compare original predictor equations with observed vehicle movement
+        run: |
+          set -eu
+          python3 experiments/experiment_002/compare_traced_predictor.py \
+            --trace results/chosen-decision-trace.csv \
+            --decision-trace results/route-decisions.csv \
+            --fcd results/observed-fcd.xml \
+            --tripinfo results/observed-tripinfo.xml \
+            --report results/actual-predictor-report.json \
+            --comparison results/vehicle-edge-errors.csv \
+            --occupancy-comparison results/occupancy-diagnostic.csv
+      - name: Upload immutable diagnostics for analysis
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp002-actual-predictor-trace-window-${{ matrix.window }}-seed2001
+          path: results/
+          retention-days: 30
