@@ -28,6 +28,14 @@ def main():
                 raise RuntimeError(f"OD pairs changed across windows for seed {seed}")
             ods[seed]=od
             errors=prediction["forecast_error_seconds"]
+            with open(folder/"sampling-sensitivity.csv",newline="") as s:
+                sensitivity=list(csv.DictReader(s))
+            if len(sensitivity)!=9:
+                raise RuntimeError("Missing 10/30/60s x 1/2/5s sensitivity grid")
+            sensitivity_30_5=next((x for x in sensitivity
+                if int(x["bin_seconds"])==30 and int(x["FCD_thinning_seconds"])==5),None)
+            if sensitivity_30_5 is None:
+                raise RuntimeError("Missing 30s bin, 5s observation sensitivity")
             row={"seed":seed,"window_seconds":window,
                 "completed":m["completed_vehicles"],
                 "planned":m["planned_vehicles"],
@@ -39,6 +47,7 @@ def main():
                 "fcd_external_stop_seconds":m["observed_external_stop_under_0_1_seconds"],
                 "unresolved_transition_seconds":m["unresolved_transition_seconds"],
                 "native_FCD_vehiclesec_mae":m["native_FCD_sampledSeconds_difference"]["mae"],
+                "thinned_5s_30s_bin_vehiclesec_mae":float(sensitivity_30_5["fcd_vehiclesec_MAE_vs_one_sec"]),
                 "timeaware_entry_mae_s":errors["entry_timeaware"]["mae_s"],
                 "timeaware_entry_bias_s":errors["entry_timeaware"]["bias_s"],
                 "freeflow_entry_mae_s":errors["entry_freeflow"]["mae_s"],
