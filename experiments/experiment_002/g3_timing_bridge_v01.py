@@ -5,37 +5,60 @@ import argparse,csv,json,collections,xml.etree.ElementTree as ET,statistics
 def csv_data(path):
     with open(path) as f:return list(csv.DictReader(f))
 
+def native_records(path):
+    d=collections.defaultdict(list)
+    for r in csv_data(path):
+        if r["kind"]=="external":d[r["vehicle"]].append(r)
+    return d
+
+def fcd_records(path):
+    raw=collections.defaultdict(list)
+    last=None
+    for _,node in ET.iterparse(path,events=("end",)):
+        if node.tag!="timestep":continue
+        t=float(node.get("time"))
+        if last is not None and abs(t-last-1.)>1e-6:
+            raise RuntimeError("FCD timestep cadence must be one second")
+        last=t
+        ids=set()
+        for v in node.findall("vehicle"):
+            vid=v.get("id");lane=v.get("lane","")
+            if not vid or vid in ids or not lane:
+                raise RuntimeError("Missing/duplicate FCD vehicle ID or lane")
+            ids.add(vid)
+            raw[vid].append((t,lane.rsplit("_",1)[0],lane.startswith(":")))
+        node.clear()
+    results={}
+    for vid,series in raw.items():
+        runs=[];internal=False
+        for t,e,k in series:
+            if k:
+                internal=True
+                continue
+            if not runs or runs[-1][0]!=e or internal:
+                runs.append((e,t))
+            internal=False
+        results[vid]=runs
+    return results
+
 def main():
     p=argparse.ArgumentParser()
     for field in ["trace","events","fcd","report","out"]:
         p.add_argument("--"+field,required=True)
     a=p.parse_args()
-    traces=collections.defaultdict(list);native=collections.defaultdict(list)
+    traces=collections.defaultdict(list)
     for r in csv_data(a.trace):traces[r["vehicle"]].append(r)
-    for r in csv_data(a.events):
-        if r["kind"]=="external":native[r["vehicle"]].append(r)
-    front=collections.defaultdict(list)
-    for _,node in ET.iterparse(a.fcd,events=("end",)):
-        if node.tag!="timestep":continue
-        t=float(node.get("time"))
-        for v in node.findall("vehicle"):
-            lane=v.get("lane","")
-            if not lane:raise RuntimeError("Missing FCD lane")
-            front[v.get("id")].append((t,lane.rsplit("_",1)[0],lane.startswith(":")))
-        node.clear()
+    native=native_records(a.events)
+    front=fcd_records(a.fcd)
     output=[];miss=[];changes=collections.Counter()
     for vid,rs in sorted(traces.items()):
         rs.sort(key=lambda x:int(x["route_index"]))
-        f=[];internal=False
-        for t,e,k in front[vid]:
-            if k:internal=True;continue
-            if not f or f[-1][1]!=e or internal:f.append((t,e))
-            internal=False
-        n=native[vid]
-        if [x["edge"] for x in rs]!=[x["edge"] for x in n] or [x["edge"] for x in rs]!=[x[1] for x in f]:
+        f=front.get(vid,[])
+        n=native.get(vid,[])
+        if [x["edge"] for x in rs]!=[x["edge"] for x in n] or [x["edge"] for x in rs]!=[x[0] for x in f]:
             miss.append(vid);continue
         for i,(r,event,sample) in enumerate(zip(rs,n,f)):
-            native_t=float(event["enter_at_prior_exit_s"]);front_t=sample[0]
+            native_t=float(event["enter_at_prior_exit_s"]);front_t=sample[1]
             d=round(front_t-native_t,6)
             changes[str(d)]+=1
             output.append((vid,i,r["edge"],native_t,front_t,d,float(r["predicted_entry_s"]),float(r["freeflow_entry_s"])))
