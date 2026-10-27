@@ -1,0 +1,1 @@
+Publish offline production-adapter review after successful GitHub Actions run 40577231235. Pure R3/R4 adapters verified with only synthetic and previous development seed2101; 25,179 prior road observations, 1,994,952 previously audited live search reads. No SUMO or heldout execution; no protected-environment reviewer configuration asserted.
