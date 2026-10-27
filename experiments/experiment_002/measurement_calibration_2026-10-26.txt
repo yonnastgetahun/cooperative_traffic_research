@@ -1,0 +1,2 @@
+M2 execution approved in chat 2026-10-26 (Los Angeles). M0 tests and final M1 three-regime smoke succeeded: https://github.com/yonnastgetahun/cooperative_traffic_research/actions/runs/40445882827
+Execute prespecified calibration seed matrix: 2101,2102,2103 x 200,600,1200 seconds (9 scenarios). No use of reserved evaluation seeds 3101-3110. Model policy and weights unchanged. Immutable SUMO image digest resolved once per workflow. Results are development diagnostics, not validation claims.
