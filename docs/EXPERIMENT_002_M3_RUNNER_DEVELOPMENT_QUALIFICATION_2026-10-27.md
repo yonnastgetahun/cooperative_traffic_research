@@ -14,6 +14,9 @@ The user approved **preparing and verifying** the future M3 held-out execution p
 - [Development-only executable GitHub workflow](../.github/workflows/experiment-002-m3-development-qualification.yml) — intentionally restricted to inspected seed 2101, 200/600/1200-second departure windows.
 - [Full frozen-source development runner](../experiments/experiment_002/m3_qualification/run_development_v01.sh) · [fail-closed source/seed guard](../experiments/experiment_002/m3_qualification/guard_v01.py) · [seed-level scorer](../experiments/experiment_002/m3_qualification/score_v01.py).
 
+
+**Draft for review, not an active held-out workflow:** [Explicitly disabled execution template](templates/experiment-002-m3-heldout-evaluation.yml.disabled). The template is outside `.github/workflows`; every job is disabled. No evaluation-seed workflow can run from it without a new reviewed code change and separate user authorization.
+
 ## Verified results
 
 **Three 1,000-trip synthetic development scenarios** (existing seed 2101) passed the six unit fixtures, frozen-source SHA checks for fourteen files, regenerated 10×10 network topology and exact OD/departure schedule equivalence, original route/audit byte comparison with and without tracing, 1-second native/FCD ordered-road timing joins, all actual search-time assignment counter reads and update revisions, full per-vehicle tripinfo invariance, and explicit native teleport/exception checks.
