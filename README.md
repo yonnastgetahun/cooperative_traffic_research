@@ -18,6 +18,7 @@ The next question is whether the time-aware traffic predictor is accurate enough
 - [Completed M0–M2 development: physical occupancy & junction-delay findings](docs/EXPERIMENT_002_OCCUPANCY_M2_DEVELOPMENT_RESULTS_2026-10-26.md)
 - [Measurement design and M3 holdout gates](docs/EXPERIMENT_002_OCCUPANCY_JUNCTION_MEASUREMENT_PLAN_V0_1.md)
 - [Latest G3 reconciliation: occupancy semantics, 211 vehicle-level cases and remaining gates](docs/EXPERIMENT_002_G3_RECONCILIATION_FINDINGS_2026-10-26.md)
+- [Next design (review pending): G3 junction exit times and actual route-search occupancy reads](docs/EXPERIMENT_002_G3_EVENT_INSTRUMENTATION_DESIGN_V0_1.md)
 - [Archived G3 evidence and CSV tables](docs/results/exp002_g3_2026_10_26/README.md)
 - [Successful three-regime decision-trace workflow and artifacts](https://github.com/yonnastgetahun/cooperative_traffic_research/actions/runs/40443562182)
 - [Proposed separate Experiment 003: voluntary departure scheduling](docs/EXPERIMENT_003_DEPARTURE_SCHEDULING_ROADMAP.md)
