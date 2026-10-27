@@ -1,0 +1,1 @@
+Approved J0-J3: J0 fixture tests and J1 native SUMO vehicle exit-times on seed 2001/window 200, archived source action run 40443562182, same 1s step, pinned SUMO digest. Observation-only; no holdouts or routing changes.
