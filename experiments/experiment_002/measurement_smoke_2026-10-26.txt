@@ -1,0 +1,3 @@
+Approved M0-M2 physical occupancy and junction-delay instrumentation execution.
+One-time push trigger for M0 fixtures and M1 seed2001 three-regime smoke only.
+Do not use held-out seeds. Exact routing policy preserved. Review M1 quality gates before triggering M2 calibration.
