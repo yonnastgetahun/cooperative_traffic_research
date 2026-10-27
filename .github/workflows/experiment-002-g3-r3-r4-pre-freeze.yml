@@ -1,0 +1,119 @@
+name: Experiment 002 G3 R3-R4 - exception coverage and seed-level dry run
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - experiments/experiment_002/g3_r3r4_trigger_2026_10_26.txt
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  fixtures:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fail-closed R3 and R4 contract fixtures
+        run: |
+          python3 -m unittest discover -s experiments/experiment_002 -p 'test_g3_r3_exception_audit_v01.py' -v
+          python3 -m unittest discover -s experiments/experiment_002 -p 'test_g3_r4_seed_analysis_v01.py' -v
+          python3 -m py_compile experiments/experiment_002/g3_r3_aggregate_v01.py
+      - name: Statistically prespecified development-only R4 dry run
+        run: |
+          python3 experiments/experiment_002/g3_r4_seed_analysis_v01.py \
+            --input docs/EXPERIMENT_002_OCCUPANCY_M2_PER_SEED.csv \
+            --out r4-development
+          echo "$GITHUB_SHA" > r4-development/analysis-code-commit.txt
+          sha256sum docs/EXPERIMENT_002_OCCUPANCY_M2_PER_SEED.csv > r4-development/input-hash.txt
+      - name: Preserve R4 development-only analysis
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp002-G3-R4-seed-level-development-dryrun
+          path: r4-development/
+          retention-days: 30
+
+  r3-exception-audit:
+    needs: fixtures
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        window: [200, 600, 1200]
+    container:
+      image: ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb
+    env:
+      SUMO_HOME: /usr/share/sumo
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch original inspected M2 scenario (development seed 2101 only)
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 40446073958
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          name: exp002-occupancy-M2-window-${{ matrix.window }}-seed2101
+          path: original
+      - name: Collect explicit SUMO teleports safety and collision statistics on immutable original routes
+        run: |
+          set -eu
+          mkdir -p r3
+          sumo --version > r3/sumo-version.txt
+          sumo -n original/network.net.xml -r original/original.rou.xml \
+            --seed 2101 --no-step-log true \
+            --statistic-output r3/statistics.xml \
+            --summary-output r3/summary.xml \
+            --collision-output r3/collisions.xml \
+            --tripinfo-output r3/observed-tripinfo.xml \
+            --log r3/sumo.log
+          python3 experiments/experiment_002/g3_tripinfo_invariance_v01.py \
+            --baseline original/observed-tripinfo.xml \
+            --observed r3/observed-tripinfo.xml \
+            --report r3/simulation-invariance.json
+      - name: R3 classify exceptional events missing data and native edge bins
+        run: |
+          set -eu
+          python3 experiments/experiment_002/g3_r3_exception_audit_v01.py \
+            --routes original/original.rou.xml \
+            --tripinfo original/observed-tripinfo.xml \
+            --replay-tripinfo r3/observed-tripinfo.xml \
+            --statistics r3/statistics.xml \
+            --fcd original/observed-fcd.xml \
+            --native original/native-external.xml \
+            --seed 2101 \
+            --window ${{ matrix.window }} \
+            --report r3/r3-exceptions.json
+          echo "Original M2 source run: 40446073958; seed: 2101; window: ${{ matrix.window }}" > r3/provenance.txt
+          echo "$GITHUB_SHA" > r3/code-sha.txt
+          echo "ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb" > r3/sumo-image-digest.txt
+          sha256sum original/network.net.xml original/trips.xml original/original.rou.xml original/observed-fcd.xml > r3/source-hashes.txt
+          sha256sum r3/*.xml r3/r3-exceptions.json > r3/observation-hashes.txt
+      - name: Preserve output even if R3 source integrity fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp002-R3-exception-audit-window-${{ matrix.window }}-seed2101
+          path: r3/
+          retention-days: 30
+
+  summarize-r3:
+    needs: r3-exception-audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: exp002-R3-exception-audit-window-*
+          path: r3-scenarios
+          merge-multiple: false
+      - name: Three-regime exception and missing-field integrity summary
+        run: |
+          python3 experiments/experiment_002/g3_r3_aggregate_v01.py \
+            --root r3-scenarios --out r3-summary
+          echo "$GITHUB_SHA" > r3-summary/analysis-code-commit.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: exp002-G3-R3-three-regime-development-summary
+          path: r3-summary/
+          retention-days: 30
