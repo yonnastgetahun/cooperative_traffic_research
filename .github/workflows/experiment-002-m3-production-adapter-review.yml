@@ -1,0 +1,66 @@
+name: Experiment 002 M3 - production adapter review (offline, no heldout)
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - experiments/experiment_002/m3_production_review/review_trigger_2026_10_27.txt
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  synthetic-fixtures-and-original-development-equivalence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out current REVIEW adapters
+        uses: actions/checkout@v4
+      - name: Check out exact frozen scientific source independently
+        uses: actions/checkout@v4
+        with:
+          ref: be2e8d27c78c8b6de4891115d6d951edc877ac6e
+          path: frozen
+      - name: Run synthetic, fail-closed unit tests and compile-only checks
+        run: |
+          set -eu
+          python3 -m unittest discover \
+            -s experiments/experiment_002/m3_production_review \
+            -p 'test_adapters_v01.py' -v
+          python3 -m compileall -q experiments/experiment_002/m3_production_review
+          python3 - <<'PY'
+          import pathlib
+          text=pathlib.Path('docs/templates/experiment-002-m3-heldout-evaluation.yml.disabled').read_text()
+          assert text.count('if: false')==3
+          assert 'workflow_dispatch' in text
+          assert '3101' in text  # the reserved registry appears only in the disabled review template
+          files=list(pathlib.Path('.github/workflows').glob('*m3*heldout*.yml'))
+          assert not files
+          print('All evaluation execution jobs are disabled and outside the Actions directory')
+          PY
+      - name: Retrieve previous three M3 development-only qualification evidence packages
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 40570158400
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          pattern: exp002-M3-QUALIFY-window-*
+          path: source
+          merge-multiple: false
+      - name: Re-evaluate frozen R3 exactly and map frozen R4 seed inputs
+        run: |
+          set -eu
+          python3 experiments/experiment_002/m3_production_review/review_development_v01.py \
+            --source-root source --frozen-root frozen \
+            --repo-root . --out production-review
+          echo "$GITHUB_SHA" > production-review/production-adapter-commit.txt
+          echo 'be2e8d27c78c8b6de4891115d6d951edc877ac6e' > production-review/frozen-science-commit.txt
+          sha256sum production-review/*.json production-review/*.csv > production-review/review-hashes.txt
+      - name: Preserve offline review results even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp002-M3-prod-adapters-offline-review-no-heldout
+          path: production-review/
+          retention-days: 30
