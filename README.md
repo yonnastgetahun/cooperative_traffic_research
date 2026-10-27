@@ -6,6 +6,9 @@ Every day, drivers sit in traffic despite having powerful navigation apps. Those
 
 ## Current research status — October 26, 2026
 
+**Held-out workflow preparation (Oct 27):** The [frozen M3 development harness qualified end-to-end](docs/EXPERIMENT_002_M3_RUNNER_DEVELOPMENT_QUALIFICATION_2026-10-27.md) in all three already-inspected seed2101 congestion regimes. [Durable scenario evidence](docs/results/exp002_m3_qualification_2026_10_27/README.md) and an [explicitly inactive held-out workflow draft](docs/templates/experiment-002-m3-heldout-evaluation.yml.disabled) are published. **No held-out execution is enabled or authorized.**
+
+
 **M3 protocol freeze — October 27, 2026:** **APPROVED and committed** as an exact [frozen Git snapshot](https://github.com/yonnastgetahun/cooperative_traffic_research/tree/exp002-m3-protocol-v1-frozen) (authoritative commit `be2e8d27c78c8b6de4891115d6d951edc877ac6e`). See the [scientific decision record](docs/EXPERIMENT_002_M3_FREEZE_DECISION_2026-10-27.md), [frozen protocol](https://github.com/yonnastgetahun/cooperative_traffic_research/blob/be2e8d27c78c8b6de4891115d6d951edc877ac6e/docs/EXPERIMENT_002_M3_FROZEN_PROTOCOL_V1.md) and [hash manifest](https://github.com/yonnastgetahun/cooperative_traffic_research/blob/be2e8d27c78c8b6de4891115d6d951edc877ac6e/docs/EXPERIMENT_002_M3_PROTOCOL_FREEZE_MANIFEST_V1.json). **This freezes the scientific methodology, not an executable evaluation runner. Held-out seeds 3101–3110 remain unopened and all evaluation runs require separate approval.**
 
 
