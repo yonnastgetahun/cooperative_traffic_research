@@ -1,0 +1,1 @@
+Persist completed G3 reconciliation and case-level CSV evidence in GitHub after source checks. This marker triggers a measurement-only publication workflow; original M2 simulations and reserved holdouts remain unchanged. Source G3 runs: 40448102464, 40448538736.
