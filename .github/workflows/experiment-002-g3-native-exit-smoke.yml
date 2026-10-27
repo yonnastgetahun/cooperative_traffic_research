@@ -1,0 +1,68 @@
+name: Experiment 002 G3 J0-J1 - native junction exit-time smoke
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - experiments/experiment_002/g3_j1_trigger_2026_10_26.txt
+permissions:
+  contents: read
+  actions: read
+jobs:
+  fixtures:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test native vehroute parser contract
+        run: |
+          python3 -m unittest discover -s experiments/experiment_002 -p 'test_g3_native_vehroute_v01.py' -v
+          python3 -m py_compile experiments/experiment_002/g3_native_vehroute_v01.py experiments/experiment_002/g3_tripinfo_invariance_v01.py
+  replay:
+    needs: fixtures
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    container:
+      image: ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb
+    env:
+      SUMO_HOME: /usr/share/sumo
+    steps:
+      - uses: actions/checkout@v4
+      - name: Retrieve already observed seed2001 high-congestion source scenario
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 40443562182
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          name: exp002-actual-predictor-trace-window-200-seed2001
+          path: source
+      - name: Native vehroute with internal links and step-resolved exit times
+        run: |
+          set -eu
+          mkdir -p j1
+          sumo --version > j1/sumo-version.txt
+          sumo -n source/network.net.xml -r source/trace-time-aware.rou.xml \
+            --vehroute-output j1/native-vehroute.xml \
+            --vehroute-output.exit-times true \
+            --vehroute-output.internal true \
+            --tripinfo-output j1/observed-tripinfo.xml \
+            --seed 2001 --no-step-log true
+          python3 experiments/experiment_002/g3_native_vehroute_v01.py \
+            --vehroute j1/native-vehroute.xml \
+            --planned-routes source/trace-time-aware.rou.xml \
+            --tripinfo j1/observed-tripinfo.xml \
+            --events j1/native-movement-events.csv \
+            --report j1/native-event-report.json
+          python3 experiments/experiment_002/g3_tripinfo_invariance_v01.py \
+            --baseline source/observed-tripinfo.xml \
+            --observed j1/observed-tripinfo.xml \
+            --report j1/simulation-invariance.json
+          echo "source=40443562182; seed=2001; window=200s; developer-only" > j1/provenance.txt
+          sha256sum source/network.net.xml source/trace-time-aware.rou.xml > j1/source-hashes.txt
+          sha256sum j1/native-vehroute.xml j1/native-movement-events.csv > j1/observation-hashes.txt
+      - name: Preserve native measurement evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp002-G3-J1-native-exit-smoke-seed2001-window200
+          path: j1/
+          retention-days: 30
