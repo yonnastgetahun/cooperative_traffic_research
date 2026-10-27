@@ -10,6 +10,8 @@ We have completed Experiment 001 congestion calibration and the initial Experime
 
 The next question is whether the time-aware traffic predictor is accurate enough to guide coordination. Our [three-regime development trace](docs/EXPERIMENT_002_ACTUAL_PREDICTOR_TRACE_2026-10-26.md) is complete. It is more accurate than free-flow timing in all three tested scenarios but **still significantly underpredicts congestion-related delays**, and is not held-out validation.
 
+**Latest G3 timing-reference verification (Oct 26):** A development-only one-seed-per-regime replay matched **25,179/25,179** native external-road entry steps to historical FCD front-position timestamps and independently verified **1,994,952 actual route-search occupancy-counter reads** with unchanged routing and tripinfo. These are instrumentation-integrity results, **not** predictor calibration; the predictor still systematically underestimates arrivals. [See verified findings](docs/EXPERIMENT_002_G3_R1_R2_VERIFICATION_RESULTS_2026-10-26.md). Held-out evaluation is not authorized.
+
 **Latest milestone (Oct 26):** The physical occupancy/junction measurement code passed its fixtures and ran on **three new development seeds across all three regimes (nine successful cases, 9,000 total completed trip records)**. Mean time-aware road-entry MAE remained **54.45 / 19.38 / 13.61 seconds** (200/600/1,200s) compared with a free-flow reference of **59.93 / 23.35 / 17.13 seconds** on the same chosen routes. The model still substantially underpredicts congestion delay. Native versus sampled occupancy discrepancies and subsecond junction uncertainties remain open. **No held-out seeds were run.**
 
 - [Research progress report — Experiments 001–002](docs/RESEARCH_PROGRESS_REPORT_2026-10-24.md)
@@ -20,6 +22,8 @@ The next question is whether the time-aware traffic predictor is accurate enough
 - [Latest G3 reconciliation: occupancy semantics, 211 vehicle-level cases and remaining gates](docs/EXPERIMENT_002_G3_RECONCILIATION_FINDINGS_2026-10-26.md)
 - [**New G3 J0–J3 native junction and exact search-time event findings**](docs/EXPERIMENT_002_G3_EVENT_INSTRUMENTATION_RESULTS_2026-10-26.md)
 - [Archived G3 event integrity reports and C6C7 target case](docs/results/exp002_g3_events_2026_10_26/README.md)
+- [**Latest: G3 three-regime native/FCD timing and actual search-read verification**](docs/EXPERIMENT_002_G3_R1_R2_VERIFICATION_RESULTS_2026-10-26.md)
+- [Archived per-road timing results and counter integrity files](docs/results/exp002_g3_r1r2_2026_10_26/README.md)
 - [**G3 observation sufficiency decision: what can be measured and what cannot**](docs/EXPERIMENT_002_G3_OBSERVATION_SUFFICIENCY_REVIEW_2026-10-26.md)
 - [G3 limits and blockers before M3 freeze — 14-item register](docs/EXPERIMENT_002_G3_MEASUREMENT_LIMITATIONS_REGISTER_2026-10-26.csv)
 - [G3 junction exit times and actual route-search lookup design (executed on development scenarios)](docs/EXPERIMENT_002_G3_EVENT_INSTRUMENTATION_DESIGN_V0_1.md)
