@@ -1,0 +1,1 @@
+Approved J3 targeted G3 replay: archived M2 seed2103 window200 (no new demand), source Actions 40446073958, pinned SUMO digest, exact policy+simulation invariance. Inspect preselected C6C7/veh0213 native exit events alongside original one-second FCD. No held-out seeds.
