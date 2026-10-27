@@ -13,6 +13,7 @@ The next question is whether the time-aware traffic predictor is accurate enough
 - [Research progress report — Experiments 001–002](docs/RESEARCH_PROGRESS_REPORT_2026-10-24.md)
 - [Approved Experiment 002 Predictor Validation Plan v0.2](docs/EXPERIMENT_002_PREDICTOR_VALIDATION_PLAN.md)
 - [Actual predictor trace: development findings and limitations](docs/EXPERIMENT_002_ACTUAL_PREDICTOR_TRACE_2026-10-26.md)
+- [Next milestone design (pending execution approval): physical occupancy & junction delay](docs/EXPERIMENT_002_OCCUPANCY_JUNCTION_MEASUREMENT_PLAN_V0_1.md)
 - [Successful three-regime decision-trace workflow and artifacts](https://github.com/yonnastgetahun/cooperative_traffic_research/actions/runs/40443562182)
 - [Proposed separate Experiment 003: voluntary departure scheduling](docs/EXPERIMENT_003_DEPARTURE_SCHEDULING_ROADMAP.md)
 
