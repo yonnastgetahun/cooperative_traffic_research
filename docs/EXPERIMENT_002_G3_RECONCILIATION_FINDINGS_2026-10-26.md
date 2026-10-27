@@ -79,6 +79,8 @@ Before claiming physical occupancy calibration, explicitly define a comparison t
 
 **Follow-on design (pending implementation approval):** [G3 Targeted Event Instrumentation v0.1](EXPERIMENT_002_G3_EVENT_INSTRUMENTATION_DESIGN_V0_1.md) specifies native `vehroute.exitTimes`, an optional read-only TraCI fallback, actual route-search-time counter lookup logging, old-development-seed replays, and policy/simulation invariance gates. The design has **not** been executed; all earlier G3 gate statuses remain unchanged.
 
+**G3 targeted event follow-up completed:** [J0–J3 native junction and original search-time event measurements](EXPERIMENT_002_G3_EVENT_INSTRUMENTATION_RESULTS_2026-10-26.md) passed on inspected development seeds. Per-vehicle junction exit events resolved the chosen C6C7 case to original one-second solver-step precision; an independent observer reconstructed **677,507** actual original search-time assignment-count reads in seed 2001, with unchanged routes. **Native road body-occupancy attribution and causal junction delay remain partial; no held-out simulations have been run.**
+
 ## Next research decision
 
 **Recommend targeted G3 follow-up, not M3 held-out evaluation:**
