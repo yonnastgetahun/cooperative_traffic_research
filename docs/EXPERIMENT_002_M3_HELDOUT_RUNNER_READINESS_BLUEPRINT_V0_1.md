@@ -7,7 +7,7 @@
 
 **Inactive, explicitly non-executable review template:** [M3 held-out workflow draft](templates/experiment-002-m3-heldout-evaluation.yml.disabled). This is placed under `docs/templates`, *not* GitHub Actions' active `.github/workflows` directory, and has hard-disabled jobs even if copied. It does not itself implement the not-yet-approved general-seed adapters.
 
-## Why this is not yet the executable held-out study
+**Latest authorized preparation (October 27):** [Production R3/R4 adapter review findings](EXPERIMENT_002_M3_PRODUCTION_ADAPTER_REVIEW_FINDINGS_2026-10-27.md) and [durable evidence](results/exp002_m3_production_adapter_review_2026_10_27/README.md). Pure adapters and the hard-disabled activation guard passed synthetic tests and original development-data equivalence. The GitHub protected environment with required reviewers has **not** been configured or verified; no active held-out workflow exists.\n\n## Why this is not yet the executable held-out study
 
 The active GitHub workflow [M3 development-only qualification](../.github/workflows/experiment-002-m3-development-qualification.yml) runs **only seed 2101** and uses frozen scientific code checked out at the exact frozen Git SHA, under pinned SUMO image `ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb`. The first step explicitly rejects evaluation seeds before generating networks or demand.
 
