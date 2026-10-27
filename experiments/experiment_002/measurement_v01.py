@@ -121,11 +121,19 @@ def phase_segments(vid, rows, samples, trip):
     are flagged rather than guessed.
     """
     observed_runs=[]
+    traversed_internal_since_external=False
     for sample in samples:
         t,e,kind,lane,speed,pos=sample
+        if kind == "internal":
+            traversed_internal_since_external=True
+            continue
         if kind != "external":continue
-        if not observed_runs or e != observed_runs[-1][0]:
+        # Two consecutive visits to the same road separated by an internal
+        # junction are distinct traversals even if edge IDs are identical.
+        if (not observed_runs or e != observed_runs[-1][0]
+                or traversed_internal_since_external):
             observed_runs.append([e,t])
+        traversed_internal_since_external=False
     expected=[r["edge"] for r in rows]
     actual=[r[0] for r in observed_runs]
     if expected != actual:
