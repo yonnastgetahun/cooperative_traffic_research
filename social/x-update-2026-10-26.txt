@@ -1,0 +1,4 @@
+Approved X update, 2026-10-26
+Experiment 002 predictor-validation progress.
+The push creating this unique file is the one-time trigger for .github/workflows/publish-x-intro.yml.
+Publication text is fixed in the workflow; this is an audit marker, not user content.
