@@ -1,0 +1,113 @@
+name: Experiment 002 G3 J4 - persist verified event evidence
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - experiments/experiment_002/g3_j4_publish_trigger_2026_10_26.txt
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  persist:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Retrieve original completed J1 timestamp-smoke evidence
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 40452285124
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          name: exp002-G3-J1-native-exit-smoke-seed2001-window200
+          path: J1
+      - name: Retrieve original completed J2 search-lookup evidence
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 40452726452
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          name: exp002-G3-J2-actual-search-time-events-seed2001-window200
+          path: J2
+      - name: Retrieve original completed J3 anchor evidence
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 40453154885
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          name: exp002-G3-J3-targeted-C6C7-seed2103-high
+          path: J3
+      - name: Validate gate evidence before writing durable archive
+        run: |
+          python3 - <<'PY'
+          import json,pathlib
+          d=lambda p:json.loads(pathlib.Path(p).read_text())
+          a=d('J1/native-event-report.json');b=d('J1/simulation-invariance.json')
+          c=d('J2/search-event-integrity.json')
+          e=d('J3/native-event-report.json');f=d('J3/simulation-invariance.json')
+          g=d('J3/search-event-integrity.json');h=d('J3/c6c7-anchor-observation.json')
+          assert a['vehicles_with_parsed_events']==1000 and a['internal_event_rows']>0
+          assert b['status']=='PASS' and c['status']=='PASS'
+          assert e['vehicles_with_parsed_events']==1000 and f['status']=='PASS' and g['status']=='PASS'
+          assert h['seed']==2103 and h['window_s']==200 and h['vehicle']=='veh0213'
+          assert h['native_external_road_sampledSeconds']>29
+          assert h['internal_front_samples_target_lane']>=28
+          for p in ['J2/policy-invariance.txt','J3/source-evidence.txt','J3/observation-hashes.txt']:
+              assert pathlib.Path(p).exists()
+          print('J1/J2/J3 evidence has passed its scientific and provenance checks.')
+          PY
+      - name: Preserve verified compact evidence and immutable analysis references
+        run: |
+          set -eu
+          mkdir -p docs/results/exp002_g3_events_2026_10_26
+          D=docs/results/exp002_g3_events_2026_10_26
+          cp J1/native-event-report.json "$D/j1-native-event-report.json"
+          cp J1/simulation-invariance.json "$D/j1-simulation-invariance.json"
+          cp J2/search-event-summary.json "$D/j2-search-event-summary.json"
+          cp J2/search-event-integrity.json "$D/j2-search-event-integrity.json"
+          cp J2/policy-invariance.txt "$D/j2-policy-invariance.txt"
+          cp J3/c6c7-anchor-observation.json "$D/j3-c6c7-anchor-observation.json"
+          cp J3/native-event-report.json "$D/j3-native-event-report.json"
+          cp J3/simulation-invariance.json "$D/j3-simulation-invariance.json"
+          cp J3/search-event-integrity.json "$D/j3-search-event-integrity.json"
+          cp J3/source-evidence.txt "$D/j3-source-evidence.txt"
+          cp J3/observation-hashes.txt "$D/j3-observation-hashes.txt"
+          cp J3/input-hashes.txt "$D/j3-input-hashes.txt"
+          python3 - <<'PY'
+          import json,pathlib
+          d=pathlib.Path('docs/results/exp002_g3_events_2026_10_26')
+          a=json.loads((d/'j1-native-event-report.json').read_text())
+          b=json.loads((d/'j2-search-event-integrity.json').read_text())
+          c=json.loads((d/'j3-c6c7-anchor-observation.json').read_text())
+          lines=[
+            '# G3 — Targeted Event Instrumentation: durable development evidence',
+            '',
+            '**Status:** J0–J3 instrumentation and targeted replay completed; **G3 remains open** until reviewed. **No held-out evaluation or model tuning**.',
+            '',
+            '## Evidence from the archived original development scenarios',
+            '',
+            f'- J1: {a["vehicles_with_parsed_events"]:,} trips; {a["native_event_rows"]:,} ordered SUMO movement events; {a["internal_event_rows"]:,} internal-junction events.',
+            f'- J2: {b["edge_cost_reads_observed"]:,} **actual search-time occupancy counter reads** and {b["assigned_edges"]:,} assignment updates, independently replay-verified. Routes and audit identical to archive.',
+            f'- J3: native case {c["vehicle"]} on upstream {c["source_external_edge"]}, native road exit at {c["native_external_exit_step_s"]} simulated seconds; internal links {", ".join(c["native_internal_edges"])}; native internal exit steps {c["native_internal_exit_steps_s"]}.',
+            '',
+            '## Source workflows',
+            '- [J1 native exit events](https://github.com/yonnastgetahun/cooperative_traffic_research/actions/runs/40452285124)',
+            '- [J2 true search counter reads](https://github.com/yonnastgetahun/cooperative_traffic_research/actions/runs/40452726452)',
+            '- [J3 preselected junction case](https://github.com/yonnastgetahun/cooperative_traffic_research/actions/runs/40453154885)',
+            '',
+            'The large compressed search-lookup event streams remain downloadable from GitHub Actions artifacts for a limited period and can be regenerated using the versioned workflows and original development inputs.',
+            '',
+            '### Scientific boundaries',
+            'SUMO exit times have discrete-step semantics, not continuous crossing precision. Internal-link dwell is not necessarily *caused* by the junction. The original search counter denotes prior planned route assignments, not physical occupancy. Recording all its reads does not imply predictor calibration or a cooperative-routing improvement. Evaluation seeds 3101–3110 remain unused.',
+          ]
+          (d/'README.md').write_text('\n'.join(lines)+'\n')
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/results/exp002_g3_events_2026_10_26/
+          git diff --cached --quiet && { echo "Already archived"; exit 0; }
+          git commit -m "Archive G3 native internal event and actual search-time lookup evidence"
+          git push origin HEAD:main
