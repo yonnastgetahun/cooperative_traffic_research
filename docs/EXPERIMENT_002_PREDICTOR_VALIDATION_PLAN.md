@@ -1,6 +1,8 @@
 # Experiment 002 — Predictor Validation Plan v0.2
 
-**Status: Revised for review after three-regime coverage backfill. Not approved for implementation or execution.**
+**Status: Approved to execute the predictor-validation instrumentation (October 26, 2026).** Earlier text below was written before approval; approved scope remains diagnostic measurement, not routing optimization or held-out validation claims.
+
+**Execution tracker:** [Three-regime actual-predictor development smoke](https://github.com/yonnastgetahun/cooperative_traffic_research/actions/runs/40443562182) — launched October 26, 2026; results must be checked before declaring the instrumentation gate complete. It uses seed 2001 and does not qualify as held-out validation. The [tracer](../experiments/experiment_002/trace_actual_predictor.py) replays existing cost equations on chosen routes, explicitly distinguishing that replay from the search heap's internal cost. The [comparison tool](../experiments/experiment_002/compare_traced_predictor.py) scores observed chosen traversals against both that replay and the free-flow reference while accounting for unmatched edges and sampling limitations.
 
 ## Updated evidence: three-regime coverage backfill
 
@@ -85,4 +87,4 @@ Do not change algorithm parameters based on the held-out evaluation results befo
 - Keep voluntary coordinated departures as the separate proposed Experiment 003; count predeparture waiting in door-to-door outcomes when eventually evaluated.
 - This plan is for synthetic research, not deployment or traffic safety certification.
 
-**Approval requested:** instrument and validate the predictor according to this plan. Publishing this document does not authorize implementation.
+**Approval history:** This plan originally requested approval. The user explicitly approved implementation on October 26, 2026. This does **not** authorize rerouting policy changes, tuning on holdout data, or claims of predictor validation before evidence has been reviewed.
