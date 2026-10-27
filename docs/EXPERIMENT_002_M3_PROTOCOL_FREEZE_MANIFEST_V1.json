@@ -1,0 +1,119 @@
+{
+  "schema_version": "exp002-m3-freeze-manifest-v1",
+  "status": "SCIENTIFIC_PROTOCOL_FROZEN_HELDOUT_EXECUTION_NOT_AUTHORIZED",
+  "approval": {
+    "authorized_action": "Freeze scientific study protocol and inspected development-code baseline only",
+    "user_explicitly_approved": true,
+    "local_date": "2026-10-27",
+    "heldout_simulations_authorized": false,
+    "heldout_workflow_build_authorized": false
+  },
+  "immutable_references": {
+    "frozen_protocol_path": "docs/EXPERIMENT_002_M3_FROZEN_PROTOCOL_V1.md",
+    "frozen_protocol_git_blob_sha1": "ab9c52e007188e95b9162a14aa7fc1783d3e278c",
+    "inspected_preflight_source_commit_sha": "0681ce34bbcfb617762305cc5c0044c38c025086",
+    "source_snapshot_including_frozen_protocol_commit_sha": "deba2b1c1df7660e57cc9f69a3c9ca3ded356aca",
+    "preflight_actions_run": "https://github.com/yonnastgetahun/cooperative_traffic_research/actions/runs/40566574722",
+    "preflight_artifact_id": 12762214949,
+    "preflight_artifact_name": "exp002-m3-freeze-preflight-no-holdout",
+    "snapshot_branch_to_create": "exp002-m3-protocol-v1-frozen",
+    "snapshot_branch_is_a_convenience_not_authoritative": true
+  },
+  "simulator": {
+    "name": "SUMO",
+    "version": "1.28.0",
+    "image": "ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb",
+    "step_seconds": 1
+  },
+  "study": {
+    "synthetic_network": "10x10 grid at 200-meter spacing",
+    "vehicles_per_scenario": 1000,
+    "primary_departure_window_seconds": 200,
+    "secondary_departure_window_seconds": [
+      600,
+      1200
+    ],
+    "forecast_scoring_target": "simulator-step external-edge entry inferred from previous native vehroute link exit, or actual vehicle depart for first edge",
+    "prediction_origin": "pre-SUMO original time-aware route-cost replay, on chosen routes; free-flow reference on same routes",
+    "primary_effect": "per-seed MAE_freeflow_minus_MAE_timeaware in seconds; positive favors predictive accuracy of time-aware",
+    "inferential_unit": "demand seed (not individual vehicle nor road-edge)",
+    "proposed_future_heldout_seed_ids": [
+      3101,
+      3102,
+      3103,
+      3104,
+      3105,
+      3106,
+      3107,
+      3108,
+      3109,
+      3110
+    ],
+    "future_heldout_runs_requested": 0,
+    "planned_heldout_scenarios_if_separately_authorized": 30,
+    "minimum_for_planned_t_interval": 10,
+    "interval": "two-sided 95% Student t interval for ten independent paired-seed differences, tcrit(df9)=2.2621571628540993",
+    "no_posthoc_accuracy_threshold": true
+  },
+  "exception_policy": {
+    "missing_teleport_statistics": "UNKNOWN blocks clean analysis",
+    "positive_teleports": "block",
+    "missing_trip_or_road_event": "block and report; do not zero-impute",
+    "exception_seed_substitution": "prohibited",
+    "native_partial_30second_bins": "excluded from full-bin road-load comparison, preserved as partial",
+    "missing_native_empty_edge_fields": "not applicable; never converted to zero"
+  },
+  "out_of_scope": [
+    "Real-world traffic safety",
+    "Physical vehicle occupancy forecast calibration from route-assignment counts",
+    "Causal junction-delay attribution",
+    "Unchosen route counterfactuals",
+    "Network travel-time improvement from better forecast errors"
+  ],
+  "code_provenance": {
+    "sha256_fingerprints_from_successful_no_simulation_preflight": {
+      "docs/EXPERIMENT_002_M3_PROTOCOL_FREEZE_PROPOSAL_V0_1.md": "a35d7a598e4d67c97c409ee77ef1f3f02f0cbbaa701a1955df74c0dedeaa8646",
+      "docs/EXPERIMENT_002_R3_EXCEPTION_AND_MISSINGNESS_CONTRACT_V0_1.md": "e32a7dd78faf900a62d1cf057aa867a13d1d3d1a0998768638997c658377fe84",
+      "docs/EXPERIMENT_002_R4_SEED_LEVEL_ANALYSIS_AND_REPRODUCIBILITY_V0_1.md": "1c4bcd650082b707bc91972e25add6eb44680467c105c486a6d7724fdbfa55cd",
+      "docs/EXPERIMENT_002_G3_OBSERVATION_SUFFICIENCY_REVIEW_2026-10-26.md": "a3f231611d7baaa96aba00ba970b11c54a553829881ddd58f1a72aa45b1aa91c",
+      "experiments/experiment_002/time_aware.py": "df9fef8a5dff78dde6abca629e604f081d8153fe82397b1dd0ee5f626bc5ec49",
+      "experiments/experiment_002/trace_actual_predictor.py": "04a98edab15157324fe7d38708ded95f1180b155daf93735837ea80bce099f43",
+      "experiments/experiment_002/g3_live_search_capture_v01.py": "2147db51c1af5e651f8cb028b1628a4ed35ed944ca14319bf1a3880f2d07db4a",
+      "experiments/experiment_002/g3_search_event_audit_v01.py": "67b676b3df60884977e7dec92b20c8a90a0b02efa117a4bed4ca635d7e9d84ed",
+      "experiments/experiment_002/g3_native_vehroute_v01.py": "79d2b75fbe2b692dfa5be7a0dfd8f2e86e40aed4146ed249ab88ca87c19ba82a",
+      "experiments/experiment_002/g3_timing_bridge_v01.py": "e5cb5b42fd0dabebbb205c9fb85112a8de8fd990dc563bef2933b79aea058888",
+      "experiments/experiment_002/g3_tripinfo_invariance_v01.py": "d052caa329b946a91b9e2dd3b4d9a1acb6cb756247600e75cf2cece759e86f00",
+      "experiments/experiment_002/g3_r3_exception_audit_v01.py": "f8bac75366d65634dd56bb4281d359ca27ddaf0b460fb0cb7434385b02b2b1bf",
+      "experiments/experiment_002/g3_r4_seed_analysis_v01.py": "863b3e218a56835d8623c6715040fd28f1a253ae7e2a765ed83fc152adcdfe81",
+      "experiments/experiment_002/fixed_demand_v01.py": "30593f3623f9452360c6accdef6080a6bc733e0dad0296f01ea9b288ac0e4cc1"
+    },
+    "git_blob_sha1_at_frozen_source_snapshot": {
+      "docs/EXPERIMENT_002_M3_FROZEN_PROTOCOL_V1.md": "ab9c52e007188e95b9162a14aa7fc1783d3e278c",
+      "docs/EXPERIMENT_002_M3_PROTOCOL_FREEZE_PROPOSAL_V0_1.md": "919feb3f925d77884b388d149baddb8fb7758187",
+      "docs/EXPERIMENT_002_R3_EXCEPTION_AND_MISSINGNESS_CONTRACT_V0_1.md": "9a6d847ec9b2c947c2e1486f7e616d5484afe2e3",
+      "docs/EXPERIMENT_002_R4_SEED_LEVEL_ANALYSIS_AND_REPRODUCIBILITY_V0_1.md": "1a60ed6d3d0c0a532bc5c1cdc10f77946643300b",
+      "docs/EXPERIMENT_002_G3_OBSERVATION_SUFFICIENCY_REVIEW_2026-10-26.md": "caab9302dca37ae1184873fefa556120a20ae3d4",
+      "experiments/experiment_002/time_aware.py": "0cb40690f070cd29122a16a00a38d127f099d999",
+      "experiments/experiment_002/trace_actual_predictor.py": "3dfae88c387046b98a096e4f47150d742b6a275f",
+      "experiments/experiment_002/g3_live_search_capture_v01.py": "4abc23dfd159df0394886ef4719c4ce19ca31ecc",
+      "experiments/experiment_002/g3_search_event_audit_v01.py": "c627293ec1337209ac833403c353aeceed0c9159",
+      "experiments/experiment_002/g3_native_vehroute_v01.py": "31ae14aa41452a2f0abd59d6ac2db60a21763001",
+      "experiments/experiment_002/g3_timing_bridge_v01.py": "a4cbab6cf0f941cd911ac7a000cc547021408d21",
+      "experiments/experiment_002/g3_tripinfo_invariance_v01.py": "15734b48371a9372e6e2868b98f84877b547b7b0",
+      "experiments/experiment_002/g3_r3_exception_audit_v01.py": "861a73509af31cec77497c3f350b103fd2ddb2e6",
+      "experiments/experiment_002/g3_r4_seed_analysis_v01.py": "37a0f07a94e0fdd2655b246b0ffbfc90ad933040",
+      "experiments/experiment_002/fixed_demand_v01.py": "7d56bbafc8aae608999342ea6981e44f3bb6da7f",
+      "docs/EXPERIMENT_002_G3_R1_R2_VERIFICATION_RESULTS_2026-10-26.md": "4d4ab72aeef6e66b237da084499c7cec45cda796",
+      "docs/EXPERIMENT_002_G3_R3_R4_EXECUTION_RESULTS_2026-10-26.md": "e02d68d6aa5f1e39f0f9e63fe57a5c8e6cc5571d",
+      "experiments/experiment_002/g3_r3_aggregate_v01.py": "696998866f00d39627e4c89f7e52fc4f22bd0331",
+      "experiments/experiment_002/g3_timing_bridge_aggregate_v01.py": "a6f5af3775f70918b35615c71a1edc71cf50b793"
+    }
+  },
+  "future_separate_authorizations_required": [
+    "Review equivalence and readiness of full held-out runner and per-scenario manifest",
+    "Explicitly dispatch/authorize held-out evaluation after review"
+  ],
+  "no_heldout_workflow_published": true,
+  "no_heldout_data_generated_read_or_executed": true,
+  "caveat": "This freezes validated scientific definitions and source baseline; executable held-out harness and per-scenario results do not yet exist."
+}
