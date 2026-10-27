@@ -6,6 +6,8 @@
 **Scope of this review:** Evaluate existing evidence and specify the limits of valid measurement claims; no new SUMO simulation or predictor-policy alteration was undertaken here.  
 **Evidence:** [G3 J0–J3 results](EXPERIMENT_002_G3_EVENT_INSTRUMENTATION_RESULTS_2026-10-26.md) · [G3 native/FCD reconciliation](EXPERIMENT_002_G3_RECONCILIATION_FINDINGS_2026-10-26.md) · [nine-development-seed M2 results](EXPERIMENT_002_OCCUPANCY_M2_DEVELOPMENT_RESULTS_2026-10-26.md) · [durable event reports](results/exp002_g3_events_2026_10_26/README.md) · [G3 evidence archive](results/exp002_g3_2026_10_26/README.md).
 
+**Subsequent authorized development-only execution (October 26):** [G3 R0–R2 three-regime verification results](EXPERIMENT_002_G3_R1_R2_VERIFICATION_RESULTS_2026-10-26.md) completed the proposed timing bridge and search-read audit using explored seed 2101 across high/moderate/low congestion. All **25,179** native/FCD ordered external-edge entries matched at the same simulation step; **1,994,952** actual source counter lookups were reconstructed without routing changes. The original review below is retained as the prereview decision and historical limitations inventory. **R0–R2 passed for the examined development scenarios; R3/R4 and M3 freeze remain open; no held-out seeds were touched.**
+
 ## 1. Exactly what we intend to validate
 
 **Narrow scientific question:** *Given 1,000 prescribed trips in an immutable synthetic SUMO network, does the original time-aware routing cost model predict **time to reach the next road and downstream road-entry times on routes actually chosen** more accurately than a free-flow-only reference, and how do its errors vary with observed congestion?*
