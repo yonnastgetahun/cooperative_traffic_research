@@ -1,0 +1,1 @@
+Explicit user approval: M3 scientific protocol freeze, 2026-10-27 (Los Angeles local date). This marker runs ONLY unit tests and source SHA256 capture; no SUMO simulations, no held-out seeds or dispatch. Held-out evaluation requires separate future authorization. Original evidence already approved R0-R4.
