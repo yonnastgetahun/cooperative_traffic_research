@@ -1,0 +1,96 @@
+name: Experiment 002 G3 R1-R2 - three-regime native timing and live search
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - experiments/experiment_002/g3_r1_r2_trigger_2026_10_26.txt
+permissions:
+  contents: read
+  actions: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        window: [200, 600, 1200]
+    container:
+      image: ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb
+    env:
+      SUMO_HOME: /usr/share/sumo
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download prespecified existing development seed 2101
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 40446073958
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          name: exp002-occupancy-M2-window-${{ matrix.window }}-seed2101
+          path: source
+      - name: Verify original routing and actual occupancy lookup provenance
+        run: |
+          set -eu
+          mkdir -p evidence
+          python3 experiments/experiment_002/time_aware.py \
+            --net source/network.net.xml --trips source/trips.xml \
+            --out evidence/control.rou.xml --audit evidence/control-audit.csv \
+            --manifest evidence/control-manifest.json
+          cmp evidence/control.rou.xml source/original.rou.xml
+          cmp evidence/control-audit.csv source/original-audit.csv
+          python3 experiments/experiment_002/g3_live_search_capture_v01.py \
+            --net source/network.net.xml --trips source/trips.xml \
+            --out evidence/observed.rou.xml --audit evidence/observed-audit.csv \
+            --manifest evidence/observed-manifest.json \
+            --events evidence/search-lookups.jsonl.gz \
+            --summary evidence/search-summary.json
+          cmp evidence/control.rou.xml evidence/observed.rou.xml
+          cmp evidence/control-audit.csv evidence/observed-audit.csv
+          python3 experiments/experiment_002/g3_search_event_audit_v01.py \
+            --events evidence/search-lookups.jsonl.gz \
+            --routes evidence/observed.rou.xml \
+            --report evidence/search-event-integrity.json
+          echo "MATCHES_ARCHIVED_ORIGINAL_ROUTE_AND_AUDIT" > evidence/route-invariance.txt
+      - name: Observe native ordered road and junction exits without changing traffic
+        run: |
+          set -eu
+          sumo --version > evidence/sumo-version.txt
+          sumo -n source/network.net.xml -r source/original.rou.xml \
+            --vehroute-output evidence/native-vehroute.xml \
+            --vehroute-output.exit-times true \
+            --vehroute-output.internal true \
+            --tripinfo-output evidence/observed-tripinfo.xml \
+            --seed 2101 --no-step-log true
+          python3 experiments/experiment_002/g3_native_vehroute_v01.py \
+            --vehroute evidence/native-vehroute.xml \
+            --planned-routes source/original.rou.xml \
+            --tripinfo evidence/observed-tripinfo.xml \
+            --events evidence/native-movement-events.csv \
+            --report evidence/native-event-report.json
+          python3 experiments/experiment_002/g3_tripinfo_invariance_v01.py \
+            --baseline source/observed-tripinfo.xml \
+            --observed evidence/observed-tripinfo.xml \
+            --report evidence/simulation-invariance.json
+      - name: Compare native road-entry times with archived FCD front times
+        run: |
+          set -eu
+          python3 experiments/experiment_002/g3_timing_bridge_v01.py \
+            --trace source/chosen-decision-trace.csv \
+            --events evidence/native-movement-events.csv \
+            --fcd source/observed-fcd.xml \
+            --report evidence/timing-bridge-report.json \
+            --out evidence/paired-road-entry.csv
+          echo "$GITHUB_SHA" > evidence/reconciliation-commit.txt
+          echo "source M2 run=40446073958, seed=2101, window=${{ matrix.window }}" > evidence/scenario-reference.txt
+          echo "ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb" > evidence/image-digest.txt
+          sha256sum source/trips.xml source/network.net.xml source/original.rou.xml > evidence/source-hashes.txt
+          sha256sum evidence/*.json evidence/paired-road-entry.csv > evidence/observation-hashes.txt
+      - name: Always preserve per-regime diagnostic evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp002-G3-R1R2-window-${{ matrix.window }}-seed2101
+          path: evidence/
+          retention-days: 30
