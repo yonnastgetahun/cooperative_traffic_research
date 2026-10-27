@@ -1,6 +1,6 @@
 # Experiment 002 — R3 Exceptional Events and Missing Data Contract v0.1
 
-**Status:** Approved development-only instrumentation/verification, October 26, 2026. **M3 is NOT frozen; no held-out seed access permitted.**  
+**Status:** **Approved and executed successfully on the three development scenarios, October 26, 2026.** [R3–R4 findings and gate evidence](EXPERIMENT_002_G3_R3_R4_EXECUTION_RESULTS_2026-10-26.md). **M3 is NOT frozen; no held-out seed access permitted.**  
 **Source:** [R0–R2 verification](EXPERIMENT_002_G3_R1_R2_VERIFICATION_RESULTS_2026-10-26.md) · [Observation sufficiency review](EXPERIMENT_002_G3_OBSERVATION_SUFFICIENCY_REVIEW_2026-10-26.md).  
 **Execution scope:** Previously inspected seed **2101** under windows **200, 600, 1,200 seconds**, with no route, demand, physics, or predictor changes. Later apply identical rules to every frozen evaluation scenario.
 
