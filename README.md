@@ -17,8 +17,12 @@ The next question is whether the time-aware traffic predictor is accurate enough
 - [Actual predictor trace: development findings and limitations](docs/EXPERIMENT_002_ACTUAL_PREDICTOR_TRACE_2026-10-26.md)
 - [Completed M0–M2 development: physical occupancy & junction-delay findings](docs/EXPERIMENT_002_OCCUPANCY_M2_DEVELOPMENT_RESULTS_2026-10-26.md)
 - [Measurement design and M3 holdout gates](docs/EXPERIMENT_002_OCCUPANCY_JUNCTION_MEASUREMENT_PLAN_V0_1.md)
+- [Latest G3 reconciliation: occupancy semantics, 211 vehicle-level cases and remaining gates](docs/EXPERIMENT_002_G3_RECONCILIATION_FINDINGS_2026-10-26.md)
+- [Archived G3 evidence and CSV tables](docs/results/exp002_g3_2026_10_26/README.md)
 - [Successful three-regime decision-trace workflow and artifacts](https://github.com/yonnastgetahun/cooperative_traffic_research/actions/runs/40443562182)
 - [Proposed separate Experiment 003: voluntary departure scheduling](docs/EXPERIMENT_003_DEPARTURE_SCHEDULING_ROADMAP.md)
+
+**Latest diagnostic insight:** G3 reconciliation suggests much of the native road/FCD discrepancy comes from vehicle front-position versus cross-edge physical-presence semantics. In 211 preselected discrepant bins, vehicle fronts were observed near downstream internal junction boundaries. **The interpretation is not exact native per-vehicle attribution, the G3 gate remains open, and held-out seeds are untouched.**
 
 **Research boundary:** No statistically validated cooperative-routing benefit, deployment readiness, or real-world safety improvement has been established.
 
