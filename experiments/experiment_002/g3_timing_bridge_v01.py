@@ -44,9 +44,17 @@ def main():
     def errors(j):
         values=[row[3]-row[j] for row in output]
         return dict(n=len(values),bias_s=statistics.mean(values),mae_s=statistics.mean(abs(x) for x in values))
+    def fcd_errors(j):
+        values=[row[4]-row[j] for row in output]
+        return dict(n=len(values),bias_s=statistics.mean(values),mae_s=statistics.mean(abs(x) for x in values))
     report=dict(planned_edges=sum(len(x) for x in traces.values()),matched=len(output),missing_vehicle_ids=miss,
                 observed_delta_counts=dict(changes),native_timeaware=errors(6),native_freeflow=errors(7),
-                provenance="simulation-step native predecessor exit; first FCD front sample; development only")
+                FCD_timeaware=fcd_errors(6),FCD_freeflow=fcd_errors(7),
+                first_edge_count=sum(row[1]==0 for row in output),
+                FCD_later_over_one_step=sum(row[5]>1.0 for row in output),
+                FCD_earlier_over_one_step=sum(row[5]<-1.0 for row in output),
+                provenance="simulation-step native predecessor exit; first FCD front sample; development only",
+                interpretation="two observation conventions on same realized chosen route; not occupancy calibration")
     with open(a.report,"w") as f:json.dump(report,f,indent=2)
     if miss or report["matched"]!=report["planned_edges"]:raise RuntimeError("Unmatched ordered route visits")
 if __name__=="__main__":main()
