@@ -1,0 +1,1 @@
+Approved G3 R0–R2 development verification succeeded in GitHub Actions run 40456979518, 3 regimes seed2101, 25179 native/FCD matched entries, 1994952 search counter reads, exact policy/trip invariance. Publish verified compact metrics and paired-edge CSVs. No new simulations or held-out seed access.
