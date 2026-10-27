@@ -6,6 +6,10 @@ Every day, drivers sit in traffic despite having powerful navigation apps. Those
 
 ## Current research status — October 26, 2026
 
+**Latest M3 operational review (October 27):** A [read-only safeguards audit](docs/EXPERIMENT_002_M3_OPERATIONAL_READINESS_REVIEW_2026-10-27.md) passed six tests and closed a legacy manually supplied seed pathway that could have accidentally generated reserved evaluation seeds. GitHub returned **HTTP 404 for the protected reviewer environment** and independently confirmed **`main` is not protected**. [Permanent machine-readable evidence](docs/results/exp002_m3_operational_review_2026_10_27/README.md). **Held-out execution remains blocked and no reserved seeds have run.**
+
+
+
 **M3 production-adapter review (October 27):** [R3/R4 production adapters and activation safeguards passed offline review](docs/EXPERIMENT_002_M3_PRODUCTION_ADAPTER_REVIEW_FINDINGS_2026-10-27.md) with [per-scenario evidence](docs/results/exp002_m3_production_adapter_review_2026_10_27/README.md). All eight synthetic tests passed, and frozen R3 outputs were reproduced exactly from already inspected development cases. **Protected GitHub approval environment remains unverified, and reserved evaluation seeds have not run.**
 
 
