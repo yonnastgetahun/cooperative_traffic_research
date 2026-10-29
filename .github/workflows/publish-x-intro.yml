@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       post_text:
-        description: "Approved X post text (leave blank for latest traffic research findings)"
+        description: "Approved X post text (leave blank for M3 held-out findings with graphic)"
         required: false
         type: string
 
@@ -19,55 +19,14 @@ jobs:
     if: github.run_attempt == 1
     runs-on: ubuntu-latest
     steps:
-      - name: Publish approved introduction
+      - uses: actions/checkout@v4
+      - name: Install image and OAuth dependencies
+        run: python -m pip install --disable-pip-version-check Pillow requests-oauthlib
+      - name: Publish M3 result graphic and approved update
         env:
           POST_TEXT: ${{ inputs.post_text }}
           X_API_KEY: ${{ secrets.X_API_KEY }}
           X_API_SECRET: ${{ secrets.X_API_SECRET }}
           X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
           X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
-        run: |
-          python - <<'PY'
-          import os, json, time, secrets, base64, hmac, hashlib, sys
-          from urllib.parse import quote
-          from urllib.request import Request, urlopen
-          from urllib.error import HTTPError, URLError
-
-          post = os.getenv("POST_TEXT", "").strip() or "1,000 trips. Three congestion levels. Both cooperative routing prototypes were slower than independent routing. Next: validate our predictor against observed SUMO traffic, then rethink coordination. Research: https://github.com/yonnastgetahun/cooperative_traffic_research"
-          if len(post) > 280:
-              sys.exit("Post exceeds 280 characters")
-          keys = ("X_API_KEY", "X_API_SECRET", "X_ACCESS_TOKEN", "X_ACCESS_TOKEN_SECRET")
-          if any(not os.getenv(k) for k in keys):
-              sys.exit("Missing one or more X credentials")
-          url = "https://api.x.com/2/tweets"
-          oauth = {
-              "oauth_consumer_key": os.environ["X_API_KEY"],
-              "oauth_nonce": secrets.token_hex(16),
-              "oauth_signature_method": "HMAC-SHA1",
-              "oauth_timestamp": str(int(time.time())),
-              "oauth_token": os.environ["X_ACCESS_TOKEN"],
-              "oauth_version": "1.0",
-          }
-          enc = lambda s: quote(str(s), safe="~-._")
-          param = "&".join(f"{enc(k)}={enc(v)}" for k,v in sorted(oauth.items()))
-          base = "&".join(map(enc, ("POST", url, param)))
-          key = enc(os.environ["X_API_SECRET"]) + "&" + enc(os.environ["X_ACCESS_TOKEN_SECRET"])
-          oauth["oauth_signature"] = base64.b64encode(hmac.new(key.encode(), base.encode(), hashlib.sha1).digest()).decode()
-          auth = "OAuth " + ", ".join(f'{enc(k)}="{enc(v)}"' for k,v in sorted(oauth.items()))
-          request = Request(url, data=json.dumps({"text":post}).encode(), headers={
-              "Authorization":auth, "Content-Type":"application/json", "User-Agent":"cooperative-traffic-publisher"
-          }, method="POST")
-          try:
-              with urlopen(request, timeout=25) as response:
-                  result=json.load(response)
-              tweet_id=result.get("data",{}).get("id")
-              if not tweet_id:
-                  sys.exit("X response did not confirm a post ID")
-              print("Published successfully. Post ID: " + str(tweet_id))
-              print("View: https://x.com/i/web/status/" + str(tweet_id))
-          except HTTPError as e:
-              print("X publishing failed with HTTP " + str(e.code) + ". Check write permissions, credits, and app access.")
-              sys.exit(1)
-          except URLError:
-              sys.exit("Network error reaching X")
-          PY
+        run: python social/publish_m3_x.py
