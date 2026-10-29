@@ -13,6 +13,7 @@ jobs:
   evaluate:
     if: ${{ inputs.confirmation == 'RUN_M3_30_AUTHORIZED' }}
     runs-on: ubuntu-latest
+    environment: m3-holdout-reviewers
     timeout-minutes: 90
     strategy:
       fail-fast: false
