@@ -12,6 +12,9 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+      - name: Compile newly integrated scientific runner without executing seeds
+        run: |
+          python3 -m py_compile experiments/experiment_002/m3_production_review/authorized_scenario_runner_v01.py experiments/experiment_002/m3_production_review/authorized_postprocess_v01.py experiments/experiment_002/m3_production_review/authorized_scenario_manifest_v01.py experiments/experiment_002/m3_production_review/authorized_aggregate_v01.py
       - name: Test 30-slot synthetic manifest and fail-closed cases
         run: python3 experiments/experiment_002/m3_production_review/test_synthetic_30_slot_contract_v01.py
       - name: Exercise 30-attempt synthetic orchestration and failure recovery
