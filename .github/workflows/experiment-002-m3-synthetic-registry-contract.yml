@@ -1,15 +1,22 @@
-name: M3 synthetic registry contract (no simulation)
+name: M3 production readiness offline contracts (no simulation)
 on:
   pull_request:
     paths:
-      - 'experiments/experiment_002/m3_production_review/test_synthetic_30_slot_contract_v01.py'
+      - 'experiments/experiment_002/m3_production_review/**'
       - '.github/workflows/experiment-002-m3-synthetic-registry-contract.yml'
 permissions:
   contents: read
 jobs:
-  synthetic-contract:
+  offline-contracts:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - name: Test synthetic manifest failure modes without scientific execution
+      - name: Test 30-slot synthetic manifest and fail-closed cases
         run: python3 experiments/experiment_002/m3_production_review/test_synthetic_30_slot_contract_v01.py
+      - name: Verify existing production bundle, release record and seed driver guards
+        run: |
+          set -eu
+          python3 experiments/experiment_002/m3_production_review/test_production_bundle_validator_v01.py
+          python3 experiments/experiment_002/m3_production_review/test_release_record_v01.py
+          python3 experiments/experiment_002/m3_production_review/test_general_seed_driver_v01.py
