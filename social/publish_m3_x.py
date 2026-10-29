@@ -4,7 +4,7 @@ import os,sys,io
 from PIL import Image,ImageDraw,ImageFont
 from requests_oauthlib import OAuth1Session
 
-DEFAULT="We checked the predictions behind our slower cooperative routing results. Across 30 held-out SUMO simulations, time-aware forecasts cut road-entry timing error by 9–20% vs. free-flow estimates. But systematic timing bias remains. Next: diagnose and recalibrate. https://github.com/yonnastgetahun/cooperative_traffic_research"
+DEFAULT="Cooperative routing was slower. So we tested its predictions: across 30 held-out SUMO scenarios, time-aware forecasts cut road-entry timing error by 9–20% vs. free-flow. Bias remains. Next: diagnose and recalibrate. https://github.com/yonnastgetahun/cooperative_traffic_research"
 VALUES=[(200,5.323933,9.2),(600,3.865924,16.9),(1200,3.444368,20.5)]
 def graphic():
     im=Image.new("RGB",(1200,675),"#0b2038")
