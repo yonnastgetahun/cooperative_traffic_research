@@ -9,6 +9,7 @@ from datetime import datetime,timezone
 from pathlib import Path
 from general_seed_driver_v01 import commands,scenario_plan,FROZEN_SHA,Blocked
 from adapters_v01 import SUMO_IMAGE
+from authorized_postprocess_v01 import process
 
 def digest(p):
     h=hashlib.sha256()
@@ -38,7 +39,16 @@ def execute(seed,window,out,frozen,acknowledge=False):
             with (out/f"stage-{index}-{record['stage']}.log").open("wb") as log:
                 result=subprocess.run(cmd,stdout=log,stderr=subprocess.STDOUT,check=False)
             if result.returncode:raise RuntimeError(f"{record['stage']} exited {result.returncode}")
-        record["status"]="SIMULATION_COMPLETE_POSTPROCESS_PENDING"
+        record["stage"]="postprocess"
+        with (out/"stage-4-postprocess.log").open("w") as log:
+            try:
+                details=process(out,frozen,seed,window)
+                log.write(json.dumps(details,indent=2)+"\n")
+            except Exception as error:
+                log.write(type(error).__name__+": "+str(error)+"\n")
+                raise
+        record["stage"]="archive"
+        record["status"]="COMPLETE"
     except Exception as e:
         record["error"]=str(e)
     finally:
@@ -57,6 +67,6 @@ def main():
     a=p.parse_args()
     result=execute(a.seed,a.window,a.out,a.frozen,a.authorized_evaluation)
     print(json.dumps(result))
-    if result["status"]!="SIMULATION_COMPLETE_POSTPROCESS_PENDING":sys.exit(1)
+    if result["status"]!="COMPLETE":sys.exit(1)
 
 if __name__=="__main__":main()
