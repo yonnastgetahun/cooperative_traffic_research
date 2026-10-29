@@ -1,0 +1,16 @@
+name: M3 production bundle review - synthetic only
+on:
+  pull_request:
+    paths:
+      - 'experiments/experiment_002/m3_production_review/production_bundle_validator_v01.py'
+      - 'experiments/experiment_002/m3_production_review/test_production_bundle_validator_v01.py'
+      - 'docs/EXPERIMENT_002_M3_PRODUCTION_RUNNER_IMPLEMENTATION_STATUS.md'
+permissions:
+  contents: read
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate synthetic manifests only; never run SUMO
+        run: python3 -m unittest discover -s experiments/experiment_002/m3_production_review -p 'test_production_bundle_validator_v01.py' -v
