@@ -11,6 +11,7 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+import shutil
 from datetime import datetime, timezone
 
 FROZEN = "be2e8d27c78c8b6de4891115d6d951edc877ac6e"
@@ -29,6 +30,8 @@ def execute(out, seed, window, frozen_root, source, runner=None):
         raise ValueError("Development supervisor permits seed 2101 and frozen windows only")
     if not (Path(frozen_root) / "experiments/experiment_002/time_aware.py").is_file():
         raise ValueError("Frozen source missing")
+    if Path(out).resolve() == Path.cwd().resolve() or Path.cwd().resolve() in Path(out).resolve().parents and Path(out).resolve().name in ("results", "source", "frozen"):
+        raise ValueError("Attempt output cannot overwrite runner inputs")
     if not (Path(source) / "scenario.json").is_file():
         raise ValueError("Development input missing")
     s = json.loads((Path(source) / "scenario.json").read_text())
@@ -50,6 +53,10 @@ def execute(out, seed, window, frozen_root, source, runner=None):
         with (out / "runner.log").open("wb") as log:
             result = subprocess.run(["sh", script], cwd=Path.cwd(), env=env,
                                     stdout=log, stderr=subprocess.STDOUT, check=False)
+        for dirname in ("results", "postprocess"):
+            folder = Path.cwd() / dirname
+            if folder.is_dir():
+                shutil.copytree(folder, out / dirname)
         attempt["returncode"] = result.returncode
         if result.returncode:
             attempt["error"] = "Development runner exited nonzero"
