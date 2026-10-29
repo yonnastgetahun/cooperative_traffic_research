@@ -13,17 +13,23 @@ RESERVED=tuple(range(3101,3111))
 ALLOWED_REHEARSAL=(2101,)
 class Blocked(RuntimeError):pass
 
-def scenario_plan(seed,window):
+def scenario_plan(seed,window,authorized_evaluation=False):
     if type(seed) is not int or type(window) is not int or window not in WINDOWS:
         raise Blocked("Invalid scenario identity")
-    if seed in RESERVED:raise Blocked("Reserved evaluation seed is not authorized")
-    if seed not in ALLOWED_REHEARSAL:raise Blocked("Runner rehearsal is development-only")
+    if seed in RESERVED:
+        if authorized_evaluation is not True:
+            raise Blocked("Reserved seed requires explicit evaluation execution mode")
+        mode="authorized_evaluation"
+    elif seed in ALLOWED_REHEARSAL and authorized_evaluation is False:
+        mode="development_rehearsal"
+    else:
+        raise Blocked("Seed and authorization mode mismatch")
     return dict(seed=seed,window_seconds=window,scientific_commit=FROZEN_SHA,
-                expected_vehicles=1000,mode="development_rehearsal",
-                evaluation_authorized=False)
+                expected_vehicles=1000,mode=mode,
+                evaluation_authorized=(mode=="authorized_evaluation"))
 
-def commands(root,seed,window):
-    p=scenario_plan(seed,window)
+def commands(root,seed,window,authorized_evaluation=False):
+    p=scenario_plan(seed,window,authorized_evaluation=authorized_evaluation)
     root=Path(root)
     net=root/"network.net.xml";trips=root/"trips.xml";routes=root/"original.rou.xml"
     audit=root/"original-audit.csv";manifest=root/"original-manifest.json"
