@@ -1,0 +1,16 @@
+name: M3 release guard review - no simulation
+on:
+  pull_request:
+    paths:
+      - 'experiments/experiment_002/m3_production_review/release_record_v01.py'
+      - 'experiments/experiment_002/m3_production_review/test_release_record_v01.py'
+      - 'docs/EXPERIMENT_002_M3_RELEASE_GUARD_REVIEW_V0_1.md'
+permissions:
+  contents: read
+jobs:
+  synthetic-only:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test release record validation without demand generation or SUMO
+        run: python3 -m unittest discover -s experiments/experiment_002/m3_production_review -p 'test_release_record_v01.py' -v
