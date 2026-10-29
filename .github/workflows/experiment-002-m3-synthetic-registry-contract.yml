@@ -1,0 +1,15 @@
+name: M3 synthetic registry contract (no simulation)
+on:
+  pull_request:
+    paths:
+      - 'experiments/experiment_002/m3_production_review/test_synthetic_30_slot_contract_v01.py'
+      - '.github/workflows/experiment-002-m3-synthetic-registry-contract.yml'
+permissions:
+  contents: read
+jobs:
+  synthetic-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test synthetic manifest failure modes without scientific execution
+        run: python3 experiments/experiment_002/m3_production_review/test_synthetic_30_slot_contract_v01.py
