@@ -1,0 +1,99 @@
+name: M3 consolidated end-to-end development rehearsal (seed 2101 only)
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/experiment-002-m3-consolidated-development-rehearsal.yml'
+      - 'docs/EXPERIMENT_002_M3_CONSOLIDATED_REHEARSAL_DECISION.md'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  full-development:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      matrix:
+        window: [200, 600, 1200]
+    container:
+      image: ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb
+    env:
+      SUMO_HOME: /usr/share/sumo
+      SEED: 2101
+      WINDOW: ${{ matrix.window }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: be2e8d27c78c8b6de4891115d6d951edc877ac6e
+          path: frozen
+      - name: Retrieve original previously inspected seed-2101 inputs
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 40446073958
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          name: exp002-occupancy-M2-window-${{ matrix.window }}-seed2101
+          path: source
+      - name: Generate, route, simulate and score with frozen scientific code
+        run: |
+          set -eu
+          sh experiments/experiment_002/m3_qualification/run_development_v01.sh
+      - name: Independently repeat native observation, R3 and seed-level scoring on fresh development output
+        run: |
+          set -eu
+          python3 experiments/experiment_002/m3_production_review/development_postprocess_v01.py             --source results --out postprocess --frozen frozen             --seed 2101 --window "$WINDOW"
+          python3 - <<'PY'
+          import json,os,pathlib
+          p=pathlib.Path("postprocess/postprocess-integrity.json")
+          r=json.loads(p.read_text())
+          assert r["seed"]==2101 and r["window_seconds"]==int(os.environ["WINDOW"])
+          assert r["status"]=="DEVELOPMENT_POSTPROCESS_REPRODUCED_FROZEN_REFERENCE"
+          assert r["heldout_authorized"] is False
+          print("Freshly generated development observations independently reproduced frozen R3/R4.")
+          PY
+      - name: Archive every attempted scenario even if it fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m3-full-dev-window-${{ matrix.window }}-seed2101
+          path: |
+            results/
+            postprocess/
+          retention-days: 30
+  consolidate:
+    needs: full-development
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Retrieve all three fresh development runs
+        uses: actions/download-artifact@v4
+        with:
+          pattern: m3-full-dev-window-*
+          path: qualification
+          merge-multiple: false
+      - name: Check frozen cross-regime results and development-only provenance
+        run: |
+          set -eu
+          for w in 200 600 1200; do
+            test -s "qualification/m3-full-dev-window-$w-seed2101/postprocess/postprocess-integrity.json"
+          done
+          python3 - <<'PY'
+          import json,pathlib
+          for w in (200,600,1200):
+              p=pathlib.Path(f"qualification/m3-full-dev-window-{w}-seed2101/postprocess/postprocess-integrity.json")
+              d=json.loads(p.read_text())
+              assert d["status"]=="DEVELOPMENT_POSTPROCESS_REPRODUCED_FROZEN_REFERENCE"
+              assert d["seed"]==2101 and d["window_seconds"]==w
+              assert d["heldout_authorized"] is False
+              assert d["vehicles"]==1000 and d["matched_edges"]>1000
+          PY
+          python3 experiments/experiment_002/m3_qualification/aggregate_v01.py             --root qualification             --reference docs/results/exp002_g3_r1r2_2026_10_26/three-regime-timing-bridge.csv             --out final-review
+      - name: Archive consolidated review evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m3-consolidated-dev-readiness-evidence
+          path: final-review/
+          retention-days: 30
