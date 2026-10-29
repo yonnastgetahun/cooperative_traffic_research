@@ -39,6 +39,17 @@ def execute(seed,window,out,frozen,acknowledge=False):
             with (out/f"stage-{index}-{record['stage']}.log").open("wb") as log:
                 result=subprocess.run(cmd,stdout=log,stderr=subprocess.STDOUT,check=False)
             if result.returncode:raise RuntimeError(f"{record['stage']} exited {result.returncode}")
+        record["stage"]="frozen-route-equivalence"
+        control=[sys.executable,str(frozen/"experiments/experiment_002/time_aware.py"),
+          "--net",str(out/"network.net.xml"),"--trips",str(out/"trips.xml"),
+          "--out",str(out/"control.rou.xml"),"--audit",str(out/"control-audit.csv"),
+          "--manifest",str(out/"control-manifest.json")]
+        with (out/"stage-route-equivalence.log").open("wb") as log:
+            subprocess.run(control,stdout=log,stderr=subprocess.STDOUT,check=True)
+        if (out/"control.rou.xml").read_bytes()!=(out/"original.rou.xml").read_bytes():
+            raise RuntimeError("Frozen route assignment differs from traced predictor")
+        if (out/"control-audit.csv").read_bytes()!=(out/"original-audit.csv").read_bytes():
+            raise RuntimeError("Frozen route audit differs from traced predictor")
         record["stage"]="postprocess"
         with (out/"stage-4-postprocess.log").open("w") as log:
             try:
