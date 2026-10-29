@@ -1,0 +1,16 @@
+name: M3 general-seed driver design - synthetic-only review
+on:
+  pull_request:
+    paths:
+      - 'experiments/experiment_002/m3_production_review/general_seed_driver_v01.py'
+      - 'experiments/experiment_002/m3_production_review/test_general_seed_driver_v01.py'
+      - 'docs/EXPERIMENT_002_M3_GENERAL_SEED_DRIVER_REVIEW_V0_1.md'
+permissions:
+  contents: read
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify frozen scenario commands and reserved-seed preflight denial
+        run: python3 -m unittest discover -s experiments/experiment_002/m3_production_review -p 'test_general_seed_driver_v01.py' -v
