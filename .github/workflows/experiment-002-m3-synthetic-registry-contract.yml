@@ -1,0 +1,31 @@
+name: M3 production readiness offline contracts (no simulation)
+on:
+  pull_request:
+    paths:
+      - 'experiments/experiment_002/m3_production_review/**'
+      - '.github/workflows/experiment-002-m3-synthetic-registry-contract.yml'
+permissions:
+  contents: read
+jobs:
+  offline-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile newly integrated scientific runner without executing seeds
+        run: |
+          python3 -m py_compile experiments/experiment_002/m3_production_review/authorized_scenario_runner_v01.py experiments/experiment_002/m3_production_review/authorized_postprocess_v01.py experiments/experiment_002/m3_production_review/authorized_scenario_manifest_v01.py experiments/experiment_002/m3_production_review/authorized_aggregate_v01.py
+      - name: Test 30-slot synthetic manifest and fail-closed cases
+        run: python3 experiments/experiment_002/m3_production_review/test_synthetic_30_slot_contract_v01.py
+      - name: Exercise 30-attempt synthetic orchestration and failure recovery
+        run: python3 experiments/experiment_002/m3_production_review/test_synthetic_orchestration_recovery_v01.py
+      - name: Test real subprocess failure archival and no-overwrite safeguards
+        run: python3 experiments/experiment_002/m3_production_review/test_development_attempt_supervisor_v01.py
+      - name: Test production immutable preflight and non-dispatch registry
+        run: python3 experiments/experiment_002/m3_production_review/test_production_orchestration_preflight_v01.py
+      - name: Verify existing production bundle, release record and seed driver guards
+        run: |
+          set -eu
+          python3 experiments/experiment_002/m3_production_review/test_production_bundle_validator_v01.py
+          python3 experiments/experiment_002/m3_production_review/test_release_record_v01.py
+          python3 experiments/experiment_002/m3_production_review/test_general_seed_driver_v01.py
