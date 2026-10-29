@@ -36,8 +36,11 @@ def execute(seed,window,out,frozen,acknowledge=False):
             record["stage"]=["network","demand","routing","sumo"][index]
             # Frozen script paths are relative to working directory; use absolute frozen paths.
             cmd=[str(frozen / arg[7:]) if arg.startswith("frozen/") else arg for arg in cmd]
+            if index == 3:
+                # SUMO resolves edgeData output relative to the process cwd.
+                cmd += ["--end", "100000"]
             with (out/f"stage-{index}-{record['stage']}.log").open("wb") as log:
-                result=subprocess.run(cmd,stdout=log,stderr=subprocess.STDOUT,check=False)
+                result=subprocess.run(cmd,cwd=out if index == 3 else None,stdout=log,stderr=subprocess.STDOUT,check=False)
             if result.returncode:raise RuntimeError(f"{record['stage']} exited {result.returncode}")
         record["stage"]="frozen-route-equivalence"
         control=[sys.executable,str(frozen/"experiments/experiment_002/time_aware.py"),
