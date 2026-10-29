@@ -1,0 +1,16 @@
+name: M3 native observation integration - offline fixtures
+on:
+  pull_request:
+    paths:
+      - 'experiments/experiment_002/m3_production_review/native_observation_integration_v01.py'
+      - 'experiments/experiment_002/m3_production_review/test_native_observation_integration_v01.py'
+      - 'docs/EXPERIMENT_002_M3_NATIVE_INTEGRATION_REVIEW.md'
+permissions:
+  contents: read
+jobs:
+  fixtures:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test observation and exception completeness without SUMO
+        run: python3 -m unittest discover -s experiments/experiment_002/m3_production_review -p 'test_native_observation_integration_v01.py' -v
