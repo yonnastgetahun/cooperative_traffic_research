@@ -1,0 +1,16 @@
+name: M3 development integration contract - offline only
+on:
+  pull_request:
+    paths:
+      - 'experiments/experiment_002/m3_production_review/development_integration_v01.py'
+      - 'experiments/experiment_002/m3_production_review/test_development_integration_v01.py'
+      - 'docs/EXPERIMENT_002_M3_INTEGRATION_REVIEW_V0_1.md'
+permissions:
+  contents: read
+jobs:
+  fixtures:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test immutable development plan and blocked reserved seeds
+        run: python3 -m unittest discover -s experiments/experiment_002/m3_production_review -p 'test_development_integration_v01.py' -v
