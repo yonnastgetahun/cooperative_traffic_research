@@ -1,0 +1,41 @@
+name: M3 archived development postprocess - no simulation
+on:
+  pull_request:
+    paths:
+      - 'experiments/experiment_002/m3_production_review/development_postprocess_v01.py'
+      - 'experiments/experiment_002/m3_production_review/test_development_postprocess_v01.py'
+      - 'docs/EXPERIMENT_002_M3_POSTPROCESS_INTEGRATION_REVIEW.md'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: be2e8d27c78c8b6de4891115d6d951edc877ac6e
+          path: frozen
+      - name: Unit tests - no SUMO
+        run: python3 -m unittest discover -s experiments/experiment_002/m3_production_review -p 'test_development_postprocess_v01.py' -v
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 40570158400
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          pattern: exp002-M3-QUALIFY-window-*
+          path: source
+          merge-multiple: false
+      - name: Reprocess archived development observations with original frozen methods
+        run: |
+          set -eu
+          for w in 200 600 1200; do
+            python3 experiments/experiment_002/m3_production_review/development_postprocess_v01.py               --source "source/exp002-M3-QUALIFY-window-$w-seed2101"               --out "review/window-$w" --frozen frozen --seed 2101 --window "$w"
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: exp002-m3-development-postprocess-review
+          path: review/
+          retention-days: 30
