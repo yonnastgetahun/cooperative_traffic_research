@@ -32,3 +32,13 @@
 
 ## Current decision
 **NO-GO for production execution and held-out evaluation.** The above criteria define the single consolidated completion gate; this document does not claim that unfinished work has passed.
+
+## Latest independent repository settings evidence
+
+GitHub ruleset ID `26009049` was read directly. It is active on the default branch and includes deletion prevention, non-fast-forward prevention, and a pull-request requirement with stale-review dismissal and review-thread resolution. It requires **zero** approving reviews and lists no bypass actors. This verifies the repository ruleset, **not** the protected Actions environment.
+
+The environment administration endpoint remains unavailable to the connected GitHub client. Therefore the ten-minute timer, administrator bypass, and environment branch restrictions remain **UNVERIFIED**. Do not mark production release controls as passed.
+
+## Implementation increment
+
+`production_orchestration_preflight_v01.py` now expresses the exact 30 planned case identities, frozen source/image preflight, and fail-closed dispatch boundary. This is **non-executing planning code**, not a completed general-seed production runner. Its CI tests must pass before it is counted as verified. Actual general-seed generation, native observation, R3/R4 integration, failure recovery, and guarded deployment remain incomplete.
