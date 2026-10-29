@@ -93,7 +93,7 @@ jobs:
           for w in 200 600 1200; do
             cp -a "qualification/m3-full-dev-window-$w-seed2101/results" "qualification-for-aggregate/exp002-M3-QUALIFY-window-$w-seed2101"
           done
-          python3 experiments/experiment_002/m3_qualification/aggregate_v01.py             --root qualification             --reference docs/results/exp002_g3_r1r2_2026_10_26/three-regime-timing-bridge.csv             --out final-review
+          python3 experiments/experiment_002/m3_qualification/aggregate_v01.py             --root qualification-for-aggregate             --reference docs/results/exp002_g3_r1r2_2026_10_26/three-regime-timing-bridge.csv             --out final-review
       - name: Archive consolidated review evidence
         if: always()
         uses: actions/upload-artifact@v4
