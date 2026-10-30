@@ -14,12 +14,31 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - name: Retrieve and verify all 120 archives with paginated inventory
+      - name: Retrieve and verify all 120 archives with GitHub CLI
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          python3 experiments/experiment_004/download_archived_120_v01.py \
-            --repository ${{ github.repository }} --out evidence
+          python3 - <<'PY'
+          import json,subprocess
+          expected={f"exp004-seed-{s}-window-{w}-arm-{a}" for s in range(3301,3311) for w in (200,600,1200) for a in "ABCD"}
+          result=subprocess.run(["gh","api","--paginate","repos/${{ github.repository }}/actions/runs/41023721390/artifacts?per_page=100","--jq",".artifacts[] | [.name,.id,.expired] | @tsv"],capture_output=True,text=True,check=True)
+          rows=[line.split("\t") for line in result.stdout.splitlines() if line.strip()]
+          names=[row[0] for row in rows if row[0] in expected]
+          if len(names)!=120 or len(set(names))!=120 or set(names)!=expected:
+              raise SystemExit(f"Artifact inventory incomplete: found {len(names)}/120")
+          if any(row[2]=="true" for row in rows if row[0] in expected):raise SystemExit("Expired artifact")
+          print("Verified all 120 unique scenario archives",flush=True)
+          PY
+          mkdir -p evidence
+          gh run download 41023721390 --repo "${{ github.repository }}" --dir evidence --pattern 'exp004-seed-*'
+          python3 - <<'PY'
+          from pathlib import Path
+          root=Path("evidence")
+          expected={f"exp004-seed-{s}-window-{w}-arm-{a}" for s in range(3301,3311) for w in (200,600,1200) for a in "ABCD"}
+          found={p.name for p in root.iterdir() if p.is_dir()}
+          if found!=expected:raise SystemExit(f"Downloaded {len(found)}/120: missing {sorted(expected-found)[:5]}")
+          print("All 120 archived scenario folders downloaded",flush=True)
+          PY
       - name: Normalize 120 archived scenario paths
         run: |
           python3 - <<'PY'
