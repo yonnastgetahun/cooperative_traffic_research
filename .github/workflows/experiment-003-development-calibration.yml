@@ -1,0 +1,74 @@
+name: Experiment 003 independent development calibration
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/experiment-003-development-calibration.yml'
+      - 'experiments/experiment_003/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        seed: [2201,2202,2203,2204,2205,2206,2207,2208,2209,2210]
+        window: [200,600,1200]
+    container:
+      image: ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: be2e8d27c78c8b6de4891115d6d951edc877ac6e
+          path: frozen
+      - name: Generate frozen independent development observations
+        run: |
+          python3 experiments/experiment_003/run_development_scenario_v01.py \
+            --seed ${{ matrix.seed }} --window ${{ matrix.window }} \
+            --out seed-${{ matrix.seed }}-window-${{ matrix.window }} --frozen frozen
+      - name: Archive each scenario even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp003-dev-seed-${{ matrix.seed }}-window-${{ matrix.window }}
+          path: seed-${{ matrix.seed }}-window-${{ matrix.window }}/
+          retention-days: 30
+  fit:
+    needs: generate
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: exp003-dev-seed-*
+          path: development-data
+          merge-multiple: false
+      - name: Require 30 completed development scenarios and fit frozen coefficients
+        run: |
+          python3 - <<'PY'
+          import json,pathlib
+          root=pathlib.Path("development-data")
+          for seed in range(2201,2211):
+            for window in (200,600,1200):
+              folder=root/f"exp003-dev-seed-{seed}-window-{window}"
+              assert json.loads((folder/"attempt.json").read_text())["status"]=="COMPLETE"
+              assert (folder/"paired-road-entry.csv").is_file()
+              dest=root/f"seed-{seed}-window-{window}"
+              folder.rename(dest)
+          PY
+          mkdir -p results
+          python3 experiments/experiment_003/fit_cumulative_timing_v01.py \
+            --development-root development-data --development-seeds 2201,2202,2203,2204,2205,2206,2207,2208,2209,2210 \
+            --out results/exp003-development-coefficients.json
+      - name: Preserve fitted coefficients or diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp003-development-calibration-results
+          path: results/
+          retention-days: 30
