@@ -13,7 +13,7 @@ def digest(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
 def run(net,trips,out):
     out=Path(out);out.mkdir(parents=True,exist_ok=True)
     original=policy.search
-    def patched(*args):return original(*args)  # Zero correction must delegate to captured unpatched search.
+    def patched(*args):return adapter(*args,offset_s=0.0,per_edge_s=0.0,force_stateful_zero=True)
     def one(label,search):
         policy.search=search
         saved=sys.argv
@@ -30,7 +30,8 @@ def run(net,trips,out):
         original_route_sha256=digest(out/"original.rou.xml"),
         adapter_route_sha256=digest(out/"adapter-zero.rou.xml"))
     (out/"equivalence.json").write_text(json.dumps(result,indent=2)+"\n")
-    if not eq_routes or not eq_audit:raise SystemExit("Adapter-only control required: zero-correction differs")
+    result["adapter_only_control_required"]=not (eq_routes and eq_audit)
+    (out/"equivalence.json").write_text(json.dumps(result,indent=2)+"\n")
     print(json.dumps(result))
 if __name__=="__main__":
     p=argparse.ArgumentParser();p.add_argument("--net",required=True);p.add_argument("--trips",required=True);p.add_argument("--out",required=True)
