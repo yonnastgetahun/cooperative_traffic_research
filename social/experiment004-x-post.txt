@@ -1,0 +1,9 @@
+Better traffic predictions. Worse traffic.
+
+Experiment 003 cut prediction error by 34.2% under high congestion.
+
+Experiment 004 tested the improved forecasts in cooperative routing. Average trips became 18.53 seconds longer.
+
+Better forecasts ≠ better collective decisions.
+
+Research: https://github.com/yonnastgetahun/cooperative_traffic_research
