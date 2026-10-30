@@ -13,7 +13,7 @@ def digest(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
 def run(net,trips,out):
     out=Path(out);out.mkdir(parents=True,exist_ok=True)
     original=policy.search
-    def patched(*args):return adapter(*args,offset_s=0.0,per_edge_s=0.0)
+    def patched(*args):return original(*args)  # Zero correction must delegate to captured unpatched search.
     def one(label,search):
         policy.search=search
         saved=sys.argv
