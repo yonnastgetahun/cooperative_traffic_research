@@ -13,9 +13,9 @@ class Label:
     ordinal:int
     path:tuple
 
-def search(origin,dest,departure,edges,adj,occupancy,bin_s,pressure,offset_s=0.0,per_edge_s=0.0):
+def search(origin,dest,departure,edges,adj,occupancy,bin_s,pressure,offset_s=0.0,per_edge_s=0.0,force_stateful_zero=False):
     from time_aware import search as original,freeflow
-    if offset_s==0.0 and per_edge_s==0.0:
+    if offset_s==0.0 and per_edge_s==0.0 and not force_stateful_zero:
         return original(origin,dest,departure,edges,adj,occupancy,bin_s,pressure)
     if bin_s<=0 or offset_s<0 or per_edge_s<0:raise ValueError("Invalid prospective calibration parameters")
     first=freeflow(edges[origin])
