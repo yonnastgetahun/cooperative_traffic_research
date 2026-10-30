@@ -1,0 +1,71 @@
+name: Experiment 004 paired four-arm network outcomes
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/experiment-004-network-outcomes.yml'
+      - 'experiments/experiment_004/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  simulate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        seed: [3301,3302,3303,3304,3305,3306,3307,3308,3309,3310]
+        window: [200,600,1200]
+        arm: [A,B,C,D]
+    container:
+      image: ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: be2e8d27c78c8b6de4891115d6d951edc877ac6e
+          path: frozen
+      - name: Execute prespecified network arm
+        run: |
+          python3 experiments/experiment_004/run_arm_v01.py \
+            --seed ${{ matrix.seed }} --window ${{ matrix.window }} --arm ${{ matrix.arm }} \
+            --out seed-${{ matrix.seed }}-window-${{ matrix.window }}-arm-${{ matrix.arm }} --frozen frozen
+      - name: Preserve every attempted arm including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp004-seed-${{ matrix.seed }}-window-${{ matrix.window }}-arm-${{ matrix.arm }}
+          path: seed-${{ matrix.seed }}-window-${{ matrix.window }}-arm-${{ matrix.arm }}/
+          retention-days: 30
+  aggregate:
+    needs: simulate
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: exp004-seed-*
+          path: evidence
+          merge-multiple: false
+      - name: Require all 120 arms and compute paired seed-level outcomes
+        run: |
+          python3 - <<'PY'
+          import pathlib
+          root=pathlib.Path("evidence")
+          for seed in range(3301,3311):
+            for window in (200,600,1200):
+              for arm in "ABCD":
+                source=root/f"exp004-seed-{seed}-window-{window}-arm-{arm}"
+                assert source.is_dir(),str(source)
+                source.rename(root/f"seed-{seed}-window-{window}-arm-{arm}")
+          PY
+          mkdir -p results
+          python3 experiments/experiment_004/aggregate_network_outcomes_v01.py --root evidence --out results/exp004-network-results.json
+      - name: Preserve consolidated results or failure diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp004-network-outcomes-results
+          path: results/
+          retention-days: 30

@@ -1,0 +1,43 @@
+name: Experiment 004 prospective search zero-correction equivalence
+on:
+  pull_request:
+    paths:
+      - 'experiments/experiment_004/**'
+      - '.github/workflows/experiment-004-zero-correction-equivalence.yml'
+permissions:
+  contents: read
+jobs:
+  equivalence:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb
+    strategy:
+      fail-fast: false
+      matrix:
+        window: [200,600,1200]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: be2e8d27c78c8b6de4891115d6d951edc877ac6e
+          path: frozen
+      - name: Generate prespecified inspected development demand only
+        run: |
+          mkdir -p evidence
+          netgenerate --grid --grid.number 10 --grid.length 200 --output-file evidence/network.net.xml
+          python3 frozen/experiments/experiment_002/fixed_demand_v01.py \
+            --net evidence/network.net.xml --out evidence/trips.xml \
+            --manifest evidence/demand.json --seed 2101 --window ${{ matrix.window }}
+      - name: Verify zero-correction original/adapter route equality
+        env:
+          SUMO_HOME: /usr/share/sumo
+        run: |
+          python3 experiments/experiment_004/check_zero_correction_equivalence_v01.py \
+            --net evidence/network.net.xml --trips evidence/trips.xml --out evidence/comparison
+      - name: Preserve evidence even if equality fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp004-zero-correction-window-${{ matrix.window }}
+          path: evidence/
+          retention-days: 30
