@@ -56,6 +56,10 @@ jobs:
           mkdir -p results
           python3 experiments/experiment_004/audit_archived_network_outcomes_v01.py \
             --root evidence --out results/exp004-archived-outcome-audit.json
+      - name: Compute matched fairness and exception findings
+        run: |
+          python3 experiments/experiment_004/final_fairness_exception_analysis_v01.py \
+            --root evidence --out results/exp004-fairness-exceptions.json
       - name: Preserve audit and diagnostic output
         if: always()
         uses: actions/upload-artifact@v4
