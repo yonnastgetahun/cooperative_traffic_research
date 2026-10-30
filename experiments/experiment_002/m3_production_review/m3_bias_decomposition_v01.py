@@ -31,13 +31,14 @@ def analyze(root):
                 idx=int(row["route_index"])
                 err=float(row["native_entry_s"])-float(row["timeaware_predicted_s"])
                 grouped[idx].append(err)
-                vid=row.get("vehicle_id") or row.get("veh_id") or row.get("id")
+                vid=row.get("vehicle_id") or row.get("veh_id") or row.get("vehicle") or row.get("id")
                 if vid is not None:vehicles[vid][idx]=err
             bins=[]
             for lo,hi in BINS:
                 vals=[v for i,vs in grouped.items() if lo<=i<=hi for v in vs]
                 bins.append(dict(index_range=f"{lo}-{hi}",n=len(vals),
                     mean_signed_error_s=statistics.mean(vals) if vals else None))
+            if not vehicles:raise ValueError(f"{file}: no vehicle identifier column available for within-vehicle increments")
             increments=[]
             for seq in vehicles.values():
                 for idx in sorted(seq):
