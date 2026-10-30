@@ -1,0 +1,73 @@
+name: Experiment 003 independent confirmatory calibration
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/experiment-003-confirmatory.yml'
+      - 'experiments/experiment_003/run_confirmatory_scenario_v01.py'
+      - 'experiments/experiment_003/evaluate_confirmatory_v01.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        seed: [3201,3202,3203,3204,3205,3206,3207,3208,3209,3210]
+        window: [200,600,1200]
+    container:
+      image: ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: be2e8d27c78c8b6de4891115d6d951edc877ac6e
+          path: frozen
+      - name: Execute frozen confirmatory scenario
+        run: |
+          python3 experiments/experiment_003/run_confirmatory_scenario_v01.py \
+            --seed ${{ matrix.seed }} --window ${{ matrix.window }} \
+            --out seed-${{ matrix.seed }}-window-${{ matrix.window }} --frozen frozen
+      - name: Preserve each attempt including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp003-confirm-seed-${{ matrix.seed }}-window-${{ matrix.window }}
+          path: seed-${{ matrix.seed }}-window-${{ matrix.window }}/
+          retention-days: 30
+  evaluate:
+    needs: generate
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: exp003-confirm-seed-*
+          path: confirmatory-data
+          merge-multiple: false
+      - name: Require all 30 complete scenarios and evaluate frozen correction
+        run: |
+          python3 - <<'PY'
+          import json,pathlib
+          root=pathlib.Path("confirmatory-data")
+          for seed in range(3201,3211):
+            for window in (200,600,1200):
+              folder=root/f"exp003-confirm-seed-{seed}-window-{window}"
+              assert json.loads((folder/"attempt.json").read_text())["status"]=="COMPLETE"
+              assert (folder/"paired-road-entry.csv").is_file()
+              folder.rename(root/f"seed-{seed}-window-{window}")
+          PY
+          mkdir -p results
+          python3 experiments/experiment_003/evaluate_confirmatory_v01.py \
+            --root confirmatory-data --out results/exp003-confirmatory-results.json
+      - name: Preserve scientific results or diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp003-confirmatory-results
+          path: results/
+          retention-days: 30
