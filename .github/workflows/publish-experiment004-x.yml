@@ -1,5 +1,11 @@
 name: Publish Experiment 004 results to X
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'social/experiment004-x-post.txt'
+      - 'social/publish_experiment004_x.py'
+      - '.github/workflows/publish-experiment004-x.yml'
   workflow_dispatch:
 permissions:
   contents: read
