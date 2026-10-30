@@ -1,0 +1,42 @@
+name: M3 archived 30-scenario bias decomposition
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'experiments/experiment_002/m3_production_review/m3_bias_decomposition_v01.py'
+      - 'experiments/experiment_002/m3_production_review/m3_bias_mechanism_v01.py'
+      - '.github/workflows/experiment-002-m3-archived-bias-decomposition.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Retrieve all 30 archived held-out scenario artifacts
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 40953111402
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          pattern: m3-eval-seed-*
+          path: archived-evidence
+          merge-multiple: false
+      - name: Analyze road-entry bias by route position and regime
+        run: |
+          mkdir -p analysis
+          python3 experiments/experiment_002/m3_production_review/m3_bias_decomposition_v01.py \
+            --artifacts archived-evidence --output analysis/m3-bias-decomposition.json
+      - name: Execute prespecified mechanism analysis on same archives
+        run: |
+          python3 experiments/experiment_002/m3_production_review/m3_bias_mechanism_v01.py \
+            --artifacts archived-evidence --output analysis/m3-bias-mechanism.json
+      - name: Preserve scientific analysis or failure diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m3-archived-30-scenario-bias-analysis
+          path: analysis/
+          retention-days: 30
