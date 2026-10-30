@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'experiments/experiment_004/audit_archived_network_outcomes_v01.py'
+      - 'experiments/experiment_004/download_archived_120_v01.py'
       - '.github/workflows/experiment-004-archived-outcome-audit.yml'
 permissions:
   contents: read
@@ -13,14 +14,12 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          run-id: 41023721390
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          repository: ${{ github.repository }}
-          pattern: exp004-seed-*
-          path: evidence
-          merge-multiple: false
+      - name: Retrieve and verify all 120 archives with paginated inventory
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 experiments/experiment_004/download_archived_120_v01.py \
+            --repository ${{ github.repository }} --out evidence
       - name: Normalize 120 archived scenario paths
         run: |
           python3 - <<'PY'
