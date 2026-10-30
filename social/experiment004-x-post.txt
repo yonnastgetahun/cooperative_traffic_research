@@ -1,9 +1,7 @@
-Better traffic predictions. Worse traffic.
+Better predictions. Worse traffic.
 
-Experiment 003 cut prediction error by 34.2% under high congestion.
-
-Experiment 004 tested the improved forecasts in cooperative routing. Average trips became 18.53 seconds longer.
+Experiment 003 cut timing error 34.2% under high congestion. But in Experiment 004, calibrated cooperative routing made average trips 18.53s longer.
 
 Better forecasts ≠ better collective decisions.
 
-Research: https://github.com/yonnastgetahun/cooperative_traffic_research
+https://github.com/yonnastgetahun/cooperative_traffic_research
