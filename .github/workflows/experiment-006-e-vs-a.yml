@@ -1,0 +1,99 @@
+name: Experiment 006 matched E vs A efficacy and fairness
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/experiment-006-e-vs-a.yml'
+      - 'experiments/experiment_006/**'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/experiment-006-e-vs-a.yml'
+      - 'experiments/experiment_006/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  development-parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        window: [200, 600, 1200]
+    container:
+      image: ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: be2e8d27c78c8b6de4891115d6d951edc877ac6e
+          path: scientific
+      - uses: actions/checkout@v4
+        with:
+          ref: 2997fd27c58e3b30cfd55a3c30ce4638ae8a1795
+          path: policy-source
+      - name: Inspect development seed 2101 A/E route reproducibility and A shortest-path semantics
+        run: |
+          python3 experiments/experiment_006/preflight_v01.py \
+            --window ${{ matrix.window }} \
+            --scientific scientific --policy-source policy-source
+  paired-scenarios:
+    if: github.event_name != 'pull_request'
+    needs: development-parity
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        seed: [3501,3502,3503,3504,3505,3506,3507,3508,3509,3510]
+        window: [200,600,1200]
+    container:
+      image: ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: be2e8d27c78c8b6de4891115d6d951edc877ac6e
+          path: scientific
+      - uses: actions/checkout@v4
+        with:
+          ref: 2997fd27c58e3b30cfd55a3c30ce4638ae8a1795
+          path: policy-source
+      - name: Run frozen paired A and E on fresh seed and preserve provenance
+        run: |
+          python3 experiments/experiment_006/run_pair_v01.py \
+            --seed ${{ matrix.seed }} --window ${{ matrix.window }} \
+            --out exp006-seed-${{ matrix.seed }}-window-${{ matrix.window }} \
+            --scientific scientific --policy-source policy-source
+      - name: Preserve successful and failed pair outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp006-seed-${{ matrix.seed }}-window-${{ matrix.window }}
+          path: exp006-seed-${{ matrix.seed }}-window-${{ matrix.window }}/
+          retention-days: 30
+  evaluate:
+    if: github.event_name != 'pull_request' && always()
+    needs: [development-parity, paired-scenarios]
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Retrieve archived paired scenarios
+        uses: actions/download-artifact@v4
+        with:
+          pattern: exp006-seed-*
+          path: evidence
+          merge-multiple: false
+      - name: Evaluate prespecified efficiency and fairness with seed-level inference
+        run: |
+          mkdir -p results
+          python3 experiments/experiment_006/evaluate_v01.py \
+            --root evidence --out results/exp006-results.json
+      - name: Preserve evaluation outputs or diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp006-e-vs-a-efficacy-results
+          path: results/
+          retention-days: 30
