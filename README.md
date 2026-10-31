@@ -4,13 +4,15 @@ Every day, drivers sit in traffic despite having powerful navigation apps. Those
 
 **What if we could bring some of the collective intelligence of tomorrow's autonomous transportation networks to today's human-driven roads?**
 
-## Latest verified science — Experiments 001–005 (October 30, 2026)
+## Latest verified science — Experiments 001–006 (October 31, 2026)
 
-**Experiment 005 completed successfully:** clock-aligned cooperative policy E, differing from calibrated policy D only in the time bins used to update already-assigned occupancy, reduced high-congestion mean trip duration by **20.13 seconds** relative to D across ten fresh paired seeds (95% seed-level CI **16.74–23.53 seconds**). The 90th-percentile trip duration improved by **50.1 seconds**, all trips completed, and the prespecified policy-specific GO criteria passed. [Full scientific findings](docs/EXPERIMENT_005_CLOCK_ALIGNMENT_RESULTS.md) · [Frozen prospective protocol](docs/POST_EXP004_CLOCK_ALIGNMENT_EXPERIMENT_DESIGN.md) · [Successful GitHub execution](https://github.com/yonnastgetahun/cooperative_traffic_research/actions/runs/41172516513).
+**Experiment 006 executed:** Clock-aligned cooperative policy E **did not demonstrate a network-wide advantage over independent nominal free-flow shortest-path policy A** on ten new paired high-congestion seeds. Mean completed-trip duration A−E was **+0.2429 seconds** (95% seed-level CI **−1.9120 to +2.3978 seconds**), so the primary efficacy result is **INCONCLUSIVE**. E also delayed **27.98% of matched drivers by more than 30 seconds**, violating the frozen **10% severe-individual-harm limit**. Thus the joint network-efficiency/fairness GO criteria were **not met**. All trips completed; structured collision/emergency statistics were zero. [Full scientific report](docs/EXPERIMENT_006_FINAL_SCIENTIFIC_REPORT.md) · [Frozen prospective protocol and execution plan](docs/EXPERIMENT_006_E_VS_A_PROSPECTIVE_PROTOCOL.md) · [Successful GitHub run](https://github.com/yonnastgetahun/cooperative_traffic_research/actions/runs/41185989951).
 
-**Crucial boundary:** The original Experiment 004 calibrated policy D retains its **NO-GO** decision. Experiment 005 demonstrates an improvement **relative to D**, not yet a benefit relative to independently routed vehicles. A paired E-versus-independent-A experiment remains a separate research question. [Post-Experiment 004 mechanism decision](docs/POST_EXP004_MECHANISM_DECISION.md).
+**Experiment 005 remains scientifically supported:** Clock alignment improved E relative to the original calibrated cooperative D policy by **20.13 seconds** in high congestion (95% paired seed-level CI **16.74–23.53s**); E's advantage over D must **not** be described as superiority over independent A. [Experiment 005 results](docs/EXPERIMENT_005_CLOCK_ALIGNMENT_RESULTS.md).
 
-**Historical status note:** The dated M3 operational and development milestones below are preserved as a research chronology. Statements such as "held-out execution remains blocked" describe their **October 26–27 historical snapshot** and are superseded by the completed Experiment 003–005 reports, not the project's current execution status.
+**Original Experiment 004 D retains its NO-GO decision.** The broader research hypothesis remains unresolved. Current next question: understand and mitigate realized individual harm, while retaining collective efficiency, before any new policy is called a success. The existing 200s regime A is an independent **nominal free-flow** shortest-path baseline, **not** a strong modern traffic-aware navigation system.
+
+**Historical status note:** The dated M3 operational and development milestones below are preserved chronologically. Statements about evaluation seeds remaining unrun describe their October 26–27 snapshots and are superseded by the completed Experiment 003–006 reports.
 
 ## Historical research-status archive — October 26–27, 2026
 
