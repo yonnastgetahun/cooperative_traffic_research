@@ -4,6 +4,12 @@ Every day, drivers sit in traffic despite having powerful navigation apps. Those
 
 **What if we could bring some of the collective intelligence of tomorrow's autonomous transportation networks to today's human-driven roads?**
 
+## Scientific direction — back to the broader question (October 31, 2026)
+
+**New foundational synthesis:** [Cooperative Traffic Research — Original Vision, Evidence 001–006, Alternative Coordination Mechanisms, and Quality of Experience](docs/FOUNDATIONAL_SCIENTIFIC_SYNTHESIS_AND_RESEARCH_DIRECTIONS_2026-10-31.md).
+
+The next intellectual step is **not** automatically another fix to routing policy E. The research now compares possible mechanisms—network-externality-aware assignment, voluntary departure/bottleneck timing, traffic-flow smoothing, partial participation and incentives—while preserving the distinction between network-wide travel speed, **predictability and smoothness**, and genuinely perceived traveler quality of experience. No current experiment has measured subjective calmness or validated comfort. **This is a research-direction assessment, not Experiment 007; no new SUMO runs are authorized by it.**
+
 ## Latest verified science — Experiments 001–006 (October 31, 2026)
 
 **Experiment 006 executed:** Clock-aligned cooperative policy E **did not demonstrate a network-wide advantage over independent nominal free-flow shortest-path policy A** on ten new paired high-congestion seeds. Mean completed-trip duration A−E was **+0.2429 seconds** (95% seed-level CI **−1.9120 to +2.3978 seconds**), so the primary efficacy result is **INCONCLUSIVE**. E also delayed **27.98% of matched drivers by more than 30 seconds**, violating the frozen **10% severe-individual-harm limit**. Thus the joint network-efficiency/fairness GO criteria were **not met**. All trips completed; structured collision/emergency statistics were zero. [Full scientific report](docs/EXPERIMENT_006_FINAL_SCIENTIFIC_REPORT.md) · [Frozen prospective protocol and execution plan](docs/EXPERIMENT_006_E_VS_A_PROSPECTIVE_PROTOCOL.md) · [Successful GitHub run](https://github.com/yonnastgetahun/cooperative_traffic_research/actions/runs/41185989951).
