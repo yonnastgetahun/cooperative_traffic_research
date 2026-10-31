@@ -59,3 +59,8 @@ Compute a **30-seed-window C/D matched route-versus-outcome decomposition**, whe
 This will test whether the first example's observed spillover association generalizes and whether route length is a material explanation. It cannot alone establish the causal contribution of the forecast-clock mismatch; only after this read-only analysis should we decide whether a **single** controlled clock-alignment intervention or another discriminating experiment is warranted.
 
 **No new simulations, calibration fitting, policy retuning, or readiness program have been initiated.**
+
+## Full 60-archive C/D decomposition (completed)
+
+The full 60-archive, 30 matched seed-window C/D comparison is now documented in [the archived decomposition results](POST_EXP004_FULL_ARCHIVE_DECOMPOSITION_RESULTS.md). It confirms positive high-congestion D−C delay for both changed- and unchanged-route drivers, nearly identical nominal free-flow route geometry in 98% of changed routes, and greater concentration of assigned vehicles by road edge under D. These are strong descriptive findings, not a proven causal explanation; see the linked report for ten-seed intervals, all 30 seed-level rows, uncertainties, and a single future discriminating clock-alignment test proposal.
+
