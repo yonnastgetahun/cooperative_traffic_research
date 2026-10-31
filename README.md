@@ -4,7 +4,15 @@ Every day, drivers sit in traffic despite having powerful navigation apps. Those
 
 **What if we could bring some of the collective intelligence of tomorrow's autonomous transportation networks to today's human-driven roads?**
 
-## Current research status — October 26, 2026
+## Latest verified science — Experiments 001–005 (October 30, 2026)
+
+**Experiment 005 completed successfully:** clock-aligned cooperative policy E, differing from calibrated policy D only in the time bins used to update already-assigned occupancy, reduced high-congestion mean trip duration by **20.13 seconds** relative to D across ten fresh paired seeds (95% seed-level CI **16.74–23.53 seconds**). The 90th-percentile trip duration improved by **50.1 seconds**, all trips completed, and the prespecified policy-specific GO criteria passed. [Full scientific findings](docs/EXPERIMENT_005_CLOCK_ALIGNMENT_RESULTS.md) · [Frozen prospective protocol](docs/POST_EXP004_CLOCK_ALIGNMENT_EXPERIMENT_DESIGN.md) · [Successful GitHub execution](https://github.com/yonnastgetahun/cooperative_traffic_research/actions/runs/41172516513).
+
+**Crucial boundary:** The original Experiment 004 calibrated policy D retains its **NO-GO** decision. Experiment 005 demonstrates an improvement **relative to D**, not yet a benefit relative to independently routed vehicles. A paired E-versus-independent-A experiment remains a separate research question. [Post-Experiment 004 mechanism decision](docs/POST_EXP004_MECHANISM_DECISION.md).
+
+**Historical status note:** The dated M3 operational and development milestones below are preserved as a research chronology. Statements such as "held-out execution remains blocked" describe their **October 26–27 historical snapshot** and are superseded by the completed Experiment 003–005 reports, not the project's current execution status.
+
+## Historical research-status archive — October 26–27, 2026
 
 **Latest M3 operational review (October 27):** A [read-only safeguards audit](docs/EXPERIMENT_002_M3_OPERATIONAL_READINESS_REVIEW_2026-10-27.md) passed six tests and closed a legacy manually supplied seed pathway that could have accidentally generated reserved evaluation seeds. GitHub returned **HTTP 404 for the protected reviewer environment** and independently confirmed **`main` is not protected**. [Permanent machine-readable evidence](docs/results/exp002_m3_operational_review_2026_10_27/README.md). **Held-out execution remains blocked and no reserved seeds have run.**
 
