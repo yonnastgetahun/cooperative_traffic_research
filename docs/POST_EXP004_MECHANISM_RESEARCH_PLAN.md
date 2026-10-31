@@ -38,6 +38,20 @@ These are future deliverables, not completed results.
 ## Gate before any new simulation
 Do **not** automatically run new seeds, retune calibration, or extend qualification tests. Propose a new controlled experiment only after identifying a discriminating mechanism question, a clean intervention/control comparison, prespecified network outcomes (mean trip time, completion, tail, fairness), and a fresh frozen seed manifest. Keep the policy-D NO-GO intact.
 
+## Approved future research dimensions — scale and network complexity (2026-10-30)
+
+**Decision:** Preserve scale sensitivity as a separate, future scientific investigation **after** the current Experiment 004 archived-mechanism decomposition. This is authorization to document the research direction, **not** authorization to initiate simulations, change frozen experiments, or assign final study parameters.
+
+Three distinct research axes should not be conflated:
+
+1. **Vehicle-demand pressure at fixed network size:** keep the 10×10 network and departure-window definition controlled while changing demand systematically. Investigate whether cooperative routing harm or benefit changes near congestion thresholds. Previously discussed volumes of 750, 1,000, 1,250 and 1,500 vehicles are *illustrative possibilities*, not approved fixed treatment levels. Normalize and report traffic loading, trip distribution, capacity and queues rather than assuming vehicle count alone describes congestion.
+2. **Network scale with controlled demand intensity:** compare network sizes independently of vehicle pressure. Preserve meaningful origin–destination distance distributions, arrival/departure intensity relative to network capacity, and comparable congestion regimes. A hypothetical 20×20 grid with 4,000 vehicles is an illustration, **not** a matched-density design or preapproved experiment.
+3. **Network topology and bottleneck complexity:** consider road hierarchy, capacity asymmetry, junction delays, arterial bottlenecks and limited alternative corridors. A larger uniform grid need not test these effects. Network *complexity* may be more informative than size alone, but this remains a hypothesis.
+
+**Required sequencing:** finish the current 60 C/D raw-archive matched route-change and unchanged-driver spillover analysis across ten seeds and three congestion regimes, synthesize the competing mechanism explanations, and only then decide whether a tightly controlled causal mechanism test or a scale-sensitivity experiment provides the most discriminating evidence. Do not expand the present mechanism phase into a broad new testing/readiness program.
+
+**Scientific evaluation if later designed:** compare the same well-defined routing arms and credible independent baseline, report network-wide mean and tail duration, completion, waiting/queuing, route switches, participant/nonparticipant or matched-driver fairness where applicable, and uncertainty at independent seed level. Do not treat more vehicles on a bigger grid as an automatic congestion-equivalent comparison. Keep voluntary participation, compliance and departure-time coordination as separate future research variables, not additions to the present Exp004 analysis.
+
 ## Scientific boundaries
 This result rejects the **tested calibrated routing policy**, not the general possibility of cooperative traffic improvements. Synthetic advance-demand SUMO results do not establish real-world human participation, departure-time coordination, or autonomous fleet effects.
 
