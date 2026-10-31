@@ -1,0 +1,91 @@
+name: Experiment 005 clock-alignment causal test
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/experiment-005-clock-alignment.yml'
+      - 'experiments/experiment_005/**'
+      - 'docs/POST_EXP004_CLOCK_ALIGNMENT_EXPERIMENT_DESIGN.md'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/experiment-005-clock-alignment.yml'
+      - 'experiments/experiment_005/**'
+      - 'docs/POST_EXP004_CLOCK_ALIGNMENT_EXPERIMENT_DESIGN.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  development-parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        window: [200, 600, 1200]
+    container:
+      image: ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: be2e8d27c78c8b6de4891115d6d951edc877ac6e
+          path: frozen
+      - name: Check replay fixtures and confirm byte-identical original D routes/audits on existing dev data
+        run: |
+          python3 experiments/experiment_005/preflight_v01.py \
+            --window ${{ matrix.window }} --frozen frozen
+  run-fresh-pairs:
+    if: github.event_name != 'pull_request'
+    needs: development-parity
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        seed: [3401,3402,3403,3404,3405,3406,3407,3408,3409,3410]
+        window: [200,600,1200]
+    container:
+      image: ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: be2e8d27c78c8b6de4891115d6d951edc877ac6e
+          path: frozen
+      - name: Execute prespecified two-arm paired comparison
+        run: |
+          python3 experiments/experiment_005/run_pair_v01.py \
+            --seed ${{ matrix.seed }} --window ${{ matrix.window }} \
+            --out exp005-seed-${{ matrix.seed }}-window-${{ matrix.window }} \
+            --frozen frozen
+      - name: Preserve scenario evidence even for failed attempts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp005-seed-${{ matrix.seed }}-window-${{ matrix.window }}
+          path: exp005-seed-${{ matrix.seed }}-window-${{ matrix.window }}/
+          retention-days: 30
+  evaluate:
+    if: github.event_name != 'pull_request' && always()
+    needs: [development-parity, run-fresh-pairs]
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: exp005-seed-*
+          path: evidence
+          merge-multiple: false
+      - name: Require all 30 complete seed/window pairs and calculate frozen seed-level outcomes
+        run: |
+          mkdir -p results
+          python3 experiments/experiment_005/evaluate_pairs_v01.py \
+            --root evidence --out results/exp005-clock-alignment-results.json
+      - name: Preserve result or failure diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp005-clock-alignment-results
+          path: results/
+          retention-days: 30
