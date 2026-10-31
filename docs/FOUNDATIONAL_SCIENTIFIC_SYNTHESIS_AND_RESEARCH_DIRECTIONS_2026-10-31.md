@@ -175,7 +175,7 @@ This remains a scientific hypothesis and research charter, **not an achieved per
 ## External references for context (not evidence from this project)
 
 1. FHWA, [*Traffic Analysis Toolbox XIV: Dynamic Traffic Assignment Fundamentals*](https://ops.fhwa.dot.gov/publications/fhwahop13015/sec2.htm): user vs system optimal objectives, timing and information.
-2. Yamaguchi et al., [*Dynamic system optimal traffic assignment with atomic users: Convergence and stability*](https://www.sciencedirect.com/science/article/pii/S0191261521002071), *Transportation Research Part B* (2022): prospective network-externality mechanisms.
+2. Satsukawa, Wada & Watling, [*Dynamic system optimal traffic assignment with atomic users: Convergence and stability*](https://www.sciencedirect.com/science/article/pii/S0191261521002071), *Transportation Research Part B* (2022): prospective network-externality mechanisms.
 3. Arnott, de Palma & Lindsey, [*Economics of a bottleneck*](https://www.sciencedirect.com/science/article/abs/pii/009411909090028L), *Journal of Urban Economics* (1990): scheduling delay + queuing cost.
 4. Hayat et al., [*Traffic Smoothing Using Explicit Local Controllers*](https://its.berkeley.edu/publications/traffic-smoothing-using-explicit-local-controllers-experimental-evidence-dissipating), *IEEE Control Systems* (2025): control of stop-and-go waves, not a smartphone-routing study.
 5. FHWA, [*Does Travel Time Reliability Matter?*](https://ops.fhwa.dot.gov/publications/fhwahop19062/whatis.htm) and [*Travel Time Reliability: Making It There On Time*](https://ops.fhwa.dot.gov/publications/tt_reliability/ttr_report.htm): reliability distinct from mean speed.
