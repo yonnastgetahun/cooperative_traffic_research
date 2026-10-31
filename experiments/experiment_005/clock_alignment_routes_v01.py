@@ -9,12 +9,11 @@ import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-import sumolib
-
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "experiment_002"))
 sys.path.insert(0, str(ROOT / "experiment_004"))
 import time_aware as policy
+import sumolib
 from prospective_search_adapter_v01 import search as stateful_search
 
 COEFF = {
