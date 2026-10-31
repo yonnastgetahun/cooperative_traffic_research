@@ -1,6 +1,6 @@
 # Post-Experiment 004: Mechanism Investigation Research Plan
 
-**Status:** Prospective plan. No new mechanism established and no new SUMO simulations initiated.
+**Status:** Evidence inventory and 60-archive reanalysis completed; subsequent Experiment 005 frozen two-arm causal test executed. Clock-aligned E receives a relative GO against calibrated D. See [final mechanism decision](POST_EXP004_MECHANISM_DECISION.md) and [Exp005 results](EXPERIMENT_005_CLOCK_ALIGNMENT_RESULTS.md). No independent-routing superiority is yet established.
 
 ## Central question
 Why did independently improved traffic predictions produce worse collective routing decisions in Experiment 004? Under what conditions could coordination improve network-wide outcomes?
