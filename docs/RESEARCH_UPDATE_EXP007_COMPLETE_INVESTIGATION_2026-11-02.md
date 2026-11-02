@@ -2,6 +2,10 @@
 
 **Cooperative Traffic Research | Public research update | November 2, 2026**
 
+![Visual summary: Test A failed, P0–P3 identified a structural estimator limitation, six replays reproduced the results, and the next sequence is develop, independently validate, then Test B.](../social/experiment007/investigation-summary-2026-11-02.svg)
+
+*Visual research map — all figures come from the linked frozen scientific reports; “Test B” remains a proposed future comparison, not a completed experiment.*
+
 **Status:** Test A completed and failed its prospectively frozen progression gate. Post-test forensic investigation P0–P3 completed. Six-run instrumented replay completed and validated. **Test B was not executed.**
 
 ## The question behind this research
