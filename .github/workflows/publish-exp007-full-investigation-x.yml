@@ -9,6 +9,7 @@ on:
     branches: [main]
     paths:
       - "social/experiment007/complete-investigation-x-draft.txt"
+      - ".github/workflows/publish-exp007-full-investigation-x.yml"
 permissions:
   contents: read
 jobs:
