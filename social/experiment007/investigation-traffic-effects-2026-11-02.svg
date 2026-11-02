@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="680" viewBox="0 0 1280 680" role="img" aria-labelledby="title desc">
+<title id="title">Experiment 007: Total additional network time and recorded waiting time</title>
+<desc id="desc">Comparing realized additional network travel time with included waiting-time change in four selected instrumented replay comparisons. Seed 4101 predicted-zero probe: 3177 and 2829 network-seconds; seed 4102 probe0: 2626 and 1357; seed 4102 probe1: 3935 and 3419; seed 4102 two-route bundle: 3572 and 2594. Waiting is a component of trip duration, not added to total.</desc>
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#10263a"/><stop offset="1" stop-color="#1d4054"/></linearGradient>
+<style>text{font-family:Inter,Arial,sans-serif}.title{font-size:36px;font-weight:800;fill:#fff}.sub{font-size:21px;fill:#b9cddd}.label{font-size:23px;font-weight:700;fill:#eff8fd}.num{font-size:23px;font-weight:800;fill:#fff}.legend{font-size:21px;fill:#d8e6ef}</style>
+</defs>
+<rect width="1280" height="680" fill="url(#bg)"/>
+<path d="M0 0H1280" stroke="#70dfca" stroke-width="9"/>
+<text x="58" y="75" class="title">The instrumented replays: added network travel time</text>
+<text x="58" y="115" class="sub">Measured across 1,000 simulated drivers • waiting is included in trip time</text>
+<g fill="#eff8fd" opacity=".10">
+<path d="M425 155V535M610 155V535M795 155V535M980 155V535"/>
+</g>
+<g class="label">
+<text x="56" y="219">4101 · predicted-zero probe</text>
+<text x="56" y="321">4102 · individual probe 0</text>
+<text x="56" y="423">4102 · individual probe 1</text>
+<text x="56" y="525">4102 · two-route bundle</text>
+</g>
+<g>
+<rect x="425" y="185" width="542" height="37" rx="9" fill="#9fc7ef"/><rect x="425" y="185" width="483" height="37" rx="9" fill="#69dac1"/>
+<rect x="425" y="287" width="448" height="37" rx="9" fill="#9fc7ef"/><rect x="425" y="287" width="231" height="37" rx="9" fill="#69dac1"/>
+<rect x="425" y="389" width="672" height="37" rx="9" fill="#9fc7ef"/><rect x="425" y="389" width="583" height="37" rx="9" fill="#69dac1"/>
+<rect x="425" y="491" width="610" height="37" rx="9" fill="#9fc7ef"/><rect x="425" y="491" width="443" height="37" rx="9" fill="#69dac1"/>
+</g>
+<g class="num">
+<text x="985" y="214">+3,177s</text><text x="891" y="316">+2,626s</text><text x="1110" y="418">+3,935s</text><text x="1051" y="520">+3,572s</text>
+</g>
+<rect x="56" y="579" width="22" height="22" rx="5" fill="#69dac1"/>
+<text x="87" y="598" class="legend">Recorded waiting-time change</text>
+<rect x="403" y="579" width="22" height="22" rx="5" fill="#9fc7ef"/>
+<text x="433" y="598" class="legend">Remaining elapsed-time change</text>
+<text x="58" y="645" class="sub">Network-seconds = seconds summed across drivers, not one person's delay.</text>
+</svg>
