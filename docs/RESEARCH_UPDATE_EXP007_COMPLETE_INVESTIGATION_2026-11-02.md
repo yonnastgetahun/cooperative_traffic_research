@@ -91,6 +91,8 @@ The replay reused the original network, 1,000-vehicle demand, route files, simul
 
 **1. Actual road-entry timing diverged substantially from the forecast.** In the examined seed-4102 baseline, one target driver's predicted 30-second road-entry bins disagreed with the observed bins on **11 of 12 route edges**; another target differed on **11 of 13**. These are selected trace diagnostics, not a population-wide timing-accuracy estimate.
 
+![Scientific comparison of extra network journey time and recorded waiting-time change in the four frozen replay contrasts.](../social/experiment007/investigation-traffic-effects-2026-11-02.svg)
+
 **2. Stopped-time waiting was an important observed component of the network effect.** Adding or changing a single planned route produced large differences in actual stopped time across other vehicles. For example:
 
 | Original route intervention versus same-seed baseline | Added total network travel time | Additional recorded waiting time |
