@@ -1,0 +1,105 @@
+name: Preserve six original instrumented replay archives as GitHub research release
+on:
+  pull_request:
+    paths: ['.github/workflows/exp007-sixrun-preserve-release.yml']
+  push:
+    branches: [main]
+    paths: ['.github/workflows/exp007-sixrun-preserve-release.yml']
+permissions:
+  contents: write
+  actions: read
+jobs:
+  preserve-research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 41380998833
+          github-token: ${{ github.token }}
+          name: exp007-probe-4101
+          path: preserved/original/4101
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 41380998833
+          github-token: ${{ github.token }}
+          name: exp007-probe-4102
+          path: preserved/original/4102
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 41518373285
+          github-token: ${{ github.token }}
+          pattern: exp007-instrumented-410*
+          path: preserved/instrumented
+          merge-multiple: false
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 41519190750
+          github-token: ${{ github.token }}
+          name: exp007-sixrun-original-archives-validity-and-mechanism-audit
+          path: preserved/scientific-audit
+      - name: Package immutable original member bytes; compute SHA-256 of every original and six instrumented files
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import csv,hashlib,zipfile
+          source=Path('preserved')
+          release=Path('release-packages');release.mkdir()
+          names=[
+             ('original/4101','exp007-original-4101.zip'),
+             ('original/4102','exp007-original-4102.zip'),
+             ('instrumented/exp007-instrumented-4101-I','exp007-instrumented-4101-I.zip'),
+             ('instrumented/exp007-instrumented-4101-probe2','exp007-instrumented-4101-probe2.zip'),
+             ('instrumented/exp007-instrumented-4102-I','exp007-instrumented-4102-I.zip'),
+             ('instrumented/exp007-instrumented-4102-probe0','exp007-instrumented-4102-probe0.zip'),
+             ('instrumented/exp007-instrumented-4102-probe1','exp007-instrumented-4102-probe1.zip'),
+             ('instrumented/exp007-instrumented-4102-bundle','exp007-instrumented-4102-bundle.zip'),
+             ('scientific-audit','exp007-sixrun-scientific-audit.zip')
+          ]
+          manifest=[]
+          for rel,filename in names:
+              folder=source/rel
+              assert folder.is_dir(),rel
+              members=sorted(p for p in folder.rglob('*') if p.is_file())
+              assert members,(rel,filename)
+              with zipfile.ZipFile(release/filename,'w',zipfile.ZIP_DEFLATED,compresslevel=6) as z:
+                  for f in members:
+                      relative=f.relative_to(folder).as_posix()
+                      bytes_=f.read_bytes()
+                      manifest.append({'bundle':filename,'member':relative,'size':len(bytes_),
+                                       'sha256':hashlib.sha256(bytes_).hexdigest()})
+                      z.write(f,relative)
+              with zipfile.ZipFile(release/filename) as z:
+                  for p in members:
+                      relp=p.relative_to(folder).as_posix()
+                      assert hashlib.sha256(z.read(relp)).hexdigest()==hashlib.sha256(p.read_bytes()).hexdigest()
+          assert sum(1 for _,file in names if file.startswith('exp007-instrumented-'))==6
+          assert len(list((source/'original/4101').rglob('*')))>40
+          with (release/'SHA256_PER_FILE_MANIFEST.csv').open('w',newline='') as f:
+              w=csv.DictWriter(f,fieldnames=('bundle','member','size','sha256'));w.writeheader();w.writerows(manifest)
+          with (release/'SHA256_RELEASE_ASSETS.txt').open('w') as f:
+              for p in sorted(release.glob('*.zip')):
+                  f.write(hashlib.sha256(p.read_bytes()).hexdigest()+'  '+p.name+'\n')
+          print('Research release prepared:', len(names),'ZIP archives,',len(manifest),'per-file hashes')
+          PY
+      - name: Preserve research packages as artifacts for PR validation / failure
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp007-sixrun-packages-validated
+          path: release-packages/SHA256_*
+          retention-days: 30
+      - name: Publish persistent release only after merge (no social publication)
+        if: github.event_name == 'push' && github.run_attempt == 1
+        env:
+          GH_${{ github.token }}: ${{ github.token }}
+        run: |
+          tag="exp007-sixrun-replay-2026-11-02"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "Release already exists. Refusing to duplicate or modify it."
+            exit 1
+          fi
+          gh release create "$tag" release-packages/* \
+            --title "Experiment 007 — Six-Run Instrumented Replay Evidence" \
+            --notes "Six original fixed-route observational SUMO 1.28.0 replays. All G0-G3 physical and historical-equivalence gates passed, original Test A NO-GO unchanged and Test B not run. Includes six FCD/vehroute/edge-lane output archives, two original seed input archives, the scientific audit, and SHA-256 per-file/release manifests. See docs/POST_EXP007_SIX_RUN_INSTRUMENTED_REPLAY_FINAL_SCIENTIFIC_REPORT.md in main. Repackaged ZIP container metadata can differ; original member SHA-256 values are retained."
+          gh release view "$tag" --json url,assets
