@@ -1,0 +1,102 @@
+name: Experiment 007 six frozen instrumented replays (observational only)
+on:
+  pull_request:
+    paths:
+      - "research/replay/exp007_instrumented_v01.py"
+      - ".github/workflows/exp007-sixrun-instrumented-replay.yml"
+  push:
+    branches: [main]
+    paths:
+      - "research/replay/exp007_instrumented_v01.py"
+      - ".github/workflows/exp007-sixrun-instrumented-replay.yml"
+permissions:
+  contents: read
+  actions: read
+jobs:
+  frozen-preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    container:
+      image: ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 41380998833
+          github-token: ${{ github.token }}
+          pattern: exp007-probe-410*
+          path: original
+          merge-multiple: false
+      - name: G0/G1 read-only hash, route, SUMO pinned option preflight
+        run: |
+          mkdir -p checks
+          python3 research/replay/exp007_instrumented_v01.py preflight --root original --out checks/frozen-preflight.json
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp007-instrumented-preflight
+          path: checks/
+          retention-days: 30
+  exact-replays:
+    if: github.event_name == 'push'
+    needs: frozen-preflight
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {seed: 4101, arm: "I"}
+          - {seed: 4101, arm: "probe2"}
+          - {seed: 4102, arm: "I"}
+          - {seed: 4102, arm: "probe0"}
+          - {seed: 4102, arm: "probe1"}
+          - {seed: 4102, arm: "bundle"}
+    container:
+      image: ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 41380998833
+          github-token: ${{ github.token }}
+          name: exp007-probe-${{ matrix.seed }}
+          path: original
+      - name: Passive replay with original SHA-checked routes and G2 equivalence
+        run: |
+          python3 research/replay/exp007_instrumented_v01.py replay --source original --seed ${{ matrix.seed }} --arm ${{ matrix.arm }} --out replay-${{ matrix.seed }}-${{ matrix.arm }}
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp007-instrumented-${{ matrix.seed }}-${{ matrix.arm }}
+          path: replay-${{ matrix.seed }}-${{ matrix.arm }}/
+          retention-days: 30
+  mechanism-audit:
+    needs: exact-replays
+    if: github.event_name == 'push' && always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 41380998833
+          github-token: ${{ github.token }}
+          pattern: exp007-probe-410*
+          path: original
+          merge-multiple: false
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: exp007-instrumented-*
+          path: replays
+          merge-multiple: false
+      - name: Evaluate G2/G3, bundle network interaction and edge-time measurements
+        run: |
+          mkdir -p summary
+          python3 research/replay/exp007_instrumented_v01.py aggregate --source original --root replays --out summary
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp007-sixrun-mechanism-scientific-evaluation
+          path: summary/
+          retention-days: 30
