@@ -1,0 +1,43 @@
+name: Publish Experiment 005 and 006 scientific findings to X
+on:
+  pull_request:
+    paths:
+      - "social/experiment005006-x-post.txt"
+      - "social/publish_experiment005006_x.py"
+      - ".github/workflows/publish-exp005006-x.yml"
+  push:
+    branches: [main]
+    paths:
+      - "social/experiment005006-x-post.txt"
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate frozen X post copy
+        run: |
+          python3 - <<'PY'
+          import pathlib,ast
+          path=pathlib.Path("social/experiment005006-x-post.txt")
+          text=path.read_text().strip()
+          assert 1<=len(text)<=280, f"X text length {len(text)}"
+          ast.parse(pathlib.Path("social/publish_experiment005006_x.py").read_text())
+          print(f"Post text validated: {len(text)} characters")
+          PY
+  publish:
+    needs: validate
+    if: github.event_name == 'push' && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install existing X publisher dependency
+        run: python3 -m pip install --disable-pip-version-check requests-oauthlib
+      - name: Publish approved X research update exactly once on merge
+        env:
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
+        run: python3 social/publish_experiment005006_x.py
