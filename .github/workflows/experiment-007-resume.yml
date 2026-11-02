@@ -1,0 +1,86 @@
+name: Experiment 007 resume frozen aggregation and conditional Test B
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/experiment-007-resume.yml']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  probe-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    container:
+      image: ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb
+    outputs:
+      proceed: ${{ steps.gate.outputs.proceed }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 41380998833
+          github-token: ${{ github.token }}
+          pattern: exp007-probe-*
+          path: evidence
+          merge-multiple: false
+      - id: gate
+        name: Analyze only original frozen Test A simulation archives
+        run: |
+          mkdir -p result
+          python3 experiments/experiment_007/run_v01.py aggregate-a --root evidence --out result/exp007-test-a-results.json --gate result/proceed.txt
+          echo "proceed=$(cat result/proceed.txt)" >> "$GITHUB_OUTPUT"
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp007-original-test-a-scientific-evaluation
+          path: result/
+          retention-days: 30
+  policy:
+    needs: probe-gate
+    if: needs.probe-gate.outputs.proceed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        seed: [4201,4202,4203,4204,4205,4206,4207,4208,4209,4210]
+    container:
+      image: ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: be2e8d27c78c8b6de4891115d6d951edc877ac6e
+          path: scientific
+      - name: Fresh-seed Test B I/S policy comparison (only if frozen Test A gate passes)
+        run: python3 experiments/experiment_007/run_v01.py policy --seed ${{ matrix.seed }} --out exp007-policy-${{ matrix.seed }} --scientific scientific
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp007-policy-${{ matrix.seed }}
+          path: exp007-policy-${{ matrix.seed }}/
+          retention-days: 30
+  evaluate-policy:
+    needs: policy
+    if: always() && needs.policy.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    container:
+      image: ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: exp007-policy-*
+          path: evidence
+          merge-multiple: false
+      - name: Independent-seed efficacy and fairness evaluation
+        run: |
+          mkdir -p result
+          python3 experiments/experiment_007/run_v01.py aggregate-b --root evidence --out result/exp007-test-b-results.json
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp007-test-b-scientific-evaluation
+          path: result/
+          retention-days: 30
