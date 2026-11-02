@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="810" viewBox="0 0 1440 810" role="img" aria-labelledby="title desc">
+<title id="title">Experiment 007: What we tested, discovered, and what comes next</title>
+<desc id="desc">Cooperative Traffic Research milestone summary: Test A direction agreement 8 of 20 (40%) versus predeclared 60% gate; P0 through P3 found structural externality proxy limitation; six instrumented replay arms reproduced original trip outcomes exactly; next: build estimator, validate on unseen simulations, conduct Test B only on success.</desc>
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0a1b2e"/><stop offset="1" stop-color="#132f47"/></linearGradient>
+  <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#69dcc0"/><stop offset="1" stop-color="#8cb8ff"/></linearGradient>
+  <style>text{font-family:Inter,Arial,sans-serif}.eyebrow{font-size:20px;font-weight:700;letter-spacing:2px;fill:#82e8d0}.heading{font-size:52px;font-weight:750;fill:#f7fbff}.sub{font-size:24px;fill:#b8cada}.label{font-size:20px;font-weight:700;fill:#a9c2d5}.number{font-size:65px;font-weight:800;fill:#f5fafc}.cardhead{font-size:27px;font-weight:800;fill:#f9fcff}.body{font-size:21px;fill:#d0dce8}.small{font-size:19px;fill:#a8bacb}</style>
+</defs>
+<rect width="1440" height="810" fill="url(#bg)"/>
+<path d="M0 0H1440" stroke="url(#accent)" stroke-width="12"/>
+<g opacity=".10" stroke="#aed8ec" stroke-width="2">
+<path d="M1080 60H1390M1080 120H1390M1080 180H1390M1080 240H1390M1080 300H1390"/>
+<path d="M1105 40V318M1175 40V318M1245 40V318M1315 40V318M1385 40V318"/>
+</g>
+<text x="72" y="68" class="eyebrow">COOPERATIVE TRAFFIC RESEARCH  /  EXPERIMENT 007</text>
+<text x="72" y="138" class="heading">The failed prediction—and what we learned</text>
+<text x="72" y="183" class="sub">Three investigation stages. One unchanged research question.</text>
+<rect x="70" y="235" width="404" height="275" rx="22" fill="#17334b" stroke="#3d5c70" stroke-width="2"/>
+<rect x="70" y="235" width="404" height="8" rx="4" fill="#f2a57b"/>
+<text x="100" y="282" class="label">TEST A  /  ORIGINAL EXPERIMENT</text>
+<text x="99" y="369" class="number">8/20</text>
+<text x="101" y="409" class="body">Correct predicted direction</text>
+<text x="101" y="442" class="body">40% vs 60% required</text>
+<text x="101" y="476" style="font-size:20px;font-weight:800;fill:#ffab89">NO-GO  •  TEST B STOPPED</text>
+<rect x="516" y="235" width="404" height="275" rx="22" fill="#17334b" stroke="#3d5c70" stroke-width="2"/>
+<rect x="516" y="235" width="404" height="8" rx="4" fill="#92bee8"/>
+<text x="546" y="282" class="label">P0–P3  /  FORENSIC INVESTIGATION</text>
+<text x="546" y="352" class="cardhead">A structural blind spot</text>
+<text x="546" y="394" class="body">For 20 equal-free-flow swaps,</text>
+<text x="546" y="427" class="body">predicted externality mirrored</text>
+<text x="546" y="460" class="body">predicted own-driver cost.</text>
+<rect x="961" y="235" width="409" height="275" rx="22" fill="#17334b" stroke="#3d5c70" stroke-width="2"/>
+<rect x="961" y="235" width="409" height="8" rx="4" fill="#68dbc0"/>
+<text x="991" y="282" class="label">SIX-RUN INSTRUMENTED REPLAY</text>
+<text x="989" y="370" class="number">6/6</text>
+<text x="991" y="411" class="body">Original outcomes reproduced</text>
+<text x="991" y="445" class="body">Timing, waiting, and coupled</text>
+<text x="991" y="476" class="body">traffic effects observed.</text>
+<text x="72" y="572" style="font-size:25px;font-weight:800;fill:#f7fbff">THE NEXT SCIENTIFIC SEQUENCE</text>
+<g>
+<rect x="70" y="599" width="396" height="129" rx="20" fill="#214f62"/>
+<text x="100" y="644" style="font-size:31px;font-weight:800;fill:#91f1d8">01  DEVELOP</text>
+<text x="100" y="684" class="body">Junction/queue-aware estimator</text>
+<path d="M476 664h24m-9-10l10 10-10 10" fill="none" stroke="#8fe5d5" stroke-width="4" stroke-linecap="round"/>
+<rect x="514" y="599" width="396" height="129" rx="20" fill="#214f62"/>
+<text x="544" y="644" style="font-size:31px;font-weight:800;fill:#91f1d8">02  VALIDATE</text>
+<text x="544" y="684" class="body">Fresh unseen traffic scenarios</text>
+<path d="M920 664h24m-9-10l10 10-10 10" fill="none" stroke="#8fe5d5" stroke-width="4" stroke-linecap="round"/>
+<rect x="958" y="599" width="411" height="129" rx="20" fill="#214f62"/>
+<text x="988" y="644" style="font-size:31px;font-weight:800;fill:#91f1d8">03  TEST B</text>
+<text x="988" y="682" class="body">Collective gain + individual fairness</text>
+</g>
+<text x="72" y="774" class="small">Synthetic SUMO network  •  No proven cooperative optimization advantage yet  •  GitHub: cooperative_traffic_research</text>
+</svg>
