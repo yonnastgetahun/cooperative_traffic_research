@@ -4,11 +4,15 @@ Every day, drivers sit in traffic despite having powerful navigation apps. Those
 
 **What if we could bring some of the collective intelligence of tomorrow's autonomous transportation networks to today's human-driven roads?**
 
-## Scientific direction — back to the broader question (October 31, 2026)
+## Scientific direction — mechanism efficacy first; experience later (November 1, 2026)
 
-**New foundational synthesis:** [Cooperative Traffic Research — Original Vision, Evidence 001–006, Alternative Coordination Mechanisms, and Quality of Experience](docs/FOUNDATIONAL_SCIENTIFIC_SYNTHESIS_AND_RESEARCH_DIRECTIONS_2026-10-31.md).
+[Foundational Scientific Synthesis & Research-Direction Assessment](docs/FOUNDATIONAL_SCIENTIFIC_SYNTHESIS_AND_RESEARCH_DIRECTIONS_2026-10-31.md) — updated sequencing decision:
 
-The next intellectual step is **not** automatically another fix to routing policy E. The research now compares possible mechanisms—network-externality-aware assignment, voluntary departure/bottleneck timing, traffic-flow smoothing, partial participation and incentives—while preserving the distinction between network-wide travel speed, **predictability and smoothness**, and genuinely perceived traveler quality of experience. No current experiment has measured subjective calmness or validated comfort. **This is a research-direction assessment, not Experiment 007; no new SUMO runs are authorized by it.**
+1. **Now:** Establish when and how distinct coordination mechanisms (system-optimal route assignment, voluntary departure/bottleneck timing, traffic-flow control) improve network performance against credible independent baselines.
+2. **Alongside that:** Continue measuring individual fairness, severe realized delays, consent/participation assumptions and spillover effects.
+3. **Later:** Consider quality of experience (comfort, calmness and perceived journey quality). These outcomes are **not active experiment objectives** and have not been measured by our SUMO studies. [Deferred exploration notes](docs/DEFERRED_QUALITY_OF_EXPERIENCE_RESEARCH_NOTES.md).
+
+**Experiment 007 has not been selected or launched.** The immediate direction is a bounded comparison of coordination mechanisms, not another automatic refinement of policy E or a quality-of-experience measurement program.
 
 ## Latest verified science — Experiments 001–006 (October 31, 2026)
 
