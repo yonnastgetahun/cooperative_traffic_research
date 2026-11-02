@@ -1,4 +1,4 @@
-name: Publish Experiment 005 and 006 scientific findings to X
+name: Publish Experiment 003–006 four-image research update to X
 on:
   pull_request:
     paths:
@@ -16,15 +16,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Validate frozen X post copy
+      - name: Install asset-validation dependencies
+        run: python3 -m pip install --disable-pip-version-check Pillow requests-oauthlib
+      - name: Verify all four PNGs before allowing publication
         run: |
           python3 - <<'PY'
-          import pathlib,ast
-          path=pathlib.Path("social/experiment005006-x-post.txt")
-          text=path.read_text().strip()
-          assert 1<=len(text)<=280, f"X text length {len(text)}"
-          ast.parse(pathlib.Path("social/publish_experiment005006_x.py").read_text())
-          print(f"Post text validated: {len(text)} characters")
+          import ast,pathlib
+          from social.publish_experiment005006_x import fetch_images
+          text=pathlib.Path("social/experiment005006-x-post.txt").read_text().strip()
+          assert 1<=len(text)<=280
+          assert "RESEARCH_UPDATE_EXPERIMENTS_003_TO_006.md" in text
+          assert len(fetch_images())==4
+          print("PASS: 4 verified image assets and one approved landing link")
           PY
   publish:
     needs: validate
@@ -32,9 +35,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install existing X publisher dependency
-        run: python3 -m pip install --disable-pip-version-check requests-oauthlib
-      - name: Publish approved X research update exactly once on merge
+      - name: Install X uploader dependencies
+        run: python3 -m pip install --disable-pip-version-check Pillow requests-oauthlib
+      - name: Publish ONLY after all four media IDs have been obtained
         env:
           X_API_KEY: ${{ secrets.X_API_KEY }}
           X_API_SECRET: ${{ secrets.X_API_SECRET }}
