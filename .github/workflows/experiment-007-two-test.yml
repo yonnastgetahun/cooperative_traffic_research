@@ -1,0 +1,128 @@
+name: Experiment 007 two-test frozen scientific execution
+on:
+  pull_request:
+    paths: ['experiments/experiment_007/**', '.github/workflows/experiment-007-two-test.yml']
+  push:
+    branches: [main]
+    paths: ['experiments/experiment_007/**', '.github/workflows/experiment-007-two-test.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  development:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    container:
+      image: ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: be2e8d27c78c8b6de4891115d6d951edc877ac6e
+          path: scientific
+      - name: Development-only equal-information, route integrity and clock checks (seed 2101)
+        run: python3 experiments/experiment_007/run_v01.py dev --out exp007-development --scientific scientific
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp007-development
+          path: exp007-development/
+          retention-days: 30
+  probe:
+    if: github.event_name != 'pull_request'
+    needs: development
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        seed: [4101,4102,4103,4104,4105]
+    container:
+      image: ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: be2e8d27c78c8b6de4891115d6d951edc877ac6e
+          path: scientific
+      - name: Run frozen six-arm marginal perturbation probe
+        run: python3 experiments/experiment_007/run_v01.py probe --seed ${{ matrix.seed }} --out exp007-probe-${{ matrix.seed }} --scientific scientific
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp007-probe-${{ matrix.seed }}
+          path: exp007-probe-${{ matrix.seed }}/
+          retention-days: 30
+  probe-gate:
+    if: github.event_name != 'pull_request' && always() && needs.probe.result == 'success'
+    needs: probe
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      proceed: ${{ steps.gate.outputs.proceed }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: exp007-probe-*
+          path: evidence
+          merge-multiple: false
+      - name: Frozen Test A scientific gate
+        id: gate
+        run: |
+          mkdir -p result
+          python3 experiments/experiment_007/run_v01.py aggregate-a --root evidence --out result/exp007-test-a-results.json --gate result/proceed.txt
+          echo "proceed=$(cat result/proceed.txt)" >> "$GITHUB_OUTPUT"
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp007-test-a-evaluation
+          path: result/
+          retention-days: 30
+  policy:
+    if: github.event_name != 'pull_request' && needs.probe-gate.outputs.proceed == 'true'
+    needs: probe-gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        seed: [4201,4202,4203,4204,4205,4206,4207,4208,4209,4210]
+    container:
+      image: ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: be2e8d27c78c8b6de4891115d6d951edc877ac6e
+          path: scientific
+      - name: Execute frozen I/S matched seed and fairness comparison
+        run: python3 experiments/experiment_007/run_v01.py policy --seed ${{ matrix.seed }} --out exp007-policy-${{ matrix.seed }} --scientific scientific
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp007-policy-${{ matrix.seed }}
+          path: exp007-policy-${{ matrix.seed }}/
+          retention-days: 30
+  evaluate-policy:
+    if: github.event_name != 'pull_request' && always() && needs.policy.result == 'success'
+    needs: policy
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: exp007-policy-*
+          path: evidence
+          merge-multiple: false
+      - name: Aggregate frozen independent-seed efficacy and realized fairness
+        run: |
+          mkdir -p result
+          python3 experiments/experiment_007/run_v01.py aggregate-b --root evidence --out result/exp007-test-b-results.json
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp007-test-b-evaluation
+          path: result/
+          retention-days: 30
