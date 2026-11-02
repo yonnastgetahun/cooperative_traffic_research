@@ -1,0 +1,7 @@
+seed,arm,G0_G1,G2,G3,max_trip_field_abs_error_s,total_network_elapsed_delta_s,completed_duration_delta_s,insertion_delay_delta_s,waiting_time_delta_s,FCD_vehicle_time_samples,FCD_nearstop_vehicle_samples,nearstop_samples_delta_vs_baseline,completed_driver_count
+4101,I,PASS,PASS,PASS,0,0,0,0,0,203716,47779,0,1000
+4101,probe2,PASS,PASS,PASS,0,3177,3129,48,2829,206845,50583,2804,1000
+4102,I,PASS,PASS,PASS,0,0,0,0,0,211536,51867,0,1000
+4102,probe0,PASS,PASS,PASS,0,2626,2634,-8,1357,214170,53229,1362,1000
+4102,probe1,PASS,PASS,PASS,0,3935,3947,-12,3419,215483,55296,3429,1000
+4102,bundle,PASS,PASS,PASS,0,3572,3596,-24,2594,215132,54472,2605,1000

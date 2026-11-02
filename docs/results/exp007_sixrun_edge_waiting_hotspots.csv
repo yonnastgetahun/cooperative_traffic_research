@@ -1,0 +1,7 @@
+seed,arm,edge,signed_waiting_diff_sum_s,absolute_waiting_diff_sum_s,first_ge10s_waiting_diff_5s_interval,peak_absolute_waiting_diff_5s_interval,measurement
+4101,probe2,D5E5,1307,1583,190,320,edgeData_5s
+4102,probe0,C4C3,903,1101,250,305,edgeData_5s
+4102,probe1,D6C6,-1431,1699,165,400,edgeData_5s
+4102,probe1,E6E5,1619,1633,210,315,edgeData_5s
+4102,bundle,D6C6,-2107,2131,165,330,edgeData_5s
+4102,bundle,D3E3,1464,1748,200,380,edgeData_5s
