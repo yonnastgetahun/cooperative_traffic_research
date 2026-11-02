@@ -2,12 +2,12 @@ name: Experiment 007 six frozen instrumented replays (observational only)
 on:
   pull_request:
     paths:
-      - "experiments/experiment_007/instrumented_replay_v01.py"
+      - "research/replay/exp007_instrumented_v01.py"
       - ".github/workflows/exp007-sixrun-instrumented-replay.yml"
   push:
     branches: [main]
     paths:
-      - "experiments/experiment_007/instrumented_replay_v01.py"
+      - "research/replay/exp007_instrumented_v01.py"
       - ".github/workflows/exp007-sixrun-instrumented-replay.yml"
 permissions:
   contents: read
@@ -30,7 +30,7 @@ jobs:
       - name: G0/G1 read-only hash, route, SUMO pinned option preflight
         run: |
           mkdir -p checks
-          python3 experiments/experiment_007/instrumented_replay_v01.py preflight --root original --out checks/frozen-preflight.json
+          python3 research/replay/exp007_instrumented_v01.py preflight --root original --out checks/frozen-preflight.json
       - if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -64,7 +64,7 @@ jobs:
           path: original
       - name: Passive replay with original SHA-checked routes and G2 equivalence
         run: |
-          python3 experiments/experiment_007/instrumented_replay_v01.py replay --source original --seed ${{ matrix.seed }} --arm ${{ matrix.arm }} --out replay-${{ matrix.seed }}-${{ matrix.arm }}
+          python3 research/replay/exp007_instrumented_v01.py replay --source original --seed ${{ matrix.seed }} --arm ${{ matrix.arm }} --out replay-${{ matrix.seed }}-${{ matrix.arm }}
       - if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -93,7 +93,7 @@ jobs:
       - name: Evaluate G2/G3, bundle network interaction and edge-time measurements
         run: |
           mkdir -p summary
-          python3 experiments/experiment_007/instrumented_replay_v01.py aggregate --source original --root replays --out summary
+          python3 research/replay/exp007_instrumented_v01.py aggregate --source original --root replays --out summary
       - if: always()
         uses: actions/upload-artifact@v4
         with:
