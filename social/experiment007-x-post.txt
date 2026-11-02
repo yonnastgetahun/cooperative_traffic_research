@@ -1,0 +1,5 @@
+Exp 007: 30 SUMO runs. Forecasts got 8/20 network-effect directions right (40% vs 60% gate). Test B stopped. NO-GO for this model, not cooperation.
+
+https://github.com/yonnastgetahun/cooperative_traffic_research/blob/main/docs/RESEARCH_UPDATE_EXPERIMENT_007_TEST_A.md
+
+#AI #BuildInPublic #AIResearch #AIStartups #MultiAgentSystems #ProductManagement #OpenSource
