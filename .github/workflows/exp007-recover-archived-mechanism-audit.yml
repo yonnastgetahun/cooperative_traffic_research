@@ -1,0 +1,47 @@
+name: Experiment 007 six-run archived-mechanism evaluation (no simulations)
+on:
+  pull_request:
+    paths: ['.github/workflows/exp007-recover-archived-mechanism-audit.yml']
+  push:
+    branches: [main]
+    paths: ['.github/workflows/exp007-recover-archived-mechanism-audit.yml']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  audit-original-six:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 41380998833
+          github-token: ${{ github.token }}
+          pattern: exp007-probe-410*
+          path: original
+          merge-multiple: false
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 41518373285
+          github-token: ${{ github.token }}
+          pattern: exp007-instrumented-410*
+          path: replays
+          merge-multiple: false
+      - name: Reconcile artifact naming without editing any original evidence
+        run: |
+          cd replays
+          for name in 4101-I 4101-probe2 4102-I 4102-probe0 4102-probe1 4102-bundle; do
+            test -f "exp007-instrumented-$name/attempt.json"
+            ln -s "exp007-instrumented-$name" "replay-$name"
+          done
+      - name: Verify original-outcome equivalence, FCD coverage, and frozen bundle interaction
+        run: |
+          mkdir -p analysis
+          python3 research/replay/exp007_instrumented_v01.py aggregate --source original --root replays --out analysis
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp007-sixrun-original-archives-validity-and-mechanism-audit
+          path: analysis/
+          retention-days: 30
