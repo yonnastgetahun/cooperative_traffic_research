@@ -1,0 +1,6 @@
+seed,predicted_bundle_network_s,realized_bundle_network_s,isolated_predicted_total_sum_network_s,isolated_realized_total_sum_network_s,predicted_interaction_network_s,realized_interaction_network_s
+4101,24.838013,617,24.838013,399,0,218
+4102,24.838013,3572,24.838013,6561,0,-2989
+4103,20.518359,-1490,20.518359,1182,0,-2672
+4104,21.598272,-4118,23.758099,-2188,-2.159827,-1930
+4105,18.358531,979,18.358531,2481,0,-1502
