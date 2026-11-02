@@ -6,6 +6,8 @@
 
 *Visual research map — all figures come from the linked frozen scientific reports; “Test B” remains a proposed future comparison, not a completed experiment.*
 
+**[View the corrected full investigation infographic](https://at.adobe.com/8sTduNQcFAJqMweq)** — 1536 × 1024 image, revised to state the estimator identity only for the 20 tested equal-free-flow swaps, correctly attribute elapsed network time to **all** drivers, and distinguish candidate mechanisms from demonstrated causes.
+
 **Status:** Test A completed and failed its prospectively frozen progression gate. Post-test forensic investigation P0–P3 completed. Six-run instrumented replay completed and validated. **Test B was not executed.**
 
 ## The question behind this research
