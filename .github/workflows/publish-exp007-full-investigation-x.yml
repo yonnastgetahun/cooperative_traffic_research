@@ -21,7 +21,7 @@ jobs:
       - name: Verify exact approved X caption, four full-investigation PNGs and matching SHA256
         run: |
           python3 - <<'PY'
-          from social.publish_experiment007_x import approved_caption,fetch_images
+          from social.publish_exp007_full_investigation_x import approved_caption,fetch_images
           approved_caption()
           assert len(fetch_images())==4
           print("PASS: approved caption and four byte-verified PNGs")
