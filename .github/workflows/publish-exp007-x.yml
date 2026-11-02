@@ -1,0 +1,43 @@
+name: Publish Experiment 007 approved four-image update to X
+on:
+  pull_request:
+    paths:
+      - "social/experiment007-x-post.txt"
+      - "social/publish_experiment007_x.py"
+      - ".github/workflows/publish-exp007-x.yml"
+  push:
+    branches: [main]
+    paths:
+      - "social/experiment007-x-post.txt"
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install media-validation dependencies
+        run: python3 -m pip install --disable-pip-version-check Pillow requests-oauthlib
+      - name: Validate approved caption, four original PNGs and matching SHA256
+        run: |
+          python3 - <<'PY'
+          from social.publish_experiment007_x import approved_caption,fetch_images
+          approved_caption()
+          assert len(fetch_images())==4
+          print("PASS: approved caption and four byte-verified PNGs")
+          PY
+  publish:
+    needs: validate
+    if: github.event_name == 'push' && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install existing X uploader dependencies
+        run: python3 -m pip install --disable-pip-version-check Pillow requests-oauthlib
+      - name: Publish only with all four verified original images
+        env:
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
+        run: python3 social/publish_experiment007_x.py
