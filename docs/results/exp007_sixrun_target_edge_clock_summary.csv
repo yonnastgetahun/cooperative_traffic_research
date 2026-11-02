@@ -1,0 +1,9 @@
+seed,arm,vehicle,route_edges,forecast_30s_bin_disagreements,mean_abs_forecast_entry_error_seconds,method
+4101,I,veh0000,6,2,11.1,first_FCD_external_edge_sample_vs_frozen_footprint
+4101,probe2,veh0000,6,2,12.3,first_FCD_external_edge_sample_vs_frozen_footprint
+4102,I,veh0582,12,11,109.9,first_FCD_external_edge_sample_vs_frozen_footprint
+4102,probe0,veh0582,12,7,24.9,first_FCD_external_edge_sample_vs_frozen_footprint
+4102,I,veh0158,13,11,58.4,first_FCD_external_edge_sample_vs_frozen_footprint
+4102,probe1,veh0158,13,11,49.5,first_FCD_external_edge_sample_vs_frozen_footprint
+4102,bundle,veh0582,12,5,17.4,first_FCD_external_edge_sample_vs_frozen_footprint
+4102,bundle,veh0158,13,11,40.4,first_FCD_external_edge_sample_vs_frozen_footprint
