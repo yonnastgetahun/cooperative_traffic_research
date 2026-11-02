@@ -1,0 +1,41 @@
+name: Experiment 007 post-Test A P0-P3 archive investigation (no SUMO)
+
+on:
+  pull_request:
+    paths:
+      - 'research/audits/exp007_p0_p3_audit.py'
+      - '.github/workflows/exp007-p0-p3-archive-audit.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'research/audits/exp007_p0_p3_audit.py'
+      - '.github/workflows/exp007-p0-p3-archive-audit.yml'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  archival-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Retrieve only original frozen Experiment 007 probe archives (30 completed simulations)
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 41380998833
+          github-token: ${{ github.token }}
+          pattern: exp007-probe-*
+          path: evidence
+          merge-multiple: false
+      - name: Reconstruct P0-P3 with standard-library Python, no SUMO execution
+        run: |
+          python3 research/audits/exp007_p0_p3_audit.py --root evidence --out audit
+      - name: Preserve reproducible archival analysis (including mismatched failures)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp007-p0-p3-archive-audit
+          path: audit/
+          retention-days: 30
