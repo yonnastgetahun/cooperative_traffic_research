@@ -1,7 +1,3 @@
-Better predictions. Worse traffic.
+We fixed a routing flaw: 20.13s faster vs the original policy. But no proven gain vs independent routing, and 27.98% of drivers lost >30s.
 
-We fixed a routing clock mismatch: trips were 20.13s faster vs the flawed policy (Exp 005).
-
-But vs independent routing (Exp 006), benefit was inconclusive; 27.98% had >30s longer trips.
-
-github.com/yonnastgetahun/cooperative_traffic_research
+Research: https://github.com/yonnastgetahun/cooperative_traffic_research/blob/main/docs/RESEARCH_UPDATE_EXPERIMENTS_003_TO_006.md
