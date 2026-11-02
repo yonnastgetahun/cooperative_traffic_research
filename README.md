@@ -4,6 +4,12 @@ Every day, drivers sit in traffic despite having powerful navigation apps. Those
 
 **What if we could bring some of the collective intelligence of tomorrow's autonomous transportation networks to today's human-driven roads?**
 
+## Start here: Latest public research update (Experiments 003–006)
+
+**[We corrected a consequential routing flaw. But cooperation still didn't win.](docs/RESEARCH_UPDATE_EXPERIMENTS_003_TO_006.md)**
+
+A concise, reader-friendly account of prediction improvements, the unexpected routing failure, its clock-alignment correction, and the inconclusive independent-routing comparison with severe individual harms. This is the **one destination linked from the LinkedIn and X research announcement**, with the frozen reports and original runs linked inside.
+
 ## Scientific direction — mechanism efficacy first; experience later (November 1, 2026)
 
 [Foundational Scientific Synthesis & Research-Direction Assessment](docs/FOUNDATIONAL_SCIENTIFIC_SYNTHESIS_AND_RESEARCH_DIRECTIONS_2026-10-31.md) — updated sequencing decision:
