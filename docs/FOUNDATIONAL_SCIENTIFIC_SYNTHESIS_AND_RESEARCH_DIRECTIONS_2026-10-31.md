@@ -2,17 +2,17 @@
 
 **Date:** 2026-10-31  
 **Status:** Research synthesis and prospective direction assessment; **not a new experiment, algorithm specification, study freeze, or simulation authorization**.  
-**Scope:** Return to the original question after Experiments 001–006, compare distinct forms of cooperation, and introduce **quality of journey experience alongside speed** as a first-class future research dimension. Preserve completed negative and positive findings.
+**Scope (updated November 1, 2026):** Return to the original question after Experiments 001–006 and compare fundamentally different coordination mechanisms for **network-wide traffic efficiency**. Assess individual fairness and realized harm alongside network outcomes. **Defer quality-of-experience research** until coordination efficacy is better established; preserve it separately without making it an active experimental objective.
 
 ## Executive scientific position
 
-**Overarching question:** *Can voluntary, information-enabled coordination among human drivers produce a transportation network that works better for the collective while delivering an acceptable, perhaps smoother and more predictable, experience for individuals? Under what traffic, network and behavioral conditions is that possible?*
+**Current overarching question:** *Under what congestion, network, and participation conditions—and through which mechanisms—can voluntary coordination improve total traffic-system efficiency compared with credible independent routing, while keeping individual burdens measurable and reasonably bounded?*
 
 The motivating **future scenario**, discussed in the original project conversations, imagines a transportation system with widespread self-driving vehicles benefiting from common awareness and possible coordination. Working backward asks whether a portion of those benefits could be captured by human-driven vehicles through smartphones, shared intentions and voluntary coordination. **This is a research premise, not evidence that autonomous vehicles automatically coordinate, or that present navigation services do no coordination.**
 
 **Current conclusion:** Experiments 001–006 do **not** establish a cooperative system that is both faster network-wide and acceptably fair relative to the original independent routing comparator. They **do** show that predictive accuracy, policy objectives, assignment clocks and traffic interactions are scientifically distinct, and that nominal detour constraints are a poor stand-in for realized harm. The negative Experiment 006 outcome should broaden our inquiry, **not automatically trigger another version of policy E**.
 
-**Important new question:** A journey may be slightly slower yet more predictable, less stop-and-go, less taxing, and more acceptable. Conversely, a small average speed improvement may hide uncomfortable volatility, serious surprise delays, or sacrifices falling on nonparticipants. **Speed, total travel time, perceived quality and fair distribution are not equivalent outcomes.** We must not infer perceived calmness or satisfaction from current SUMO travel-time records.
+**Sequencing decision (November 1, 2026):** First determine whether and when *different coordination mechanisms* improve aggregate traffic outcomes. **Fairness and the distribution of realized harm remain active safeguards.** Quality of experience, comfort and subjective calmness are important but explicitly **deferred**, not a current reason to select, design or evaluate the next experiment. Original ideas are archived in [deferred QoE notes](DEFERRED_QUALITY_OF_EXPERIENCE_RESEARCH_NOTES.md).
 
 ## 1. Original vision and historical propositions
 
@@ -59,9 +59,9 @@ The [read-only archive review](EXPERIMENT_006_ARCHIVED_SEVERE_HARM_MECHANISM_ANA
 |---|---|---|
 | **Mechanism: what is coordinated?** | Route, departure, bottleneck-entry timing, speed/flow, shared information, incentives | System-optimal route assignment; voluntary time shifting; flow smoothing |
 | **Conditions: when and for whom?** | Congestion severity, network size/geometry, topology, percent participating, compliance, information quality, uncertainty, heterogeneous trip constraints | 200/600/1200s demand windows; 5–50% opt-in; arterial chokepoints; imperfect demand |
-| **Objectives: what is a better outcome?** | Network duration/throughput, predictability/reliability, smoothness, comfort, individual delay, agency and fair distribution, environmental cost | Mean and tail trip duration; repeated-OD lateness risk; stop/start exposure; user-reported calmness |
+| **Active outcomes: efficacy plus fairness** | Aggregate and mean travel time, total delay, throughput, trip completion, tail outcomes, individual realized harm, burden on participants and nonparticipants | Seed-paired network means; changed- vs unchanged-route harms; completion and severe-delay share. **Subjective QoE is deferred.** |
 
-**Design implication:** A routing-policy mechanism tested at full penetration on a uniform grid against nominal independent shortest paths tells us very little about a voluntary partial-participation mechanism aimed at reliability or smoothness on a more varied network. Conversely, increasing network size does not by itself test new kinds of coordination.
+**Design implication:** A policy tested at full participation on a uniform grid against a nominal free-flow shortest-path baseline does not establish benefits relative to credible traffic-aware independent navigation, partial voluntary adoption, or other network structures. Increasing network size does not by itself test a new coordination mechanism. **Active comparisons should prioritize network efficiency with distributional fairness; experience outcomes are later-phase work.**
 
 ## 4. Alternative coordination mechanisms: comparative assessment
 
@@ -72,7 +72,7 @@ These are **research candidates**, not approved experiments or implemented polic
 | **A. Individual traffic-aware navigation / shared forecasts** | Shared data and individual predicted journey cost, without binding joint assignment | Does better dynamic independent route choice already capture most of the attainable benefit? | Baseline must actually use dynamic, credible traffic information; our tested A does not | **Baseline gap**; not yet tested |
 | **B. Explicit network-externality-aware route assignment** | Route choices evaluated for effect on **other vehicles and total system cost**, potentially subject to fairness limits | Can optimizing actual social consequences outperform individual-time or sequential assigned-count penalties? | Requires realistic counterfactual assignment evaluation; a marginal-cost approximation is not automatically globally optimal | **Mechanism untested**; closest to fundamental user-vs-system optimality question |
 | **C. Voluntary departure/bottleneck-entry coordination** | When trips start or enter scarce-capacity segments, possibly combined with routing | Can limited time shifts reduce queuing enough to repay **all predeparture waiting and schedule inconvenience**? | Must honor deadlines, opt-in, generalized door-to-door cost; cannot reuse wider random departure windows as proof | **Historical deferred idea**, untested |
-| **D. Traffic-wave smoothing / coordinated driving behavior** | Speed profiles and stop-and-go-wave dynamics, rather than path selection | Can smoother flow reduce oscillations, wasted energy, or uncomfortable driving without requiring shorter trip time? | Vehicle actuation and human phone advice are not interchangeable; safety and comfort need separate validation | **External field literature exists; no local test** |
+| **D. Traffic-wave smoothing / coordinated driving behavior** | Speed profiles and stop-and-go-wave dynamics, rather than path selection | Can coordinated vehicle control reduce network delay and traffic oscillations compared with uncontrolled traffic? | Vehicle actuation and phone-based advice are different interventions; do not infer safety, comfort or subjective QoE from network speed | **External field literature exists; no local test** |
 | **E. Consent- and incentive-compatible participation** | Who opts in, who may sacrifice, compensation/credits/reciprocity, partial compliance | Is a limited-penetration mechanism stable and worthwhile for participants **and nonparticipants** across repeated journeys? | Strategic noncompliance, fairness across users/days and unwillingness to bear unreciprocated harms | **Original design intent**, untested |
 | **F. Distributed or adaptive coordination** | Local vs centralized commitments, updates and uncertainty propagation | Can imperfect, evolving information and decentralized decisions produce better outcomes than one-shot advance-demand allocation? | Information delay, oscillatory replanning, communication burden; avoid conflating changed information with changed objective | **Untested** |
 
@@ -88,26 +88,15 @@ These are **research candidates**, not approved experiments or implemented polic
 
 No literature example above proves the Cooperative Traffic Research central hypothesis; they establish distinct, well-founded mechanisms to consider.
 
-## 5. Quality of experience vs speed — introduce now, measure honestly later
+## 5. Explicit research sequence — efficacy, fairness, then experience
 
-**New exploratory research dimension, requested October 31:** Evaluate whether the transportation system can provide a **calmer and more dependable journey** even when a trip is not maximally fast. This may be central, rather than secondary, to the future-autonomous-coordination thought experiment.
+**Approved sequencing decision: November 1, 2026.** Quality of experience is intentionally deferred. It should **not** drive the next experiment, expand the current measurement program, or be combined prematurely into a weighted performance objective.
 
-### A proposed multidimensional outcome framework (not a calibrated utility score)
+1. **Now — establish whether coordination works.** Compare fundamentally different mechanisms (system-optimal/externality-aware routing, voluntary departure or bottleneck-entry coordination, traffic-flow control) against credible independent or noncoordinated baselines. Seek clear evidence of collective improvement in mean/total travel time, network delay, throughput and completion, not incremental repair of E by default.
+2. **Alongside that — preserve fairness and individual harm.** Report the distribution of realized driver delays, severe-tail impacts, participant vs nonparticipant effects, opt-out assumptions, and measurable constraints on sacrifice. Do not erase Experiment 006's severe-harm results or equate nominal detour guards with realized protection.
+3. **Later — study quality of journey experience.** Only after coordination mechanisms are better understood, investigate perceived comfort, calmness, predictable arrival, smoother journeys and traveler preferences. These have **not** been measured by Experiments 001–006 and should not yet be proposed as active primary or secondary endpoints.
 
-| Dimension | Candidate measure | What current experiments support | What they do **not** support |
-|---|---|---|---|
-| **Time and access** | Mean and total end-to-end journey time, person-hours, throughput, missed deadlines | Tripinfo duration, waiting, completion in fixed-departure SUMO | Predeparture sacrifice, real job/family schedule value |
-| **Reliability / predictability** | Repeated *same OD and time-context* p90/p95, buffer/planning time, lateness frequency, forecast uncertainty | Cross-seed aggregate trip duration comparisons | True day-to-day reliability with different OD samples/real incidents |
-| **Flow smoothness** | Stops per vehicle, time stopped, speed variance, acceleration/jerk exposure, stop-and-go episodes | SUMO `waitingTime` aggregate as **limited stopped-time proxy** | Vehicle trajectory smoothness or comfort from trip duration alone |
-| **Perceived comfort and stress** | Traveler-reported calmness, workload, discomfort, perceived predictability or control | **None measured** | Subjective QoE cannot be inferred from queue duration alone |
-| **Agency, consent, fairness** | Optional acceptance/rejection, schedule-constraint violations, realized harm distribution, reciprocal benefits over repeated travel | Matched-driver simulation harm comparisons | Actual preferences, compensation adequacy or willingness to comply |
-| **Environment and safety** | Fuel/energy, emissions, collisions and validated conflict/near-miss measures | Some structured SUMO exception statistics, not full safety case | Real-world safety, vehicle fuel economy, exposure risks |
-
-**Measurement interpretation:** [FHWA reliability guidance](https://ops.fhwa.dot.gov/publications/tt_reliability/ttr_report.htm) treats predictability and high-delay tails as different from average travel time. [Research on acceleration and jerk vs passenger comfort](https://www.sciencedirect.com/science/article/pii/S0003687022002046) demonstrates why motion profiles matter, but our SUMO archive's travel-time/waiting outcomes do **not** equal measured comfort. Subjective quality requires human reports or validated human-grounded models; operational proxies are not enough.
-
-**Hypothetical Pareto tradeoff, NOT a project result:** a route that takes 90 seconds longer but avoids repeated stoppages and greatly reduces arrival-time uncertainty *might* be preferred by some travelers and rejected by others. We should not impose a universal tradeoff coefficient without preference evidence. Initial research should **report a Pareto frontier** across travel time, reliability, smoothness, and individual harm rather than silently combine them into a single arbitrary 'quality score'.
-
-**Important constraint for future temporal studies:** if a vehicle waits at home before departure, door-to-door generalized elapsed/schedule time **must include that imposed waiting**, even if the SUMO driving segment looks smoother or shorter. Distinguish *time available for other activities* from *unwanted waiting* only when that distinction is specified and validated.
+The exploratory [quality-of-experience notes](DEFERRED_QUALITY_OF_EXPERIENCE_RESEARCH_NOTES.md) preserve the earlier October 31 discussion and potential measures for that later phase. A mechanism that coordinates vehicle speed to reduce **network delay or traffic-wave propagation** remains eligible for *stage 1*, but must not be presented as a demonstrated subjective comfort benefit.
 
 ## 6. Which scientific questions now have the highest information value?
 
@@ -117,7 +106,6 @@ These are **candidate investigations**, ranked as directions for thought, **not 
 |---|---|---|---|
 | **Is the objective wrong?** Route-assignment proxy vs genuine social-cost minimization | Exp006's near-zero network effect and severe individual harm challenge the goal, not just prediction fidelity | Existing A/E assignments and tripinfo give heterogeneous realized effects; cannot reveal unchosen-route counterfactual welfare | Write down feasible counterfactual social-cost and harm-constrained objectives; identify assumptions and a credible dynamic independent benchmark |
 | **Is controlling *when*, not only *where*, the missing mechanism?** | Early demand-timing contrasts and queue harm suggest temporal demand pressure matters | Historical regime comparisons show demand-spreading effects, **not voluntary scheduling causality** | Specify schedule deadlines, opt-in, total generalized cost incl predeparture waiting; compare timing-only vs routing-only vs combined |
-| **Could quality improve without speed improvements?** | Original 'calmer system' ambition and Exp006 stopped-time patterns warrant wider objective | Existing waiting totals are limited proxies; archived edge-time smoothness absent | Distinguish measurable motion smoothness from subjective quality; select validated outcome definitions |
 | **What participation fraction is enough?** | Original human-driver vision is not full compulsory coordination | No mixed-penetration experiment; all treatments assigned all routes | Predefine voluntary participation/compliance and nonparticipant spillover metrics |
 | **Where does network structure matter?** | Congestion displacement may depend on bottlenecks and route options | Observed synthetic quadrant associations are descriptive | Vary demand vs grid scale vs topology *separately*, preserving comparable congestion and OD exposure |
 | **What is the correct independent benchmark?** | Existing A is nominal shortest-free-flow, below original planned traffic-aware benchmark | Code/source provides exact limitations | Define robust time-dependent independent-rerouting comparator and the type of information it can access |
@@ -128,7 +116,7 @@ These are **candidate investigations**, ranked as directions for thought, **not 
 
 **Most distinctive untested coordination lever:** **Voluntary departure / bottleneck-entry timing** could change congestion formation without merely shifting drivers onto other roads. Its generalized-time and schedule cost must be modeled honestly.
 
-**Most overlooked outcome:** **Quality of experience**—smoothness, predictability and perceived calmness—has not been scientifically measured, despite being integral to the motivating vision. Start defining its outcome taxonomy **now**, but do not label current SUMO waiting-time records as measured subjective experience.
+**Deferred dimension:** Quality of journey experience remains part of the long-run vision, but its measurement and optimization are deliberately postponed. **It is not a current criterion for choosing the next mechanism experiment.**
 
 **Most consequential experimental validity gap:** Before any claim of beating modern navigation, use a stronger credible **independently traffic-aware** baseline. The original A is valid only as the frozen nominal shortest-free-flow comparator used for Experiments 004/006.
 
@@ -136,7 +124,7 @@ These are **candidate investigations**, ranked as directions for thought, **not 
 
 ## 7. How to choose the next intervention without repeating narrow iteration
 
-Do not write another algorithm or run SUMO yet. The immediate next intellectual deliverable is **one mechanism-comparison decision note** evaluating **at least three substantively different mechanisms**: (i) externality-aware/system-optimal route allocation, (ii) voluntary departure/bottleneck-entry timing, and (iii) speed/flow smoothing or other coordination of motion. Treat consent/partial participation and QoE as cross-cutting dimensions.
+Do not write another algorithm or run SUMO yet. The immediate next intellectual deliverable is **one mechanism-comparison decision note** evaluating at least three substantively different mechanisms: (i) externality-aware/system-optimal route allocation, (ii) voluntary departure/bottleneck-entry timing, and (iii) coordinated vehicle flow/control. Preserve **fairness, voluntary participation and nonparticipant impacts** across the comparison. **Do not evaluate or add subjective journey quality in this phase.**
 
 Evaluate each candidate explicitly against:
 1. **Original-vision fit:** Does it explore an actually distinct form of cooperation, rather than another clock or penalty change?
@@ -144,7 +132,7 @@ Evaluate each candidate explicitly against:
 3. **Public/scientific novelty:** Does existing literature already answer the proposed question? Document overlap and legitimate differentiation, not speculative claims of novelty.
 4. **Benchmark credibility:** Is it compared with a realistic independent navigation or non-coordination control rather than only original A?
 5. **Fairness and agency:** Can we measure both participants and nonparticipants, actual harms and opportunities to opt out?
-6. **Experience and broader welfare:** Can we observe reliability/smoothness without conflating proxies with subjective comfort? Are schedule costs and distribution reported?
+6. **Complete network and individual costs:** Are travel time, throughput, imposed predeparture waiting, schedule constraints, and driver harm correctly counted? Do benefits survive these costs?
 7. **Scale and external validity:** Can demand, topology and vehicle participation be varied independently later, without confounding the first result?
 8. **Scientific cost:** Does the question require a fresh experiment, or can it be resolved first through existing observations, theory and literature?
 
@@ -156,19 +144,18 @@ Evaluate each candidate explicitly against:
 - Keep completed Experiments 001–006 and their original seed-level conclusions unchanged; Exp004 policy D NO-GO; Exp005 policy E GO *relative to D*; Exp006 A/E primary inconclusive **and joint efficiency/fairness criterion not met**.
 - Treat Experiment 006 realized driver harm as essential evidence, but **do not assume policy E is the only future mechanism**.
 - Restore the original voluntary-cooperation, participation and departure-time questions.
-- Introduce **quality of journey experience vs speed** as a live scientific question now; subjective QoE remains unmeasured.
+- **Defer quality of journey experience** until collective efficacy is better established; keep fairness, individual harm and voluntary participation active now. Preserve earlier QoE ideas in a separate historical note.
 - Preserve previously approved vehicle-volume, network-scale and topology studies as distinct *future contexts*, not immediate simulations.
 - Reaffirm that frozen 30-second harm limits used in an experiment are not universally revealed willingness to sacrifice.
 
 ### Proposals, not approvals for execution
 - Compare mechanism families and write a direction-selection note before choosing a new intervention.
-- Define candidate repeated-trip reliability and trajectory smoothness outcomes; separately consider future user-experience preference elicitation.
 - Consider externality-aware system-cost assignment, volunteer scheduling, flow smoothing, mixed participation and stronger independent benchmarks.
 - No new model calibration, policy optimization, SUMO seed cohort, safety claim, real-world deployment or social publishing is requested by this synthesis.
 
 ## 9. One-sentence project north star
 
-> **Discover when and how voluntary coordination can improve the collective functioning of road traffic while creating journeys that people find reliably acceptable, perhaps calmer and more predictable—even when a small, bounded, consensual sacrifice of speed is involved.**
+> **Discover when, why, and under which network and participation conditions voluntary coordination can improve collective traffic flow relative to credible independent decisions, while measuring and bounding burdens imposed on individual drivers.**
 
 This remains a scientific hypothesis and research charter, **not an achieved performance claim**.
 
