@@ -13,7 +13,7 @@ CAPTION = Path("social/vision-faq-x-2026-11-02.txt")
 def approved_caption():
     text = CAPTION.read_text(encoding="utf-8").strip()
     assert text.startswith("“Doesn't Google Maps and Waze already do this?”")
-    assert "#ProductDiscovery" in text
+    assert "#ProductDiscovery" in text\n    link = "https://yonnastgetahun.github.io/cooperative_traffic_research/site/"\n    effective_length = len(text) - len(link) + 23\n    if text.count(link) != 1 or effective_length > 280:\n        raise RuntimeError(f"X caption invalid or too long: {effective_length} effective characters")\n    print(f"Approved X caption: {effective_length} effective characters")
     assert "cooperative_traffic_research/site/" in text
     return text
 
