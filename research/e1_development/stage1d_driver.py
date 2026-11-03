@@ -291,7 +291,10 @@ def assess_check(root,selected_q,out):
     maxwall=max(r["elapsed_wall_s"] for r in allrows)
     peakrss=max(r["peak_rss_kb"] for r in allrows)
     resource_ok=maxwall<=120 and peakrss<=2*1024*1024
-    qualified=me <= 0.95*min(m0,m1) and me<m0 and me<m1 and resource_ok
+    # Prospectively screen extreme predicted-benefit/realized-harm mistakes.
+    # >30 NETWORK seconds is a development warning, not a real safety guarantee.
+    severe_false_benefit=sum(1 for r in single if r["pred_external"]<0 and r["observed_external"]>30)
+    qualified=me <= 0.95*min(m0,m1) and me<m0 and me<m1 and resource_ok and severe_false_benefit==0
     outcomes={
       "status":"DEVELOPMENT_QUALIFIED_FOR_SEPARATE_VALIDATION_PROTOCOL" if qualified else "DEVELOPMENT_NOT_QUALIFIED",
       "independent_validation":"NOT_STARTED","Test_B":"NOT_RUN",
@@ -301,6 +304,7 @@ def assess_check(root,selected_q,out):
       "by_seed":{"E1":e1,"B0":b0,"B1":b1},
       "E1_vs_best_baseline_improvement":(min(m0,m1)-me)/min(m0,m1) if min(m0,m1)>0 else None,
       "false_benefit_cases":sum(r["pred_benefit_real_harm"] for r in single),
+      "severe_false_benefit_gt30_network_s":severe_false_benefit,
       "max_pair_wall_s":maxwall,"peak_rss_kb":peakrss,"resource_gate_pass":resource_ok,
       "model_uncertainty":"UNCALIBRATED_LOW_FIDELITY_CONSERVATIVE_JUNCTION_CONFLICTS",
       "samples":{"check_seeds":len(CHECK),"single_swaps":len(single),"bundle_arms":len(allrows)-len(single)},
