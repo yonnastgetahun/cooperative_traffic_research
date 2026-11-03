@@ -13,8 +13,8 @@ def grid():
                 roads.append((f"e{x}_{y}__{nx}_{ny}", (x,y), (nx,ny)))
     links=tuple(Link(e,200.,13.89,1) for e,_,_ in roads)
     junction={eid:(source,dest) for eid,source,dest in roads}
-    turns=tuple(Turn(a,b,f"j{v[0]}_{v[1]}") for a,(u,v) in roads
-                for b,(vv,w) in roads if v==vv and w!=u)
+    turns=tuple(Turn(a,b,f"j{v[0]}_{v[1]}") for a,u,v in roads
+                for b,vv,w in roads if v==vv and w!=u)
     vehicles=[]
     for i in range(1000):
         x=(i*7)%10
