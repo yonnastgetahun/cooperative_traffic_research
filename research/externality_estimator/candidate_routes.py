@@ -24,24 +24,56 @@ def legal_alternatives(scenario: Scenario, vehicle_id: str, max_candidates: int 
     max_ff=ff0+min(30.0,.1*ff0)
     max_length=1.15*length0
     candidates=[path0]
-    # bounded by at most 4x nominal number of links; never infinite-cycle search
-    limit=max(2,len(edges))
-    queue=[(edges[start].length_m/edges[start].speed_mps, (start,))]
-    while queue and len(candidates)<max_candidates:
-        cost,path=heapq.heappop(queue)
-        if len(path)>limit:
+    # An exact reverse Dijkstra lower bound makes the enumeration A*.
+    # The original uniform-cost prefix expansion explored exponentially many
+    # partial paths on long grid routes, delaying the full 1,000-driver cohort.
+    # This changes search order, NOT the legal connectivity or detour limits.
+    reverse = {eid: [] for eid in edges}
+    for u, next_edges in neighbors.items():
+        for v in next_edges:
+            reverse[v].append(u)
+
+    def ff(eid):
+        return edges[eid].length_m / edges[eid].speed_mps
+
+    lower = {end: 0.0}
+    reverse_q = [(0.0, end)]
+    while reverse_q:
+        distance, eid = heapq.heappop(reverse_q)
+        if distance > lower[eid] + 1e-9:
             continue
-        if path[-1]==end:
-            length=sum(edges[e].length_m for e in path)
-            if cost<=max_ff+1e-9 and length<=max_length+1e-9 and path not in candidates:
+        for incoming in reverse[eid]:
+            proposed = distance + ff(eid)
+            if proposed < lower.get(incoming, float("inf")) - 1e-9:
+                lower[incoming] = proposed
+                heapq.heappush(reverse_q, (proposed, incoming))
+    if start not in lower:
+        return tuple(candidates)
+
+    max_depth = len(edges)
+    initial_cost = ff(start)
+    queue = [(initial_cost + lower[start], initial_cost, (start,))]
+    while queue and len(candidates) < max_candidates:
+        optimistic, cost, path = heapq.heappop(queue)
+        if optimistic > max_ff + 1e-9:
+            break
+        if path[-1] == end:
+            distance_m = sum(edges[e].length_m for e in path)
+            if distance_m <= max_length + 1e-9 and path not in candidates:
                 candidates.append(path)
             continue
+        if len(path) >= max_depth:
+            continue
         for nxt in neighbors[path[-1]]:
-            if nxt in path:
+            if nxt in path or nxt not in lower:
                 continue
-            ff=cost+edges[nxt].length_m/edges[nxt].speed_mps
-            if ff<=max_ff+1e-9:
-                heapq.heappush(queue,(ff,path+(nxt,)))
+            total_cost = cost + ff(nxt)
+            if total_cost + lower[nxt] > max_ff + 1e-9:
+                continue
+            new_path = path + (nxt,)
+            if sum(edges[e].length_m for e in new_path) > max_length + 1e-9:
+                continue
+            heapq.heappush(queue, (total_cost + lower[nxt], total_cost, new_path))
     return tuple(candidates)
 
 
