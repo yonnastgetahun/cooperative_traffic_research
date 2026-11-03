@@ -6,7 +6,7 @@ prediction is immutably saved BEFORE the corresponding SUMO label is generated.
 The SOURCE REVIEW and frozen Stage 1B docs govern this research process.
 """
 from __future__ import annotations
-import argparse, csv, dataclasses, hashlib, importlib.util, json, os
+import argparse, csv, dataclasses, hashlib, importlib.util, json, os, resource
 import pathlib, statistics, subprocess, sys, time, xml.etree.ElementTree as ET
 from collections import defaultdict
 
@@ -35,6 +35,10 @@ def write_once(path, obj):
 
 def frozen_historic():
     p=P("experiments/experiment_007/run_v01.py")
+    blob=p.read_bytes()
+    sha=hashlib.sha1(b"blob "+str(len(blob)).encode()+b"\0"+blob).hexdigest()
+    if sha!="ee7aef99c3de2a0ae5da04ae3fc76e5a81ebcf61":
+        raise RuntimeError("Frozen historical Experiment 007 baseline source changed")
     spec=importlib.util.spec_from_file_location("frozen_experiment_007",p)
     module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
     return module
@@ -111,7 +115,8 @@ def prediction_record(scenario, manifest, q, version):
           "model_prediction_hash":pred.prediction_hash,
           "b0_external":0.0,"b1_external":b1["pred_external_delta_network_s"],
           "b2_external":0.0,"source_selection_sha":p["selection_sha"],
-          "elapsed_wall_s":pred.elapsed_wall_s
+          "elapsed_wall_s":pred.elapsed_wall_s,
+          "peak_rss_kb":resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
         })
     replacements={p["target_vehicle_id"]:tuple(p["alternate_route"]) for p in manifest["probes"]
                    if p["target_vehicle_id"] in manifest["bundle_target_ids"]}
@@ -127,9 +132,10 @@ def prediction_record(scenario, manifest, q, version):
         "per_driver_swap_s":bundle.per_driver_swap_s,
         "model_prediction_hash":bundle.prediction_hash,
         "b0_external":0.0,"b1_external":None,"b2_external":0.0,
-        "elapsed_wall_s":bundle.elapsed_wall_s})
+        "elapsed_wall_s":bundle.elapsed_wall_s,
+        "peak_rss_kb":resource.getrusage(resource.RUSAGE_SELF).ru_maxrss})
     return {"partition":manifest["partition"],"seed":manifest["seed"],"q_sat":q,
-            "input_manifest_sha256":digest(P(version.split("@")[1])) if "@" in version else manifest["selection_sha256"],
+            "input_manifest_sha256":manifest["selection_sha256"],
             "scenario_sha256":sha256(scenario),
             "parameter_sha256":sha256(params),"model_version":"E1-STAGE1D-v1",
             "uncertainty":"UNCALIBRATED_LOW_FIDELITY_CONSERVATIVE_JUNCTION_CONFLICTS",
@@ -246,6 +252,7 @@ def effect_records(seed_dir,q):
             "b0_external":r["b0_external"],"b1_external":r["b1_external"],
             "pred_benefit_real_harm":bool(r["pred_external_delta_network_s"] < 0 and actual_ext > 10),
             "model_prediction_hash":r["model_prediction_hash"],
+            "elapsed_wall_s":r["elapsed_wall_s"],"peak_rss_kb":r["peak_rss_kb"],
             "changed_route_count":len(ids),
             "realized_nonparticipant_gt30_fraction":
               sum(dx>30 for vid,dx in delta.items() if int(vid[3:])%2)/500,
@@ -281,7 +288,10 @@ def assess_check(root,selected_q,out):
         return {seed:statistics.mean(abs(r[name]-r["observed_external"]) for r in single if r["seed"]==seed) for seed in CHECK}
     e1=seed_mae("pred_external");b0=seed_mae("b0_external");b1=seed_mae("b1_external")
     me=statistics.mean(e1.values());m0=statistics.mean(b0.values());m1=statistics.mean(b1.values())
-    qualified=me <= 0.95*min(m0,m1) and me<m0 and me<m1
+    maxwall=max(r["elapsed_wall_s"] for r in allrows)
+    peakrss=max(r["peak_rss_kb"] for r in allrows)
+    resource_ok=maxwall<=120 and peakrss<=2*1024*1024
+    qualified=me <= 0.95*min(m0,m1) and me<m0 and me<m1 and resource_ok
     outcomes={
       "status":"DEVELOPMENT_QUALIFIED_FOR_SEPARATE_VALIDATION_PROTOCOL" if qualified else "DEVELOPMENT_NOT_QUALIFIED",
       "independent_validation":"NOT_STARTED","Test_B":"NOT_RUN",
@@ -291,6 +301,7 @@ def assess_check(root,selected_q,out):
       "by_seed":{"E1":e1,"B0":b0,"B1":b1},
       "E1_vs_best_baseline_improvement":(min(m0,m1)-me)/min(m0,m1) if min(m0,m1)>0 else None,
       "false_benefit_cases":sum(r["pred_benefit_real_harm"] for r in single),
+      "max_pair_wall_s":maxwall,"peak_rss_kb":peakrss,"resource_gate_pass":resource_ok,
       "model_uncertainty":"UNCALIBRATED_LOW_FIDELITY_CONSERVATIVE_JUNCTION_CONFLICTS",
       "samples":{"check_seeds":len(CHECK),"single_swaps":len(single),"bundle_arms":len(allrows)-len(single)},
       "seed_level_limitations":"Only four independent development-check seeds; within-seed probes share baseline; not independent confirmation",
