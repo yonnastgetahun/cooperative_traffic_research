@@ -1,0 +1,28 @@
+# E1 Stage 1D — Independent source-and-physics preflight
+
+**Date:** November 3, 2026. **Status:** Pre-development **source review**, not a calibrated traffic forecast or independent validation.
+
+## Review conclusion and corrected scalability blocker
+
+The frozen Stage 1B design provides legitimate E1 development partitions (DEV_BUILD 5101–5106, DEV_CHECK 5111–5114), a fixed 60-arm budget, test gates and separate future Stage 2/Test B boundaries. The Stage 1C no-SUMO fixture suite passed all 21 original checks on Python 3.11 and 3.12. However, a direct full-cohort no-SUMO preview on the actual original 1,000-driver synthetic grid **exceeded 130 seconds** during legal candidate enumeration. That was a real source-level scaling defect not exposed by miniature fixtures.
+
+**Prospective fix before any new development labels:** replace uniform-cost enumeration of partial edge paths with deterministic A* using exact reverse shortest-path remaining free-flow cost. This prunes paths that cannot reach the destination under the **unchanged** frozen 10% nominal-time/15% distance detour caps. Baseline and physical route legality remain identical, and a max of four candidates is retained. Sampled individual eligible paths that were fast to enumerate remain legal; all 1,000 original static demand trips could be selected in **under one second** in the locally reviewed historical-grid smoke. This changes candidate enumeration order in ties and therefore must be committed with the development-source SHA **before** any new development SUMO outcomes; it is not a post-hoc tuning response. It is not a numerical proof of route choice completeness beyond the exact A* lower bound and positive edge costs.
+
+## Source, input and physical model audit
+
+- Frozen full development protocol: [Stage 1B](POST_EXP007_E1_EXECUTABLE_DEVELOPMENT_PROTOCOL_V1_2026-11-03.md). Original E1 [Stage 1C record](POST_EXP007_E1_STAGE1C_IMPLEMENTATION_RECORD_2026-11-03.md).
+- Historical frozen grid net.xml inspected: **360 external directed road edges**, **100 priority junctions**, **352 internal junctions**, **1,320 unique legal external edge-edge movements** and **2,992 lane-connection XML rows**. These are from the original *synthetic SUMO network*, not real observed intersection supply. Sample 1,000-driver original static demand parsed without SUMO simulation.
+- E1 v1's `scenario_io` conservatively aggregates conflicting movements into one `conflict_class='all'` per priority junction. It **does not reconstruct SUMO's exact lane-specific response/foes priority matrix, traffic-light phases, individual lane changes or car-following speed variation**. The actual network's junction type is priority (not traffic-light controlled). The code's conservative cap can artificially constrain simultaneous nonconflicting turns: a real **physical-fidelity risk**, not a hidden calibrated advantage.
+- The conservative conflict rule is **explicitly allowed as a fallback** in the frozen Stage 1B design, and q_sat remains the only chosen development calibration parameter. Consequently this review permits an **exploratory development-only comparison with an explicit LOW-FIDELITY flag**, not claims that E1 reproduces junction physics. If this restriction destroys forecast skill, the correct outcome is **DEVELOPMENT NOT QUALIFIED**, not an unfrozen per-junction model retrofit.
+- `link_turn_queue`: original source enforces queue storage, per-tick service tokens and a shared per-junction conflict budget, global mass conservation, source insertion and no-SUMO paired full-driver elapsed time. 1-second model tick rounds fractional scheduled departures to the next available tick. These approximations remain disclosed.
+- **Non-leakage:** predictor imports no SUMO API or offline label builder; source `label_builder.py` exists for offline *after*-prediction outcome extraction only. Full announced demand is an idealized same-information synthetic assumption, not real smartphone data.
+- **Conditional model skill status:** All E1 outputs are **UNCALIBRATED**; the all-conflicting-turns fallback must also be labeled **LOW FIDELITY** in development results. Neither CI passing nor historical-input smoke demonstrates prediction accuracy.
+- **Mandatory prior limitation:** Original Experiment 007 Test A remains NO-GO (8/20, 40% vs 60%) and policy Test B not run. The new 1,000-driver grid tests may only be developer smoke; original 4101–4105 outcomes remain contaminated historical diagnostics, not E1 development acceptance.
+
+## Gate for development-only execution
+
+Proceed to generate development-only seed/route manifests and, if simulation execution is separately authorized (already requested), submit frozen 5101–5106 build predictions **before** their outcomes, then the 36 build arms, build-only q_sat selection, sealed 5111–5114 check predictions, 24 check arms and one development verdict. No E2 residual model, adaptive reweighting, new seeds or Test B.
+
+Before submitting any SUMO job: full 1,000-driver candidate selection on each new development seed must terminate and yield exactly four distinct eligible swaps; original route/legal junction checks pass; the model must complete valid paired rollouts or return explicit abstention; predicted files must be saved immutably before observed output. If an essential requirement fails, stop and report rather than broadening the study.
+
+**Scientific caution:** Even a successful development-check mean error reduction would qualify E1 *for a separate, truly unseen independent validation protocol only*, not for policy use or a Test B advantage claim.
