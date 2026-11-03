@@ -1,0 +1,40 @@
+name: E1 Stage 1C frozen no-SUMO scientific unit tests
+on:
+  pull_request:
+    paths:
+      - 'research/externality_estimator/**'
+      - '.github/workflows/exp007-e1-stage1c-no-sumo.yml'
+      - 'docs/POST_EXP007_E1_STAGE1C_IMPLEMENTATION_RECORD_2026-11-03.md'
+  push:
+    branches: [main]
+    paths:
+      - 'research/externality_estimator/**'
+      - '.github/workflows/exp007-e1-stage1c-no-sumo.yml'
+      - 'docs/POST_EXP007_E1_STAGE1C_IMPLEMENTATION_RECORD_2026-11-03.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  no-sumo-scientific-fixtures:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.12']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile prospective E1 modules
+        run: python -m compileall -q research/externality_estimator
+      - name: Run T01-T18 and static-network intake fixtures
+        run: python -m unittest discover -v research/externality_estimator/tests
+      - name: Enforce no SUMO or future-label imports in predictor
+        run: |
+          python - <<'PY'
+          from research.externality_estimator.audit import enforce_no_oracle_imports
+          enforce_no_oracle_imports('research/externality_estimator')
+          print('PASS: no SUMO or offline future-label imports in prospective predictor')
+          PY
