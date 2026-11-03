@@ -1,0 +1,11 @@
+{
+  "kind": "E1_STAGE1C_SOURCE_IMPORT",
+  "zip_url": "https://at.adobe.com/9cg5gDVsVjQW21cU",
+  "sha256": "959ca01b4ac08a328c97eae69ee9afd38d93abbf1590306bc9045cacc291139c",
+  "expected_files": 18,
+  "allowed_paths": [
+    "research/externality_estimator/",
+    "docs/POST_EXP007_E1_STAGE1C_IMPLEMENTATION_RECORD_2026-11-03.md"
+  ],
+  "no_sumo": true
+}
