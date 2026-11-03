@@ -1,14 +1,6 @@
-“Doesn't Google Maps and Waze already do this?”
+“Doesn't Google Maps already do this?”
 
-Fair question.
-
-What if tomorrow's autonomous vehicles could coordinate traffic, not just optimize individual routes?
-
-Could human drivers begin doing some of that today?
-
-Our early experiments found cooperation made traffic worse. The hypothesis remains open.
-
-New Vision & FAQ:
+Can human drivers coordinate?
 https://yonnastgetahun.github.io/cooperative_traffic_research/site/
 
 #AppliedAI #TrafficResearch #CollectiveIntelligence #AI #BuildInPublic #AIResearch #AIStartups #MultiAgentSystems #ProductManagement #OpenSource #ProductDiscovery
