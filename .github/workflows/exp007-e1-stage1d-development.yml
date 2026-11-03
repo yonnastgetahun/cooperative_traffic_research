@@ -33,7 +33,7 @@ jobs:
           python3 -m py_compile research/e1_development/stage1d_driver.py
       - name: Generate all six DEV_BUILD source/route/probe manifests without SUMO simulation
         run: |
-          python3 research/e1_development/stage1d_driver.py preflight --scientific scientific --out preflight
+          python3 -m research.e1_development.stage1d_driver preflight --scientific scientific --out preflight
       - if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -57,7 +57,7 @@ jobs:
           path: scientific
       - name: Freeze DEV_BUILD predictions before 36 SUMO arms, select q_sat only from build; then freeze DEV_CHECK predictions before 24 additional arms
         run: |
-          python3 research/e1_development/stage1d_driver.py develop --scientific scientific --out development
+          python3 -m research.e1_development.stage1d_driver develop --scientific scientific --out development
       - name: Preserve all source route manifests, immutable predictions, original labels, calibration and verdict including failures
         if: always()
         uses: actions/upload-artifact@v4
