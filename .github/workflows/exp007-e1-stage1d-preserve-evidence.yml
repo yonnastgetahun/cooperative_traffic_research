@@ -106,7 +106,7 @@ jobs:
       - name: Publish durable public scientific archive only on merged main
         if: github.event_name == 'push' && github.run_attempt == 1
         env:
-          GH_${{ github.token }}: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           tag="exp007-e1-stage1d-development-2026-11-03"
           if gh release view "$tag" >/dev/null 2>&1; then
