@@ -205,7 +205,7 @@ def run(root,out):
       'P1':p1,
       'P2':{'development_check_seeds':list(CHECK),'arms':len(coverage),
             'same_seed_comparisons':len(contrasts),'bundle_interactions':bundles},
-      'P3':{'frozen_source_unit_tests':'21 PASS','toy_conflict_crossings':fixtures,
+      'P3':{'frozen_source_unit_tests':'PASS; count and version in CI logs','toy_conflict_crossings':fixtures,
             'q050_q065_same_predicted_driver_vectors':sum(x['q050_equals_q065_complete_1000_driver_vectors'] for x in qcases),
             'n_comparisons':len(qcases)},
       'P4':{'H1':'SOURCE LIMITATION VERIFIED, causal effect not isolated',
