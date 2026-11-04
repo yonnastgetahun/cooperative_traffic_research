@@ -9,6 +9,8 @@ No SUMO calls, no inference/training, no model edits or validation claims.
 import argparse,csv,gzip,hashlib,json,pathlib,statistics,subprocess,sys
 from collections import Counter,defaultdict
 from lxml import etree as ET
+# Make repository-root research package importable when invoked as a script.
+sys.path.insert(0,str(pathlib.Path(__file__).resolve().parents[2]))
 
 BUILD=tuple(range(5101,5107))
 CHECK=tuple(range(5111,5115))
