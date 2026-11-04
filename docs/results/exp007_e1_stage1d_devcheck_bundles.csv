@@ -1,0 +1,5 @@
+seed,bundle_target_1,bundle_target_2,observed_bundle_total_network_s,E1_predicted_bundle_total_network_s,observed_joint_minus_single_interaction_network_s,E1_predicted_interaction_network_s,forecast_overlap_score
+5111,veh0498,veh0646,-1472,20,-3424,0,0
+5112,veh0070,veh0760,1050,4,-2839,0,0
+5113,veh0236,veh0624,-2295,5,-383,-7,0
+5114,veh0040,veh0764,4676,8,-799,0,0
