@@ -1,0 +1,119 @@
+name: Archive Stage 1D frozen E1 development evidence (no SUMO)
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/exp007-e1-stage1d-preserve-evidence.yml'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/exp007-e1-stage1d-preserve-evidence.yml'
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  preserve-stage1d:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download existing Stage 1D evidence only — never rerun simulator
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 41737336992
+          github-token: ${{ github.token }}
+          name: exp007-e1-stage1d-original-development-cohort
+          path: original-stage1d
+      - name: Independently verify archived cohort and repackage member bytes with SHA256 ledger
+        run: |
+          python3 - <<'PY'
+          import csv, hashlib, json, pathlib, zipfile, xml.etree.ElementTree as ET
+          from collections import Counter
+          root=pathlib.Path('original-stage1d')
+          release=pathlib.Path('stage1d-release')
+          release.mkdir()
+          def sha(b): return hashlib.sha256(b).hexdigest()
+          def read(p): return p.read_bytes()
+          files=sorted(p for p in root.rglob('*') if p.is_file())
+          assert len(files)==706, 'Original member count changed'
+          wanted=set(range(5101,5107))|set(range(5111,5115))
+          groups=Counter()
+          for p in files:
+              s=p.relative_to(root).as_posix()
+              if s.endswith('/tripinfo.xml'):
+                  groups[int(s.split('/')[0].split('-')[1])]+=1
+                  doc=ET.fromstring(read(p))
+                  ids=[x.get('id') for x in doc.findall('tripinfo')]
+                  assert len(ids)==len(set(ids))==1000, s
+          assert set(groups)==wanted
+          assert all(groups[s]==6 for s in wanted)
+          for seed in sorted(wanted):
+              prefix=root/f'seed-{seed}'
+              lock=json.loads(read(prefix/'prediction-lock.json'))
+              assert lock['seed']==seed
+              for name,digest in lock['prediction_shas'].items():
+                  assert sha(read(prefix/'predictions'/name))==digest, (seed,name)
+              scenario=json.loads(read(prefix/'scenario-manifest.json'))
+              for arm,digest in scenario['arm_route_sha256'].items():
+                  assert sha(read(prefix/'routes'/f'{arm}.rou.xml'))==digest
+          decision=json.loads(read(root/'development-verdict.json'))
+          assert decision['status']=='DEVELOPMENT_NOT_QUALIFIED'
+          assert decision['independent_validation']=='NOT_STARTED' and decision['Test_B']=='NOT_RUN'
+          assert decision['selected_build_only_q_sat']==0.5
+          assert abs(decision['MAE_mean_E1']-1555.125)<1e-7
+          assert abs(decision['MAE_mean_B1']-1555.2675485961122)<1e-7
+          assert decision['severe_false_benefit_gt30_network_s']==2
+          ledger=[]
+          name='e1-stage1d-original-member-bytes-2026-11-03.zip'
+          with zipfile.ZipFile(release/name,'w',zipfile.ZIP_DEFLATED,compresslevel=3) as z:
+              for p in files:
+                  s=p.relative_to(root).as_posix()
+                  b=read(p)
+                  ledger.append({'member':s,'bytes':len(b),'sha256':sha(b)})
+                  z.write(p,s)
+          with zipfile.ZipFile(release/name) as z:
+              assert len(z.namelist())==706
+              for row in ledger:
+                  assert sha(z.read(row['member']))==row['sha256']
+          with (release/'SHA256_PER_MEMBER.csv').open('w',newline='') as f:
+              w=csv.DictWriter(f,fieldnames=('member','bytes','sha256'))
+              w.writeheader();w.writerows(ledger)
+          assethash=sha(read(release/name))
+          (release/'SHA256_RELEASE_ASSETS.txt').write_text(assethash+'  '+name+'\n')
+          (release/'SOURCE_AND_DECISION.json').write_text(json.dumps({
+              'source_workflow_run':41737336992,
+              'source_artifact_id':13280496865,
+              'source_artifact_original_github_sha256':'f8d2b76bd6eda63e11889bd7708888bfdb55af78edd0b30526a9d981feb72fa6',
+              'original_member_count':706,'verified_sumoruns':60,
+              'verified_tripinfo_records':60000,
+              'report':'docs/POST_EXP007_E1_STAGE1D_DEVELOPMENT_FINAL_SCIENTIFIC_REPORT_2026-11-03.md',
+              'decision':'DEVELOPMENT_NOT_QUALIFIED',
+              'repackaged_asset_sha256':assethash,
+              'note':'This is a re-packed ZIP of the exact extracted 706 original artifact member bytes. The repackaged ZIP SHA differs from the original GitHub Actions ZIP; SHA256_PER_MEMBER.csv preserves member hashes.'
+          },indent=2)+'\n')
+          print('PASS: verified and repackaged',len(files),'original member bytes, 60 arms, 60000 trip records')
+          PY
+      - name: Keep manifest if validation fails or succeeds
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e1-stage1d-preservation-checks
+          path: |
+            stage1d-release/SHA256_*
+            stage1d-release/SOURCE_AND_DECISION.json
+          retention-days: 30
+      - name: Publish durable public scientific archive only on merged main
+        if: github.event_name == 'push' && github.run_attempt == 1
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="exp007-e1-stage1d-development-2026-11-03"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "Release exists. Preventing duplicate write or overwrite."
+            exit 1
+          fi
+          gh release create "$tag" stage1d-release/* \
+            --title "Experiment 007 — E1 Stage 1D Development Evidence (NO-GO)" \
+            --notes "Original, unmodified 60-arm development cohort: six DEV_BUILD seeds, four DEV_CHECK seeds, 60,000 per-driver SUMO trip records, immutable E1 prediction files and calibration. DEVELOPMENT NOT QUALIFIED: E1 DEV_CHECK MAE 1555.125 network-seconds vs B1 1555.268, far short of 5% improvement; two predicted-benefit/actual-harm cases. This is a re-packed ZIP of original member bytes with a per-member SHA256 ledger and source-artifact checksum; it is NOT an independent validation or Test B. Scientific report: docs/POST_EXP007_E1_STAGE1D_DEVELOPMENT_FINAL_SCIENTIFIC_REPORT_2026-11-03.md."
+          gh release view "$tag" --json url,assets
