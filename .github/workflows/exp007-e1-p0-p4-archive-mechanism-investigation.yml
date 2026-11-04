@@ -1,0 +1,43 @@
+name: E1 P0-P4 frozen-source physical-mechanism audit (no SUMO)
+
+on:
+  pull_request:
+    paths:
+      - 'research/audits/e1_p0_p4_archive_audit.py'
+      - '.github/workflows/exp007-e1-p0-p4-archive-mechanism-investigation.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'research/audits/e1_p0_p4_archive_audit.py'
+      - '.github/workflows/exp007-e1-p0-p4-archive-mechanism-investigation.yml'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  frozen-archive-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pin only lxml XML streaming library (no SUMO dependency)
+        run: python3 -m pip install --disable-pip-version-check 'lxml==6.0.2'
+      - name: Retrieve original Stage 1D development evidence, no simulation
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 41737336992
+          github-token: ${{ github.token }}
+          name: exp007-e1-stage1d-original-development-cohort
+          path: evidence
+      - name: Verify original 60 arms, 24 archived edgeData arms, frozen E1 source and no-SUMO fixtures
+        run: |
+          mkdir -p audit
+          python3 research/audits/e1_p0_p4_archive_audit.py --root evidence --out audit
+      - name: Preserve audit results whether source check passes or fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e1-p0-p4-archive-only-physical-investigation
+          path: audit/
+          retention-days: 30

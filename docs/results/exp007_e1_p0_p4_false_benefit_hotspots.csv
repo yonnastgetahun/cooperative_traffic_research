@@ -1,0 +1,17 @@
+seed,arm,edge,signed_waiting_delta_vehicle_s,first_five_second_interval_abs_delta_ge10_s
+5111,probe2,C3D3,-844,185
+5111,probe2,F8G8,-690,105
+5111,probe2,C5D5,648,175
+5111,probe2,C2D2,612,155
+5111,probe2,D2E2,-594,170
+5111,probe2,H6G6,579,175
+5111,probe2,G7F7,-519,85
+5111,probe2,F5F4,513,160
+5114,probe2,F4E4,1300,185
+5114,probe2,D6E6,951,205
+5114,probe2,F7E7,892,180
+5114,probe2,G3H3,752,145
+5114,probe2,E3F3,-619,185
+5114,probe2,G7H7,615,105
+5114,probe2,D3E3,582,95
+5114,probe2,H7G7,571,135

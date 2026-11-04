@@ -1,0 +1,5 @@
+seed,chosen_single_a,chosen_single_b,realized_network_elapsed_joint_minus_singles_s,external_edge_five_second_waiting_interaction_vehicle_s,E1_predicted_interaction_network_s,top_detector_edge,top_edge_signed_interaction_vehicle_s
+5111,probe0,probe1,-3424,-3118,0,G7F7,1016
+5112,probe0,probe1,-2839,-2762,0,G6F6,914
+5113,probe0,probe1,-383,78,-7,D6E6,-993
+5114,probe0,probe1,-799,288,0,F7G7,-1913
