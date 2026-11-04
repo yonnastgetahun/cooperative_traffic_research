@@ -1,0 +1,30 @@
+metric,value,units_or_note
+study,E1 Stage 1D,development-only
+date,2026-11-03,research date
+decision,DEVELOPMENT_NOT_QUALIFIED,no independent validation or Test B
+original_workflow_run,41737336992,GitHub Actions
+original_archive_artifact,13280496865,GitHub Actions
+original_archive_sha256,f8d2b76bd6eda63e11889bd7708888bfdb55af78edd0b30526a9d981feb72fa6,SHA-256 ZIP bytes
+original_source_commit,05b770cf000f84677524e0a1e89bea06ec0e703b,Git SHA
+verified_sumo_arms,60,10 seeds x 6 arms
+verified_tripinfo_records,60000,1000 IDs x 60 arms
+verified_prediction_locks,10,one per development seed
+verified_prediction_files,22,18 build files plus 4 check files
+verified_prediction_rows,110,five E1 arm predictions per parameter file
+q_selected_build_only,0.50,vehicles per second per lane
+build_q_035_external_MAE,1584.0416666666667,network seconds
+build_q_050_external_MAE,1575.2083333333333,network seconds
+build_q_065_external_MAE,1575.2083333333333,network seconds
+devcheck_E1_MAE,1555.125,network seconds
+devcheck_B0_MAE,1555.875,network seconds
+devcheck_B1_MAE,1555.2675485961124,network seconds
+devcheck_required_gain_percent,5,predeclared development gate
+devcheck_actual_gain_percent,0.009165535295895939,versus best B1
+devcheck_predicted_benefit_actual_harm_cases,2,negative predicted external positive observed greater than 30 network seconds
+devcheck_E1_sign_correct,6,of 16 material singleton probes counting predicted zero as nonmatch
+devcheck_B1_sign_correct,11,of 16 material singleton probes
+devcheck_E1_zero_predictions,4,among 16 material singleton probes
+devcheck_max_pair_wall_time_s,2.3530105539999795,offline source-recorded wall time
+devcheck_peak_rss_kb,76192,process-level maximum 74.4 MiB
+independent_scientific_validation,NOT_STARTED,separate future study
+Test_B,NOT_RUN,cooperative policy efficacy remains untested
