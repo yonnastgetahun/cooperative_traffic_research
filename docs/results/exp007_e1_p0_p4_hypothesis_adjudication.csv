@@ -1,0 +1,6 @@
+hypothesis,verified_finding,remaining_uncertainty,status
+H1 junction conflict discharge,E1 all-class permits only one shared-class junction movement per tick; toy effect observed,Historical physical junction contribution and SUMO exact compatible movements not identified,SOURCE_LIMITATION_VERIFIED_CAUSAL_INSUFFICIENT
+H2 link FIFO spatial spillback,One FIFO queue per link and all original external links have one lane,Within-link queue front not measured and multi-lane explanation inapplicable,MULTILANE_HYPOTHESIS_NOT_APPLICABLE
+H3 timing and insertion clock,Original 5-second edge and lane detector series available,No per-driver FCD or exact edge exit clock in original Stage1D,INSUFFICIENT_OBSERVATION
+H4 two-route nonadditivity,Four realized bundle interactions and detector interaction measured,Unique queue/intersection mediator not isolated,INTERACTIONS_OBSERVED_CAUSE_UNRESOLVED
+H5 global saturation sensitivity,q050 versus q065 identical predicted full 1000-driver vectors in 30 of 30 build cases,Binding conflict/storage/turn constraint not measured for actual 1000-driver scenes,PREDICTION_INSENSITIVITY_VERIFIED_CAUSE_UNRESOLVED
