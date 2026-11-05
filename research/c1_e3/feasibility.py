@@ -245,6 +245,23 @@ def main(args):
         audit["network_shas_by_seed"]["6113"]={
             "source":sha(orig2),"J0_noop":sha(nop2),"J1_modified":sha(mod2)}
         audit["patch_sha256"]=sha(patch)
+        if args.lock:
+            lock=json.loads(P(args.lock).read_text())
+            if lock["status"]!="FROZEN_BEFORE_ANY_C2_C3_SUMO_OUTCOME":
+                raise RuntimeError("C1 lock status is not prospectively frozen")
+            if lock["networks"]!=audit["network_shas_by_seed"] or lock["patch_sha256"]!=audit["patch_sha256"]:
+                raise RuntimeError("C1 network or patch checksum drift versus frozen execution lock")
+            selection=audit["selection"]
+            chosen=lock["chosen"]
+            if not (selection["co_presence_5s_bins"]==lock["co_presence_5s_bins"]==
+                    35 and selection["movement_D3E3"]["index"]==chosen["D3E3_index"]
+                    and selection["other_movement"]["index"]==chosen["other_index"]
+                    and selection["movement_D3E3"]["via"]==chosen["D3E3_via"]
+                    and selection["other_movement"]["via"]==chosen["other_via"]
+                    and selection["proposed_prohibition_reversal"]==chosen["new_prohibition"]):
+                raise RuntimeError("C1 selected intervention drift versus frozen execution lock")
+            audit["frozen_lock_sha256"]=sha(P(args.lock))
+            audit["C1_lock_match"]="PASS"
         audit["C1"]="PASS"
         audit["status"]="C0_C1_ELIGIBLE_TO_FREEZE_EXECUTABLE_PROTOCOL"
     except Exception as e:
@@ -262,5 +279,6 @@ if __name__=="__main__":
     p.add_argument("--root",required=True)
     p.add_argument("--replays",required=True)
     p.add_argument("--ledger",required=True)
+    p.add_argument("--lock")
     p.add_argument("--out",required=True)
     main(p.parse_args())
