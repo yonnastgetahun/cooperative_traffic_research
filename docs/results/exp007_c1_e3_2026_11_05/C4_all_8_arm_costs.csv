@@ -1,0 +1,9 @@
+seed,route,physical_state,all_driver_scheduled_to_arrival_network_s,all_driver_waiting_vehicle_s,nonparticipant_network_s,E3_approach_window_waiting_vehicle_s,E3_approach_nearstop_samples,E3_selected_movement_first_samples
+6112,I,J0,210647.0,51712.0,104901.0,1714.0,1685,11
+6112,I,J1,224329.0,63250.0,111752.0,1726.0,1713,7
+6112,probe2,J0,213866.0,54487.0,107632.0,2283.0,2256,8
+6112,probe2,J1,219970.0,59763.0,109805.0,3293.0,3273,0
+6113,I,J0,209676.0,50561.0,106630.0,568.0,559,14
+6113,I,J1,246842.0,86703.0,126470.0,455.0,456,8
+6113,probe2,J0,205793.0,47511.0,104658.0,421.0,422,13
+6113,probe2,J1,222979.0,64609.0,113288.0,1626.0,1623,3
