@@ -47,10 +47,10 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          tag=exp007-e1v2-f0-f5-archive-only-2026-11-05
+          tag=exp007-e1v2-f0-f5-archive-only-2026-11-05-v2
           if gh release view "$tag" >/dev/null 2>&1; then echo "Release already exists; refusing overwrite"; exit 1; fi
           (cd results && sha256sum *.csv *.json *.md *.gz > DERIVED_ASSETS_SHA256.txt)
-          gh release create "$tag" results/* --title "E1-v2 F0-F5 archived mechanism evidence (no SUMO)" --notes "Retrospective diagnostic original-development archive only. E1-v2 DEVELOPMENT_NOT_QUALIFIED. Validation and Test B not run. Associations do not identify unique causal queue or junction mechanisms."
+          gh release create "$tag" results/* --title "E1-v2 F0-F5 archived mechanism evidence v2 (zero-sample waiting correction; no SUMO)" --notes "Retrospective diagnostic original-development archive only. E1-v2 DEVELOPMENT_NOT_QUALIFIED. Validation and Test B not run. Associations do not identify unique causal queue or junction mechanisms."
       - name: Create peer-reviewable final-results PR (main only)
         if: github.event_name == 'push'
         env:
