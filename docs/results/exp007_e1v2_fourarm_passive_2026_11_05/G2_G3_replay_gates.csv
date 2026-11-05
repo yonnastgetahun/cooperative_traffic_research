@@ -1,0 +1,5 @@
+seed,arm,G2,G3,G2_max_field_s,G2_absolute_total_error_s,FCD_vehicles,FCD_samples,FCD_nearstop_samples_0_1ms,FCD_nearstop_samples_1_0ms,vehroute_external_edge_exits,edgedata_rows,lanedata_rows,last_fcd_s,last_trip_arrival_s,compressed_observation_bytes
+6112,I,PASS,PASS,0.0,0.0,1000,209815,51850,58920,8287,245872,245872,604.0,604.0,9385620
+6112,probe2,PASS,PASS,0.0,0.0,1000,213032,54618,62143,8287,256032,256032,629.0,629.0,9540991
+6113,I,PASS,PASS,0.0,0.0,1000,208835,50702,58101,8266,233680,233680,572.0,572.0,9245903
+6113,probe2,PASS,PASS,0.0,0.0,1000,204974,47640,54548,8266,233680,233680,570.0,570.0,9179206
