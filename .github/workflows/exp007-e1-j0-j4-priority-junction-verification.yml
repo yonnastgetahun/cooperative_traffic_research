@@ -42,7 +42,7 @@ jobs:
           path: evidence
       - name: Retrieve permanent per-member SHA256 ledger, without modifying source
         env:
-          GH_${{ github.token }}: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p checksum
           gh release download exp007-e1-stage1d-development-2026-11-03 \
@@ -63,7 +63,7 @@ jobs:
       - name: Preserve validated static-rule evidence in durable research release
         if: github.event_name == 'push' && github.run_attempt == 1
         env:
-          GH_${{ github.token }}: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           tag="exp007-e1-j0-j4-priority-junction-verification-2026-11-04"
           if gh release view "$tag" >/dev/null 2>&1; then
