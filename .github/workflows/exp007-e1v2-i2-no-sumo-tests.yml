@@ -1,0 +1,57 @@
+name: E1-v2 I2 connection-aware junction implementation tests (no SUMO)
+
+on:
+  pull_request:
+    paths:
+      - 'research/externality_estimator_v2/**'
+      - '.github/workflows/exp007-e1v2-i2-no-sumo-tests.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'research/externality_estimator_v2/**'
+      - '.github/workflows/exp007-e1v2-i2-no-sumo-tests.yml'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  frozen-v2-unit-check:
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.11', '3.12']
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install read-only XML canonicalization library
+        run: python -m pip install --disable-pip-version-check 'lxml==6.0.2'
+      - name: Retrieve original existing no-SUMO static grid only
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 41737336992
+          github-token: ${{ github.token }}
+          name: exp007-e1-stage1d-no-sumo-devbuild-preflight
+          path: original-grid
+      - name: V2-I2 mandatory V01-V24 with source network and frozen old E1 regressions
+        env:
+          E1_ORIGINAL_NETWORK: original-grid/seed-5101/network.net.xml
+        run: |
+          python -m unittest discover -v research/externality_estimator_v2/tests
+          python -m unittest discover -v research/externality_estimator/tests
+      - name: Prohibit runtime oracle imports and simulator calls in V2 package
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from research.externality_estimator.audit import enforce_no_oracle_imports
+          enforce_no_oracle_imports(Path('research/externality_estimator_v2'))
+          for f in Path('research/externality_estimator_v2').glob('*.py'):
+              s=f.read_text()
+              assert 'subprocess.run(' not in s and 'subprocess.Popen(' not in s
+              assert 'os.system(' not in s
+          print('PASS: no SUMO simulator/oracle dependencies in predictor')
+          PY
