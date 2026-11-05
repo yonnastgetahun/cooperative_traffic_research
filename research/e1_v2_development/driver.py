@@ -148,7 +148,9 @@ def freeze_all_predictions(root):
     for seed in SEEDS:
         directory=P(root)/("seed-"+str(seed))
         result=result_record(directory)
-        p=directory/"predictions.json"
+        prediction_dir=directory/"predictions"
+        prediction_dir.mkdir(exist_ok=True)
+        p=prediction_dir/"predictions.json"
         sh=save_prediction_once(p,result)
         lock={"seed":seed,"partition":result["partition"],
               "prediction_sha256":sh,"prediction_file":"predictions.json",
@@ -169,14 +171,14 @@ def validate_locks(root):
     for seed in SEEDS:
         folder=P(root)/("seed-"+str(seed))
         lock=json.loads((folder/"prediction-lock.json").read_text())
-        if lock["seed"]!=seed or digest(folder/"predictions.json")!=lock["prediction_sha256"]:
+        if lock["seed"]!=seed or digest(folder/"predictions"/"predictions.json")!=lock["prediction_sha256"]:
             raise RuntimeError("Prospective prediction file changed before outcomes")
 
 def evaluate_seed(root,seed):
     folder=P(root)/("seed-"+str(seed))
     man=json.loads((folder/"scenario-manifest.json").read_text())
     obs=json.loads((folder/"observations-summary.json").read_text())["observations"]
-    pred=json.loads((folder/"predictions.json").read_text())["rows"]
+    pred=json.loads((folder/"predictions"/"predictions.json").read_text())["rows"]
     base=obs["I"]["scheduled_to_arrival_s"]
     rows=[]
     for record in pred:
