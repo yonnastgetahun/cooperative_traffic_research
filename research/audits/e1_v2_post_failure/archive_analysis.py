@@ -68,7 +68,13 @@ def main(root,out,ledger=None):
     lockall=jsonread(root/"all-prediction-locks.json")
     assert lockall["status"]=="FROZEN_BEFORE_ANY_SUMO_OUTCOME"
     assert lockall["locked_seeds"]==list(SEEDS)
-    f1=[];f2=[];f3=[];f4=[];cov=[];examples=[]
+    out.mkdir(parents=True,exist_ok=True)
+    f1=[];f2count=0;f3=[];f4=[];cov=[];examples=[]
+    f2file=gzip.open(out/"F2_edge_5second.csv.gz","wt",newline="")
+    f2fields=["seed","arm","edge","begin_s","delta_entered","delta_left",
+              "delta_waiting_vehicle_s","delta_sampled_vehicle_s",
+              "baseline_occupancy","changed_occupancy","baseline_speed","changed_speed"]
+    f2writer=csv.DictWriter(f2file,fieldnames=f2fields);f2writer.writeheader()
     for seed in SEEDS:
         folder=root/("seed-"+str(seed))
         man=jsonread(folder/"scenario-manifest.json")
@@ -93,7 +99,7 @@ def main(root,out,ledger=None):
                 inc[e.get("to")].add(e.get("id"));outgoing[e.get("from")].add(e.get("id"))
         schedules={x.get("id"):float(x.get("depart")) for x in ET.parse(folder/"trips.xml").getroot().findall("trip")}
         assert len(schedules)==1000
-        route={};tripinfo={};elapsed={};edge={}
+        route={};tripinfo={};elapsed={};edge={};edge_sum={}
         for arm in ARMS:
             rp=folder/"routes"/(arm+".rou.xml")
             tp=folder/"observations"/arm/"tripinfo.xml"
@@ -106,6 +112,11 @@ def main(root,out,ledger=None):
                 assert abs((x["arrival"]-x["depart"])-x["duration"])<.06
             assert abs(sum(elapsed[arm].values())-obs[arm]["network_total_s"])<.12
             edge[arm],coverage=detect(folder/"observations"/arm/"edgeData.xml.gz",external)
+            accum=defaultdict(Counter)
+            for (eid,t),vals in edge[arm].items():
+                for field in ("entered","left","waitingTime"):
+                    if field in vals:accum[eid][field]+=vals[field]
+            edge_sum[arm]=accum
             coverage.update(seed=seed,arm=arm,trip_records=1000,
                             laneData_gz_bytes=(folder/"observations"/arm/"laneData.xml.gz").stat().st_size,
                             fcd_files=sum(1 for p in (folder/"observations"/arm).glob("*fcd*")))
@@ -153,11 +164,12 @@ def main(root,out,ledger=None):
                 de=b["entered"]-a["entered"];dl=b["left"]-a["left"]
                 netwait+=dw;abswait+=abs(dw);valid+=1
                 if first is None and (dw or de or dl):first=key[1]
-                f2.append(dict(seed=seed,arm=arm,edge=key[0],begin_s=key[1],
+                f2writer.writerow(dict(seed=seed,arm=arm,edge=key[0],begin_s=key[1],
                     delta_entered=de,delta_left=dl,delta_waiting_vehicle_s=dw,
                     delta_sampled_vehicle_s=b.get("sampledSeconds",float("nan"))-a.get("sampledSeconds",float("nan")),
                     baseline_occupancy=a.get("occupancy",""),changed_occupancy=b.get("occupancy",""),
                     baseline_speed=a.get("speed",""),changed_speed=b.get("speed","")))
+                f2count+=1
             if (seed,arm) in FOCUS:
                 examples.append(dict(seed=seed,arm=arm,observed_external_network_s=others,
                     v2_pred_external_network_s=v2["pred_external_delta_network_s"],
@@ -166,14 +178,14 @@ def main(root,out,ledger=None):
                     first_aggregate_divergence_bin_s=first,matched_edge_bin_rows=valid))
             # Junction counts refer to EXTERNAL edge endpoints only, not vehicle-level turn service.
             def totals(m,edges,field):
-                return sum(row.get(field,0) for (eid,t),row in m.items() if eid in edges)
+                return sum(m[eid].get(field,0) for eid in edges)
             for junction in sorted(junc):
                 entry=inc[junction];exit=outgoing[junction]
                 f3.append(dict(seed=seed,arm=arm,junction=junction,inbound_edges=len(entry),outbound_edges=len(exit),
-                    delta_inbound_left=totals(modified,entry,"left")-totals(baseline,entry,"left"),
-                    delta_outbound_entered=totals(modified,exit,"entered")-totals(baseline,exit,"entered"),
-                    delta_inbound_waiting_vehicle_s=totals(modified,entry,"waitingTime")-totals(baseline,entry,"waitingTime"),
-                    delta_outbound_waiting_vehicle_s=totals(modified,exit,"waitingTime")-totals(baseline,exit,"waitingTime")))
+                    delta_inbound_left=totals(edge_sum[arm],entry,"left")-totals(edge_sum["I"],entry,"left"),
+                    delta_outbound_entered=totals(edge_sum[arm],exit,"entered")-totals(edge_sum["I"],exit,"entered"),
+                    delta_inbound_waiting_vehicle_s=totals(edge_sum[arm],entry,"waitingTime")-totals(edge_sum["I"],entry,"waitingTime"),
+                    delta_outbound_waiting_vehicle_s=totals(edge_sum[arm],exit,"waitingTime")-totals(edge_sum["I"],exit,"waitingTime")))
         index={p["target_vehicle_id"]:"probe"+str(i) for i,p in enumerate(man["probes"])}
         pa,pb=(index[x] for x in man["bundle_target_ids"])
         selected={x["arm"]:x for x in f1 if x["seed"]==seed}
@@ -207,12 +219,11 @@ def main(root,out,ledger=None):
     out.mkdir(parents=True,exist_ok=True)
     out_csv(out/"F0_coverage.csv",cov);out_csv(out/"F1_effects.csv",f1)
     out_csv(out/"F3_junctions.csv",f3);out_csv(out/"F4_bundles.csv",f4)
-    with gzip.open(out/"F2_edge_5second.csv.gz","wt",newline="") as f:
-        writer=csv.DictWriter(f,list(f2[0]));writer.writeheader();writer.writerows(f2)
+    f2file.close()
     summary=dict(status="ARCHIVED_CHARACTERIZATION_COMPLETE_CAUSAL_SOURCE_UNIDENTIFIED",
        source_run=41966516110,original_members=695,member_sha_verified=bool(ledger),
        simulated_arms_historical=60,new_sumo_arms=0,original_tripinfos=60000,
-       F1_interventions=len(f1),F2_edge_bin_pairs=len(f2),F3_junction_rows=len(f3),
+       F1_interventions=len(f1),F2_edge_bin_pairs=f2count,F3_junction_rows=len(f3),
        F4_bundle_records=len(f4),devcheck_v2_MAE_network_s=mae,devcheck_sign_matches=match,
        validation="NOT_STARTED",Test_B="NOT_RUN",bundles=f4,selected_case_diagnostics=examples,
        original_verdict="DEVELOPMENT_NOT_QUALIFIED")
@@ -234,7 +245,7 @@ def main(root,out,ledger=None):
     for e in examples:
         content.append(f"| {e['seed']}/{e['arm']} | {e['observed_external_network_s']:+.0f} | {e['v2_pred_external_network_s']:+.0f} | {e['insertion_delta_network_s']:+.1f} | {e['duration_delta_network_s']:+.1f} | {e['edge_waiting_change_vehicle_s']:+.1f} |")
     content+=["","## F2 — Observed five-second edge/queue-associated changes",
-      f"- **{len(f2):,}** paired external-edge/time-bin rows compared across all 50 route-change arms.",
+      f"- **{f2count:,}** paired external-edge/time-bin rows compared across all 50 route-change arms.",
       "- Entered and left counts, waiting, sampled seconds and nonadditive speed/occupancy snapshots retained in compressed raw-derived table.",
       "- Temporal adjacency or lag is observational, not a unique spillback or queue-front causal measurement.","",
       "## F3 — Priority-junction approach/discharge",
