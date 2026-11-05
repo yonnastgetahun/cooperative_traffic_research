@@ -33,11 +33,17 @@ jobs:
           github-token: ${{ github.token }}
           name: e1v2-fourarm-original-replays
           path: replays
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 42125134835
+          github-token: ${{ github.token }}
+          name: exp007-c1-e3-C0-C1-frozen-feasibility
+          path: frozen
       - name: Read-only source mapping and SUMO 1.28 netconvert E3-only priority feasibility (no SUMO)
         run: |
           python3 -m pip install --disable-pip-version-check 'lxml==6.0.2'
           python3 -m py_compile research/c1_e3/feasibility.py
-          python3 -m research.c1_e3.feasibility --root original --replays replays --ledger ledger/SHA256_PER_MEMBER.csv --lock research/c1_e3/C1_FROZEN_INTERVENTION_LOCK.json --out feasibility
+          python3 -m research.c1_e3.feasibility --root original --replays replays --ledger ledger/SHA256_PER_MEMBER.csv --lock research/c1_e3/C1_FROZEN_INTERVENTION_LOCK.json --frozen frozen --out feasibility
       - if: always()
         uses: actions/upload-artifact@v4
         with:
