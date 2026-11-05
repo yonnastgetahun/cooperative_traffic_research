@@ -25,6 +25,28 @@ def junctions(root):
     return {x.get("id"):fmt(x) for x in root.findall("junction")}
 def conn(root):
     return sorted(fmt(x) for x in root.findall("connection"))
+def connection_differences(original,candidate):
+    def mapped(path):
+        root=ET.parse(path).getroot()
+        result={}
+        for e in root.findall("connection"):
+            k=(e.get("from"),e.get("to"),e.get("fromLane"),e.get("toLane"),e.get("via"))
+            assert k not in result,("duplicate connection",k)
+            result[k]=e.attrib
+        return result
+    a=mapped(original);b=mapped(candidate)
+    assert set(a)==set(b),{"missing":len(set(a)-set(b)),"added":len(set(b)-set(a))}
+    rows=[]
+    for k in sorted(a,key=lambda z:str(z)):
+        before,after=a[k],b[k]
+        fields=sorted(f for f in set(before)|set(after) if before.get(f)!=after.get(f))
+        if fields:
+            rows.append({"from":k[0],"to":k[1],"fromLane":k[2],"toLane":k[3],
+                         "via":k[4],
+                         "field_changes":{field:{"from":before.get(field),"to":after.get(field)}
+                                          for field in fields}})
+    return rows
+
 def semantic(original,candidate):
     a=ET.parse(original).getroot();b=ET.parse(candidate).getroot()
     ea,eb=edges(a),edges(b)
@@ -119,8 +141,17 @@ def patch_single_pair_ok(orig,noop,modified,a,b):
         return False,diff,"Road/lane field changed beyond intended E3 priority pair"
     if diff["junctions_added"] or diff["junctions_removed"] or diff["junctions_changed"]!=["E3"]:
         return False,diff,"Priority edit changed a non-E3 junction or did not affect E3"
+    differences=connection_differences(noop,modified)
+    diff["connection_changes"]=differences[:100]
+    diff["connection_change_count"]=len(differences)
+    orig_reqs=request_bits(noop);adjusted_reqs=request_bits(modified)
+    diff["E3_response_changes"]=[
+       {"request_index":i,"changed_response_bits":changed_bitpositions(orig_reqs[i][1],adjusted_reqs[i][1]),
+        "old_response":orig_reqs[i][1],"new_response":adjusted_reqs[i][1]}
+       for i in sorted(orig_reqs) if orig_reqs[i][1]!=adjusted_reqs[i][1]
+    ]
     if not diff["connections_equal"]:
-        return False,diff,"Priority edit changed connections, movement states or geometry"
+        return False,diff,"Priority edit changed connection fields; check C1_modified_semantic_diff.connection_changes for scope"
     original=request_bits(noop);adjusted=request_bits(modified)
     if original.keys()!=adjusted.keys():
         return False,diff,"E3 movement index set changed"
