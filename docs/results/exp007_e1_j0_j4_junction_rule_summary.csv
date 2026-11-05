@@ -1,0 +1,5 @@
+movement_requests_per_junction,priority_junction_count,request_movements,unordered_movement_pairs,mutual_nonfoes,foes,directional_yield_foes,clean_nonfoes_distinct_in_out_via,clean_nonfoes_both_cont0,nonfoes_sharing_source_or_receiver
+2,4,8,4,4,0,0,4,4,0
+9,32,288,1152,768,384,384,480,224,288
+16,64,1024,7680,4992,2688,2688,3456,1984,1536
+TOTAL,100,1320,8836,5764,3072,3072,3940,2212,1824
