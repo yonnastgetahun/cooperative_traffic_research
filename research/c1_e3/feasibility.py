@@ -249,8 +249,23 @@ def main(args):
             lock=json.loads(P(args.lock).read_text())
             if lock["status"]!="FROZEN_BEFORE_ANY_C2_C3_SUMO_OUTCOME":
                 raise RuntimeError("C1 lock status is not prospectively frozen")
-            if lock["networks"]!=audit["network_shas_by_seed"] or lock["patch_sha256"]!=audit["patch_sha256"]:
-                raise RuntimeError("C1 network or patch checksum drift versus frozen execution lock")
+            if lock["patch_sha256"]!=audit["patch_sha256"]:
+                raise RuntimeError("C1 patch checksum drift versus frozen execution lock")
+            if not args.frozen:
+                raise RuntimeError("Frozen source networks from run 42125134835 must be supplied with --frozen")
+            for seed in (6112,6113):
+                entry=lock["networks"][str(seed)]
+                if audit["network_shas_by_seed"][str(seed)]["source"]!=entry["source"]:
+                    raise RuntimeError("C1 original input network hash mismatch")
+                for label,suffix in (("J0_noop","J0"),("J1_modified","J1")):
+                    p=P(args.frozen)/"networks"/("%s-%s.net.xml"%(seed,suffix))
+                    regenerated=netout/("%s-%s.net.xml"%(seed,suffix))
+                    if not p.is_file() or sha(p)!=entry[label]:
+                        raise RuntimeError("Frozen pre-outcome network member differs from exact C1_LOCK")
+                    nonmeta=semantic(p,regenerated)
+                    if not no_op_equal(nonmeta):
+                        raise RuntimeError("Reconstructed C1 semantics differ from pre-frozen intervention: "+json.dumps(nonmeta))
+            audit["frozen_network_shas_by_seed"]=lock["networks"]
             selection=audit["selection"]
             chosen=lock["chosen"]
             if not (selection["co_presence_5s_bins"]==lock["co_presence_5s_bins"]==
@@ -280,5 +295,6 @@ if __name__=="__main__":
     p.add_argument("--replays",required=True)
     p.add_argument("--ledger",required=True)
     p.add_argument("--lock")
+    p.add_argument("--frozen")
     p.add_argument("--out",required=True)
     main(p.parse_args())
