@@ -24,7 +24,7 @@ jobs:
       - name: Retrieve ONLY the completed original 60-arm E1-v2 study (no SUMO)
         uses: actions/download-artifact@v4
         with:
-          run-id: 41964194079
+          run-id: 41966516110
           github-token: ${{ github.token }}
           name: exp007-e1v2-d1-original-frozen-60arm-evidence
           path: evidence
@@ -73,7 +73,7 @@ jobs:
           summary=json.loads(pathlib.Path('audit/archive-independent-reconstruction.json').read_text())
           summary['repacked_original_byte_count']=len(files)
           summary['archive_sha256']=digest
-          summary['source_workflow_id']=41964194079
+          summary['source_workflow_id']=41966516110
           (target/'ARCHIVE_SCIENCE_AND_SOURCE.json').write_text(json.dumps(summary,indent=2)+'\n')
           print('Preserved',len(files),'verified original member bytes; scientific status:',
                 summary['original_development_decision'])
