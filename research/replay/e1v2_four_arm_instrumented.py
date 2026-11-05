@@ -425,7 +425,7 @@ def analyse(root,replays,out):
                     "note":"sampled internal-lane entry; short crossings may not be observed at 1s sampling"})
         case_summary.append({"seed":seed,"target":target,"actual_externality_network_s":others,
                 "actual_all_driver_network_s":total,"insertion_network_s":ins,
-                "duration_network_s":dur,"waiting_network_s":wait,
+                "duration_network_s":durations,"waiting_network_s":wait,
                 "nearstop_FCD_delta_vehicle_samples":nearnew-nearold,
                 "nearstop_FCD_delta_1ms_threshold":newf["near10_samples"]-oldf["near10_samples"],
                 "drivers_helped":helpn,"drivers_harmed":hurt,"drivers_harmed_gt30":harmed,
@@ -439,7 +439,7 @@ def analyse(root,replays,out):
         contrasts.append({"seed":seed,"observed_other_driver_network_s":others,
                     "observed_all_driver_network_s":total,
                     "source_insertion_network_s":ins,
-                    "in_network_duration_network_s":dur,
+                    "in_network_duration_network_s":durations,
                     "recorded_waiting_time_network_s":wait})
     writecsv(out/"G2_G3_replay_gates.csv",arms)
     writecsv(out/"driver_matched_differences.csv",individual)
