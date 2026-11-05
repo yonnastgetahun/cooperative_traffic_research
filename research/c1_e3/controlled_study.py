@@ -11,7 +11,7 @@ from collections import Counter,defaultdict
 P=pathlib.Path
 sys.path.insert(0,str(P(__file__).resolve().parents[1]/"replay"))
 from e1v2_four_arm_instrumented import (
- assert_sources,compare_one,scheduled,tripinfo,safety,sha,make_add
+ assert_sources,compare_one,scheduled,tripinfo,safety,sha
 )
 SOURCE_RUN=41966516110
 ARM_ORDER=((6112,"I"),(6112,"probe2"),(6113,"I"),(6113,"probe2"))
@@ -31,10 +31,12 @@ def writecsv(p,rows,fields=None):
 def validated_lock(lock,feas):
     lock=readj(lock);result=readj(P(feas)/"C0_C1_verdict.json")
     if lock["status"]!="FROZEN_BEFORE_ANY_C2_C3_SUMO_OUTCOME":raise RuntimeError("Unfrozen source intervention")
-    if result["status"]!="C0_C1_ELIGIBLE_TO_FREEZE_EXECUTABLE_PROTOCOL" or result.get("C1_lock_match")!="PASS":
-        raise RuntimeError("C0/C1 source-backed E3 lock did not pass")
+    if result["status"]!="C0_C1_ELIGIBLE_TO_FREEZE_EXECUTABLE_PROTOCOL" or result.get("C1")!="PASS":
+        raise RuntimeError("C0/C1 original frozen 42125134835 source-backed E3 feasibility did not pass")
+    if lock["selection_run"]!=42125134835 or result["source"]["original_run"]!=SOURCE_RUN:
+        raise RuntimeError("Wrong preregistered feasibility or original source run")
     if result["patch_sha256"]!=lock["patch_sha256"] or result["network_shas_by_seed"]!=lock["networks"]:
-        raise RuntimeError("Network SHA from physical-conversion feasibility differs from frozen lock")
+        raise RuntimeError("Original immutable C1 network member bytes differ from frozen lock")
     for seed in (6112,6113):
         for j,label in (("J0","J0_noop"),("J1","J1_modified")):
             p=P(feas)/"networks"/("%d-%s.net.xml"%(seed,j))
@@ -118,6 +120,8 @@ def do_execution(source,feas,lock,out):
             "validation":"NOT_STARTED","Test_B":"NOT_RUN","arms_attempted":[]}
     try:
         frozen=validated_lock(lock,feas);source_check(source)
+        frozen["__lock_path"]=str(lock)
+        record["frozen_lock_sha256"]=sha(P(lock))
         record["phase"]="C2_NOOP"
         # The frozen no-op network controls are all completed and independently
         # checked BEFORE the first modified-priority SUMO invocation.
