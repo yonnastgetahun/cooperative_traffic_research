@@ -1,0 +1,89 @@
+name: E1-v2 D1 independent archive-only scientific audit and permanent preservation
+
+on:
+  pull_request:
+    paths:
+      - 'research/audits/e1v2_d1_independent_archive_audit.py'
+      - '.github/workflows/exp007-e1v2-d1-archival-science-audit.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'research/audits/e1v2_d1_independent_archive_audit.py'
+      - '.github/workflows/exp007-e1v2-d1-archival-science-audit.yml'
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  original-evidence-reconciliation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - name: Retrieve ONLY the completed original 60-arm E1-v2 study (no SUMO)
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 41964194079
+          github-token: ${{ github.token }}
+          name: exp007-e1v2-d1-original-frozen-60arm-evidence
+          path: evidence
+      - name: Recompute MAE/sign/false-benefit/route/provenance metrics from original tripinfo
+        run: |
+          mkdir -p audit
+          python3 research/audits/e1v2_d1_independent_archive_audit.py \
+            --root evidence --out audit
+      - name: Preserve independent compact audit on all outcomes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp007-e1v2-d1-independent-archive-reconstruction
+          path: audit/
+          retention-days: 30
+      - name: Preserve original member bytes and SHA-256 ledger permanently on merged main
+        if: github.event_name == 'push' && github.run_attempt == 1
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import csv,hashlib,json,pathlib,zipfile
+          root=pathlib.Path('evidence')
+          target=pathlib.Path('release-original-e1v2-d1')
+          target.mkdir(exist_ok=True)
+          def sha(data):return hashlib.sha256(data).hexdigest()
+          files=sorted(x for x in root.rglob('*') if x.is_file())
+          assert len(files)>600,'Original complete source archive unexpectedly small'
+          ledger=[]
+          archive=target/'e1v2-d1-original-member-bytes.zip'
+          with zipfile.ZipFile(archive,'w',compression=zipfile.ZIP_DEFLATED,compresslevel=3) as z:
+              for f in files:
+                  name=f.relative_to(root).as_posix()
+                  b=f.read_bytes()
+                  ledger.append({'member':name,'size':len(b),'sha256':sha(b)})
+                  z.write(f,name)
+          with zipfile.ZipFile(archive,'r') as z:
+              assert len(z.namelist())==len(files)
+              for row in ledger:
+                  assert sha(z.read(row['member']))==row['sha256']
+          with (target/'PER_MEMBER_SHA256.csv').open('w',newline='') as out:
+              writer=csv.DictWriter(out,fieldnames=('member','size','sha256'))
+              writer.writeheader();writer.writerows(ledger)
+          digest=hashlib.sha256(archive.read_bytes()).hexdigest()
+          (target/'REPACKED_ZIP_SHA256.txt').write_text(digest+'  '+archive.name+'\n')
+          summary=json.loads(pathlib.Path('audit/archive-independent-reconstruction.json').read_text())
+          summary['repacked_original_byte_count']=len(files)
+          summary['archive_sha256']=digest
+          summary['source_workflow_id']=41964194079
+          (target/'ARCHIVE_SCIENCE_AND_SOURCE.json').write_text(json.dumps(summary,indent=2)+'\n')
+          print('Preserved',len(files),'verified original member bytes; scientific status:',
+                summary['original_development_decision'])
+          PY
+          tag="exp007-e1v2-d1-development-original-evidence-2026-11-04"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "This frozen science release exists; not overwriting."
+            exit 1
+          fi
+          gh release create "$tag" release-original-e1v2-d1/* audit/* \
+            --title "E1-v2 D1 Frozen Development — Original Evidence and Independent Archive Audit" \
+            --notes "Development-only synthetic 60-arm original E1-v2 study with complete matched SUMO tripinfo and prospective prediction locks; preserved member SHA256 ledger and original-byte ZIP, independent read-only MAE/sign/adverse-risk recomputation. Whether qualified or not, this is NOT independent estimator validation and NOT cooperative Test B. See frozen protocol docs/POST_EXP007_E1_V2_D1_FROZEN_DEVELOPMENT_PROTOCOL_V1_2026-11-04.md."
+          gh release view "$tag" --json url,assets
