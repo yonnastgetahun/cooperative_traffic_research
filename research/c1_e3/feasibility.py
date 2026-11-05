@@ -84,7 +84,7 @@ def selected_pair(opts,fcd):
         lower,higher=a,b
     else:
         lower,higher=b,a
-    return {"candidate_count":len(rows),"approach_samples":samples,
+    return ({"candidate_count":len(rows),"approach_samples":samples,
             "co_presence_5s_bins":overlap,
             "movement_D3E3":{"index":a.index,"from":a.src,"to":a.dst,"via":a.via,
                              "source_lane":a.source_lane,"cont":a.cont},
@@ -95,7 +95,7 @@ def selected_pair(opts,fcd):
             "proposed_prohibition_reversal":{"prohibitor":lower.src+"->"+lower.dst,
                                              "prohibited":higher.src+"->"+higher.dst},
             "selection_rule":"maximize number of 5s bins in [120,300) with sampled approach presence in both incoming lanes; tie lexicographic"},
-            a,b
+            a,b)
 def invoke(cmd,log):
     p=subprocess.run(cmd,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True)
     P(log).write_text("COMMAND: "+json.dumps(cmd)+"\n"+p.stdout)
