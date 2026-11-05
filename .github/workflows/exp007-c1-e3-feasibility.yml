@@ -37,7 +37,7 @@ jobs:
         run: |
           python3 -m pip install --disable-pip-version-check 'lxml==6.0.2'
           python3 -m py_compile research/c1_e3/feasibility.py
-          python3 -m research.c1_e3.feasibility --root original --replays replays --ledger ledger/SHA256_PER_MEMBER.csv --out feasibility
+          python3 -m research.c1_e3.feasibility --root original --replays replays --ledger ledger/SHA256_PER_MEMBER.csv --lock research/c1_e3/C1_FROZEN_INTERVENTION_LOCK.json --out feasibility
       - if: always()
         uses: actions/upload-artifact@v4
         with:
