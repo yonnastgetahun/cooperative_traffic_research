@@ -26,7 +26,7 @@ def trip(p):
 def roads(p):
     return {v.get("id"):tuple(v.find("route").get("edges").split()) for v in ET.parse(p).getroot().findall("vehicle")}
 def detect(p,external):
-    data={};fields=Counter();internal=0;times=[];short_bins=0;last_end=0
+    data={};fields=Counter();internal=0;times=[];short_bins=0;last_end=0;known_empty_waits=0;unknown_nonempty_waits=0
     with gzip.open(p,"rb") as f:
         for event,x in ET.iterparse(f,events=("end",)):
             if x.tag!="interval":continue
@@ -46,10 +46,18 @@ def detect(p,external):
                     v=e.get(field)
                     if v is not None:
                         d[field]=float(v);fields[field]+=1
+                # Only a no-sample edge interval licenses an exact zero waiting value.
+                # A missing waitingTime with nonzero sampledSeconds stays UNKNOWN.
+                if "waitingTime" not in d:
+                    if d.get("sampledSeconds")==0:
+                        d["waitingTime"]=0.0
+                        known_empty_waits+=1
+                    else:
+                        unknown_nonempty_waits+=1
                 data[key]=d
             x.clear()
     assert times and data
-    return data,dict(intervals=len(times),start=min(times),end=last_end,short_final_or_partial_intervals=short_bins,external_rows=len(data),internal_rows=internal,fields=dict(fields))
+    return data,dict(intervals=len(times),start=min(times),end=last_end,short_final_or_partial_intervals=short_bins,external_rows=len(data),internal_rows=internal,zero_wait_inferred_no_samples=known_empty_waits,unknown_wait_nonempty=unknown_nonempty_waits,fields=dict(fields))
 def addrec(rows,path):
     path.parent.mkdir(parents=True,exist_ok=True)
     out_csv(path,rows)
@@ -101,7 +109,7 @@ def main(root,out,ledger=None):
                 inc[e.get("to")].add(e.get("id"));outgoing[e.get("from")].add(e.get("id"))
         schedules={x.get("id"):float(x.get("depart")) for x in ET.parse(folder/"trips.xml").getroot().findall("trip")}
         assert len(schedules)==1000
-        route={};tripinfo={};elapsed={};edge={};edge_sum={}
+        route={};tripinfo={};elapsed={};edge={};edge_sum={};unobserved_wait={}
         for arm in ARMS:
             rp=folder/"routes"/(arm+".rou.xml")
             tp=folder/"observations"/arm/"tripinfo.xml"
@@ -115,9 +123,12 @@ def main(root,out,ledger=None):
             assert abs(sum(elapsed[arm].values())-obs[arm]["network_total_s"])<.12
             edge[arm],coverage=detect(folder/"observations"/arm/"edgeData.xml.gz",external)
             accum=defaultdict(Counter)
+            unobserved_wait[arm]=set()
             for (eid,t),vals in edge[arm].items():
                 for field in ("entered","left","waitingTime"):
                     if field in vals:accum[eid][field]+=vals[field]
+                if "waitingTime" not in vals:
+                    unobserved_wait[arm].add(eid)
             edge_sum[arm]=accum
             coverage.update(seed=seed,arm=arm,trip_records=1000,
                             laneData_gz_bytes=(folder/"observations"/arm/"laneData.xml.gz").stat().st_size,
@@ -184,11 +195,15 @@ def main(root,out,ledger=None):
                 return sum(m[eid].get(field,0) for eid in edges)
             for junction in sorted(junc):
                 entry=inc[junction];exit=outgoing[junction]
+                def safe_wait(edges):
+                    if (edges & unobserved_wait[arm]) or (edges & unobserved_wait["I"]):
+                        return ""
+                    return totals(edge_sum[arm],edges,"waitingTime")-totals(edge_sum["I"],edges,"waitingTime")
                 f3.append(dict(seed=seed,arm=arm,junction=junction,inbound_edges=len(entry),outbound_edges=len(exit),
                     delta_inbound_left=totals(edge_sum[arm],entry,"left")-totals(edge_sum["I"],entry,"left"),
                     delta_outbound_entered=totals(edge_sum[arm],exit,"entered")-totals(edge_sum["I"],exit,"entered"),
-                    delta_inbound_waiting_vehicle_s=totals(edge_sum[arm],entry,"waitingTime")-totals(edge_sum["I"],entry,"waitingTime"),
-                    delta_outbound_waiting_vehicle_s=totals(edge_sum[arm],exit,"waitingTime")-totals(edge_sum["I"],exit,"waitingTime")))
+                    delta_inbound_waiting_vehicle_s=safe_wait(entry),
+                    delta_outbound_waiting_vehicle_s=safe_wait(exit)))
         index={p["target_vehicle_id"]:"probe"+str(i) for i,p in enumerate(man["probes"])}
         pa,pb=(index[x] for x in man["bundle_target_ids"])
         selected={x["arm"]:x for x in f1 if x["seed"]==seed}
@@ -238,7 +253,7 @@ def main(root,out,ledger=None):
       f"- Original **695** source files, **60,000** completed tripinfo records, **60** previously run arms, and ten pred-before-label locks verified.",
       f"- Per-member original SHA256 release ledger verified: **{bool(ledger)}**.",
       "- Five-second edgeData used; exact individual edge-entry clocks and vehicle-resolved FCD NOT established.",
-      "- Missing field attributes are not silently read as zeros. Complete stream coverage and internal-edge counts appear in F0_coverage.csv.","",
+      "- Only missing waitingTime on zero-sampledSeconds edges is inferred to be exactly zero; missing on sampled edges is UNKNOWN. Coverage, zero-inference counts, final partial bins and internal-edge rows appear in F0_coverage.csv.","",
       "## F1 — Actual elapsed-time decomposition",
       f"- **50** route-change pairs: own + others = whole-network effect; source insertion + in-network duration = whole-network effect.",
       f"- Frozen four-seed E1-v2 MAE **{mae:.4f} network-seconds**, correct externality direction **{match}/16**. D1 NO-GO unchanged.",
@@ -250,10 +265,10 @@ def main(root,out,ledger=None):
     content+=["","## F2 — Observed five-second edge/queue-associated changes",
       f"- **{f2count:,}** paired external-edge/time-bin rows compared across all 50 route-change arms.",
       "- Entered and left counts, waiting, sampled seconds and nonadditive speed/occupancy snapshots retained in compressed raw-derived table.",
-      "- Temporal adjacency or lag is observational, not a unique spillback or queue-front causal measurement.","",
+      "- Waiting comparisons are performed on matched duration bins with observed or explicitly zero-sample inferred waiting; incomplete nonempty bins are omitted. Temporal adjacency or lag is observational, not a unique spillback or queue-front causal measurement.","",
       "## F3 — Priority-junction approach/discharge",
       f"- **{len(f3):,}** junction-by-arm rows for the **100** priority intersections.",
-      "- Inbound external-edge left, outbound entered and approach waiting contrasts are aggregate proxies; they do NOT count exact turn movements, gap acceptance, or concurrent crossings.","",
+      "- Inbound external-edge left and outbound entered counts are aggregate proxies. Missing waiting on sampled edges is marked unavailable rather than zero. None of these measures counts exact turns, gap acceptance or simultaneous crossings.","",
       "## F4 — Ten prospectively selected two-route bundles",
       "Four-arm identity: J = C(bundle) - C(single_a) - C(single_b) + C(I); all drivers included. Companion singleton IDs verified per seed.",
       "",
@@ -263,7 +278,7 @@ def main(root,out,ledger=None):
         content.append(f"| {b['seed']} | {b['singleton_a']}, {b['singleton_b']} | {b['observed_J_all_network_s']:+.1f} | {b['v1_pred_J_all_network_s']:+.1f} | {b['v2_pred_J_all_network_s']:+.1f} | {b['J_insertion_network_s']:+.1f} | {b['J_edge_waiting_vehicle_s']:+.1f} |")
     content+=["","## F5 — Hypothesis assessment",
       "- **Timing T:** directly observed scheduled and actual trip starts; five-second aggregate edge counts. Exact per-driver edge forecast-vs-truth error NOT OBSERVABLE.",
-      "- **Queue Q:** aggregate waiting and occupancy responses observable; true queue-front propagation, downstream receiving and causal mediation UNIDENTIFIED.",
+      "- **Queue Q:** five-second sampled waiting and occupancy responses observable with explicit zero-sample convention; true queue-front propagation, downstream receiving and causal mediation UNIDENTIFIED.",
       "- **Junction J:** static conflict model previously verified; aggregate external approach/discharge changes observable; movement-specific right-of-way and gap acceptance UNOBSERVABLE.",
       "- **Bundles B:** ten exact whole-driver interaction contrasts directly reconstructed; they do not prove a single junction or queue was causal.",
       "- **Accounting A:** 60 archived arm identity/source SHA checks, prediction locks, fixed routes, source insertion and duration decomposition passed; missing detector fields and sampling semantics remain documented.",
