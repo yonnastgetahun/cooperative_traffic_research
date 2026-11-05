@@ -1,0 +1,175 @@
+name: C1 E3 controlled causal effect-modification - frozen eight-arm once
+on:
+  pull_request:
+    paths:
+      - 'research/c1_e3/**'
+      - '.github/workflows/exp007-c1-e3-controlled.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'research/c1_e3/C1_EXECUTION_TRIGGER_2026-11-05.txt'
+permissions:
+  contents: write
+  actions: read
+jobs:
+  pr_no_sumo_syntax_and_trigger_check:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify source syntax, frozen selection and intended only once trigger
+        run: |
+          python3 -m py_compile research/c1_e3/feasibility.py research/c1_e3/controlled_study.py
+          python3 - <<'PY'
+          import json
+          d=json.load(open('research/c1_e3/C1_FROZEN_INTERVENTION_LOCK.json'))
+          assert d['fixed_seeds']==[6112,6113]
+          assert d['status']=='FROZEN_BEFORE_ANY_C2_C3_SUMO_OUTCOME'
+          assert d['selection_run']==42125134835
+          assert d['chosen']['D3E3_index']==14 and d['chosen']['other_index']==1
+          assert d['independent_validation']=='NOT_STARTED' and d['Test_B']=='NOT_RUN'
+          text=open('research/c1_e3/C1_EXECUTION_TRIGGER_2026-11-05.txt').read()
+          assert 'ONE-SHOT AUTHORIZED' in text
+          print('NO SIMULATIONS: source syntax, lock, one-shot trigger pass')
+          PY
+  original_source_and_exactly_eight_arm_C2_C4:
+    if: github.event_name == 'push' && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    container:
+      image: ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch original frozen 60-arm D1 evidence (original data never modified)
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 41966516110
+          github-token: ${{ github.token }}
+          name: exp007-e1v2-d1-original-frozen-60arm-evidence
+          path: original
+      - name: Obtain original 695 SHA256 ledger
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 41969929377
+          github-token: ${{ github.token }}
+          name: exp007-e1v2-d1-no-go-audit-manifests
+          path: ledger
+      - name: Download exact pre-outcome 6112/6113 J0/J1 generated network files and observed C1 decision (NO reconversion)
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 42125134835
+          github-token: ${{ github.token }}
+          name: exp007-c1-e3-C0-C1-frozen-feasibility
+          path: frozen
+      - name: Confirm all original 695 source member bytes, pinned status and C1 network files
+        run: |
+          python3 - <<'PY'
+          import sys,json
+          sys.path.insert(0,'research/replay')
+          from e1v2_four_arm_instrumented import assert_sources
+          a=assert_sources('original',full_ledger='ledger/SHA256_PER_MEMBER.csv')
+          assert a['G0']=='PASS' and a['original_run']==41966516110
+          print('PASS original 695 SHA members, two fixed seeds and E1-v2 original NO-GO')
+          PY
+          python3 -m py_compile research/c1_e3/controlled_study.py
+      - name: Execute four no-op controls and only if they reproduce, four modified E3 cases; then evaluate Psi
+        run: |
+          python3 -m research.c1_e3.controlled_study --source original --feas frozen --lock research/c1_e3/C1_FROZEN_INTERVENTION_LOCK.json --out controlled
+          cat controlled/C1_FINAL_SCIENTIFIC_REPORT.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Retain all original attempts, including a fail-closed stop
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c1-e3-original-frozen-eightarm-attempts
+          path: controlled/
+          if-no-files-found: warn
+          retention-days: 30
+
+  retain_original_replay_bytes_and_scientific_verdict:
+    needs: original_source_and_exactly_eight_arm_C2_C4
+    if: github.event_name == 'push' && github.run_attempt == 1 && always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - name: Recover whatever original attempts completed, even an integrity STOP
+        uses: actions/download-artifact@v4
+        with:
+          name: c1-e3-original-frozen-eightarm-attempts
+          path: controlled
+      - name: Retrieve original C1 pre-outcome network and decision members for release
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 42125134835
+          github-token: ${{ github.token }}
+          name: exp007-c1-e3-C0-C1-frozen-feasibility
+          path: frozen
+      - name: Build exact-member-verified ZIP packages of every attempted arm, frozen C1 networks, and scientific results
+        run: |
+          python3 - <<'PY'
+          import csv,hashlib,zipfile
+          from pathlib import Path
+          root=Path('release');root.mkdir()
+          dirs=[p for p in Path('controlled').iterdir() if p.is_dir()]
+          manifest=[]
+          for folder in dirs:
+              if not (folder/'attempt.json').is_file():continue
+              name='c1-e3-'+folder.name+'.zip'
+              with zipfile.ZipFile(root/name,'w',zipfile.ZIP_DEFLATED,compresslevel=3) as z:
+                  for p in sorted(folder.glob('*')):
+                      if not p.is_file():continue
+                      data=p.read_bytes()
+                      manifest.append(dict(archive=name,member=p.name,size=len(data),
+                                           sha256=hashlib.sha256(data).hexdigest()))
+                      z.writestr(p.name,data)
+          for location,name in [(Path('frozen'),'c1-e3-preregistered-networks-and-C1.zip'),
+                                (Path('controlled'),'c1-e3-scientific-verdict.zip')]:
+              if not location.is_dir():continue
+              files=sorted(p for p in location.rglob('*') if p.is_file() and
+                           (location.name=='frozen' or p.parent==location))
+              with zipfile.ZipFile(root/name,'w',zipfile.ZIP_DEFLATED,compresslevel=3) as z:
+                  for p in files:
+                      data=p.read_bytes();rel=p.relative_to(location).as_posix()
+                      manifest.append(dict(archive=name,member=rel,size=len(data),
+                                           sha256=hashlib.sha256(data).hexdigest()))
+                      z.writestr(rel,data)
+          assert manifest and any(r['archive']=='c1-e3-preregistered-networks-and-C1.zip' for r in manifest)
+          with (root/'SHA256_PER_MEMBER.csv').open('w',newline='') as f:
+              w=csv.DictWriter(f,fieldnames=['archive','member','size','sha256']);w.writeheader();w.writerows(manifest)
+          with (root/'SHA256_RELEASE_ASSETS.txt').open('w') as f:
+              for p in sorted(root.glob('*.zip')):
+                  f.write(hashlib.sha256(p.read_bytes()).hexdigest()+'  '+p.name+'\n')
+          for p in root.glob('*.zip'):
+              with zipfile.ZipFile(p) as z:
+                  for r in manifest:
+                      if r['archive']==p.name:
+                          assert hashlib.sha256(z.read(r['member'])).hexdigest()==r['sha256']
+          print('Original C1 intervention/attempt SHA256 members verified:',len(manifest))
+          PY
+      - name: Preserve the bounded study outcome permanently, even an integrity STOP
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag=exp007-c1-e3-controlled-effect-modification-2026-11-05
+          if gh release view "$tag" >/dev/null 2>&1; then echo "C1 original evidence release already exists; refuse overwrite"; exit 1; fi
+          gh release create "$tag" release/* --title "C1 E3 controlled priority effect-modification — original eight-arm or stopped-at-gate evidence" --notes "Exact pre-outcome E3 selected priority patch and 6112/6113 J0/J1 network bytes from run 42125134835, plus exactly the attempted C2/C3 SUMO 1.28.0 arms, and original scientific run-state. One-shot execution preserves the original D1 DEVELOPMENT_NOT_QUALIFIED, independent validation NOT STARTED, cooperative Test B NOT RUN. Report the original run-state or final scientific verdict; this release alone does not imply C2/C3 passage or cooperative efficacy."
+          gh release view "$tag" --json url,assets
+      - name: Commit compact findings into a separate peer-reviewable results branch, never re-trigger C1
+        run: |
+          branch="science/c1-e3-results-$GITHUB_RUN_ID"
+          mkdir -p docs/results/exp007_c1_e3_2026_11_05
+          if [ -s controlled/C1_FINAL_SCIENTIFIC_REPORT.md ]; then
+            cp controlled/C1_FINAL_SCIENTIFIC_REPORT.md docs/POST_EXP007_C1_E3_CONTROLLED_FINAL_SCIENTIFIC_REPORT_2026-11-05.md
+            cp controlled/C4*.csv controlled/C4_scientific_verdict.json docs/results/exp007_c1_e3_2026_11_05/
+          elif [ -s controlled/STOP_REPORT.md ]; then
+            cp controlled/STOP_REPORT.md docs/POST_EXP007_C1_E3_CONTROLLED_FINAL_SCIENTIFIC_REPORT_2026-11-05.md
+          else
+            printf '%s\n' '# C1 study: validity report unavailable' 'The one-shot GitHub Actions run ended before any readable C2/C3/C4 report. Do not infer physical effects. Inspect the run and original evidence release.' > docs/POST_EXP007_C1_E3_CONTROLLED_FINAL_SCIENTIFIC_REPORT_2026-11-05.md
+          fi
+          cp controlled/run-state.json docs/results/exp007_c1_e3_2026_11_05/ 2>/dev/null || true
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add docs/POST_EXP007_C1_E3_CONTROLLED_FINAL_SCIENTIFIC_REPORT_2026-11-05.md docs/results/exp007_c1_e3_2026_11_05/
+          git commit -m "science: preserve controlled C1 E3 effect-modification execution outcome"
+          git push origin "$branch"
