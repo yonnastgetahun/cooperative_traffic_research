@@ -51,13 +51,13 @@ def audit(root,out):
         folder=root/f"seed-{seed}"
         m=read(folder/"scenario-manifest.json")
         lock=read(folder/"prediction-lock.json")
-        result=read(folder/"predictions.json")
+        result=read(folder/"predictions"/"predictions.json")
         obs=read(folder/"observations-summary.json")
         partition="DEV_BUILD" if seed in BUILD else "DEV_CHECK"
         if (m["seed"]!=seed or m["partition"]!=partition or lock["seed"]!=seed
             or result["seed"]!=seed or obs["seed"]!=seed or len(result["rows"])!=5):
             raise AssertionError("Wrong seed/partition/forecast group")
-        if sha(folder/"predictions.json")!=lock["prediction_sha256"]:
+        if sha(folder/"predictions"/"predictions.json")!=lock["prediction_sha256"]:
             raise AssertionError("Prediction changed from predecision SHA")
         if sha(folder/"network.net.xml")!=m["network_sha256"] or sha(folder/"trips.xml")!=m["demand_sha256"]:
             raise AssertionError("Original network/OD changed")
