@@ -1,0 +1,109 @@
+name: E1-v2 D1 original evidence audit and durable NO-GO release (NO new SUMO)
+
+on:
+  pull_request:
+    paths:
+      - 'research/audits/e1_v2_d1_archive_no_go_audit.py'
+      - '.github/workflows/exp007-e1v2-d1-audit-preserve-nogo.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'research/audits/e1_v2_d1_archive_no_go_audit.py'
+      - '.github/workflows/exp007-e1v2-d1-audit-preserve-nogo.yml'
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  archive-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@v4
+      - name: Retrieve original 60-arm E1-v2 development artifact; no SUMO
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 41966516110
+          github-token: ${{ github.token }}
+          name: exp007-e1v2-d1-original-frozen-60arm-evidence
+          path: original
+      - name: Verify all predictions, network SHA, 60000 tripinfos and frozen NO-GO; preserve exact source-member bytes
+        run: |
+          python3 - <<'PY'
+          import pathlib,zipfile,csv,json,hashlib,io,xml.etree.ElementTree as ET
+          root=pathlib.Path("original")
+          files=sorted(p for p in root.rglob("*") if p.is_file())
+          assert len(files)==695, len(files)
+          for seed in list(range(6101,6107))+list(range(6111,6115)):
+              pre=root/("seed-"+str(seed))
+              man=json.loads((pre/"scenario-manifest.json").read_text())
+              lock=json.loads((pre/"prediction-lock.json").read_text())
+              obs=json.loads((pre/"observations-summary.json").read_text())["observations"]
+              sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+              assert sha(pre/"network.net.xml")==man["network_sha256"]
+              assert sha(pre/"trips.xml")==man["demand_sha256"]
+              assert sha(pre/"predictions/predictions.json")==lock["prediction_sha256"]
+              for arm in ("I","probe0","probe1","probe2","probe3","bundle"):
+                  assert sha(pre/"routes"/(arm+".rou.xml"))==man["arm_route_sha256"][arm]
+                  f=pre/"observations"/arm/"tripinfo.xml"
+                  assert sha(f)==obs[arm]["tripinfo_sha256"]
+                  ids=[x.get("id") for x in ET.parse(f).getroot().findall("tripinfo")]
+                  assert len(ids)==len(set(ids))==1000
+          verdict=json.loads((root/"development-verdict.json").read_text())
+          assert verdict["scientific_status"]=="DEVELOPMENT_NOT_QUALIFIED"
+          assert verdict["new_validation"]=="NOT_STARTED" and verdict["Test_B"]=="NOT_RUN"
+          assert verdict["n_sumo_arms"]==60 and verdict["n_driver_tripinfos"]==60000
+          assert abs(verdict["mean_seed_externality_MAE_network_s"]["E1v2"]-1478.5625)<1e-7
+          assert verdict["n_directional_correct"]==5 and verdict["false_benefit_count_gt30_network_s"]==0
+          out=pathlib.Path("release");out.mkdir()
+          name="e1v2-d1-original-member-bytes-2026-11-04.zip"
+          ledger=[]
+          with zipfile.ZipFile(out/name,"w",zipfile.ZIP_DEFLATED,compresslevel=3) as z:
+              for p in files:
+                  rel=p.relative_to(root).as_posix()
+                  data=p.read_bytes()
+                  ledger.append({"member":rel,"bytes":len(data),"sha256":hashlib.sha256(data).hexdigest()})
+                  z.writestr(rel,data)
+          with zipfile.ZipFile(out/name) as z:
+              assert len(z.namelist())==695
+              for x in ledger:
+                  assert hashlib.sha256(z.read(x["member"])).hexdigest()==x["sha256"]
+          with (out/"SHA256_PER_MEMBER.csv").open("w",newline="") as f:
+              w=csv.DictWriter(f,fieldnames=("member","bytes","sha256"));w.writeheader();w.writerows(ledger)
+          archive_sha=hashlib.sha256((out/name).read_bytes()).hexdigest()
+          (out/"SHA256_RELEASE_ASSETS.txt").write_text(archive_sha+"  "+name+"\n")
+          (out/"SOURCE_AND_DECISION.json").write_text(json.dumps({
+             "original_workflow":41966516110,"original_artifact":13387764476,
+             "original_artifact_zip_sha256":"c8b7e508ecbffd2c4b5ea7803dc83024780e1beecd42002c080ebf6b4d0c88e5",
+             "repacked_member_count":695,"arms":60,"tripinfo_records":60000,
+             "status":"DEVELOPMENT_NOT_QUALIFIED","validation":"NOT_STARTED","Test_B":"NOT_RUN",
+             "note":"Original 695 extracted file members preserved exactly; repackaged ZIP SHA differs from original Actions ZIP wrapper."
+          },indent=2)+"\n")
+          (out/"development-verdict.json").write_bytes((root/"development-verdict.json").read_bytes())
+          print("PASS: 695 original files, 60000 trip records, prediction locks and scientific NO-GO")
+          PY
+      - name: Preserve small provenance/ledger files for PR checks
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp007-e1v2-d1-no-go-audit-manifests
+          path: |
+            release/SHA256_*
+            release/SOURCE_AND_DECISION.json
+            release/development-verdict.json
+          retention-days: 30
+      - name: Publish permanent archive only on first merged main run
+        if: github.event_name == 'push' && github.run_attempt == 1
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="exp007-e1v2-d1-development-nogo-2026-11-04"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "Release exists; do not overwrite original evidence."
+            exit 1
+          fi
+          gh release create "$tag" release/* \
+            --title "E1-v2 D1 — 60-arm development NO-GO (original evidence)" \
+            --notes "Original 60-arm E1-v2 J1 development source members with per-member SHA-256 and development-verdict.json. E1-v2 MAE 1478.5625 network-s, worse than zero baseline 1478.0625; sign 5/16 versus 60% required. DEVELOP­MENT NOT QUALIFIED. No independent validation or Test B. Repackaged ZIP preserves original 695 member bytes, not original Actions ZIP wrapper."
+          gh release view "$tag" --json url,assets
