@@ -152,6 +152,7 @@ def freeze_all_predictions(root):
         sh=save_prediction_once(p,result)
         lock={"seed":seed,"partition":result["partition"],
               "prediction_sha256":sh,"prediction_file":"predictions.json",
+              "prediction_shas":{"predictions.json":sh},
               "source_hash":result["model_v2_sha256"],
               "observed_outcomes_used":False}
         write(directory/"prediction-lock.json",lock)
