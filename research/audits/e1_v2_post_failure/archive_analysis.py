@@ -26,12 +26,14 @@ def trip(p):
 def roads(p):
     return {v.get("id"):tuple(v.find("route").get("edges").split()) for v in ET.parse(p).getroot().findall("vehicle")}
 def detect(p,external):
-    data={};fields=Counter();internal=0;times=[];miss=0
+    data={};fields=Counter();internal=0;times=[];short_bins=0;last_end=0
     with gzip.open(p,"rb") as f:
         for event,x in ET.iterparse(f,events=("end",)):
             if x.tag!="interval":continue
             begin=float(x.get("begin"));end=float(x.get("end"))
-            assert end>begin and abs(end-begin-5)<.001
+            assert end>begin and end-begin<=5.001,(p,begin,end)
+            if end-begin<4.999:short_bins+=1
+            last_end=max(last_end,end)
             times.append(begin)
             for e in x.findall("edge"):
                 name=e.get("id")
@@ -39,7 +41,7 @@ def detect(p,external):
                     internal+=1;continue
                 key=(name,begin)
                 assert key not in data
-                d={}
+                d={"_end":end}
                 for field in ("entered","left","departed","arrived","waitingTime","sampledSeconds","speed","occupancy"):
                     v=e.get(field)
                     if v is not None:
@@ -47,7 +49,7 @@ def detect(p,external):
                 data[key]=d
             x.clear()
     assert times and data
-    return data,dict(intervals=len(times),start=min(times),end=max(times)+5,external_rows=len(data),internal_rows=internal,fields=dict(fields))
+    return data,dict(intervals=len(times),start=min(times),end=last_end,short_final_or_partial_intervals=short_bins,external_rows=len(data),internal_rows=internal,fields=dict(fields))
 def addrec(rows,path):
     path.parent.mkdir(parents=True,exist_ok=True)
     out_csv(path,rows)
@@ -159,6 +161,7 @@ def main(root,out,ledger=None):
             abswait=0.;netwait=0.;first=None;valid=0
             for key in sorted(joined,key=lambda z:(z[1],z[0])):
                 a=baseline[key];b=modified[key]
+                if abs(a["_end"]-b["_end"])>.001:continue
                 if not {"entered","left","waitingTime"}<=a.keys() or not {"entered","left","waitingTime"}<=b.keys():continue
                 dw=b["waitingTime"]-a["waitingTime"]
                 de=b["entered"]-a["entered"];dl=b["left"]-a["left"]
@@ -194,7 +197,7 @@ def main(root,out,ledger=None):
         Jwait=0.;Jwaitabs=0.;nj=0
         for key in common:
             vals=[edge[k][key].get("waitingTime") for k in ("bundle",pa,pb,"I")]
-            if None in vals:continue
+            if None in vals or len({edge[k][key]["_end"] for k in ("bundle",pa,pb,"I")})!=1:continue
             delta=vals[0]-vals[1]-vals[2]+vals[3]
             Jwait+=delta;Jwaitabs+=abs(delta);nj+=1
         f4.append(dict(seed=seed,targets="|".join(man["bundle_target_ids"]),
