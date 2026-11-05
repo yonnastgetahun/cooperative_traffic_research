@@ -4,7 +4,17 @@ Every day, drivers sit in traffic despite having powerful navigation apps. Those
 
 **What if we could bring some of the collective intelligence of tomorrow's autonomous transportation networks to today's human-driven roads?**
 
-## Start here: Latest public research update (Experiments 003–006)
+## Current scientific status — Experiment 007 and E1-v2 (November 5, 2026)
+
+**Experiment 007 Test A: NO-GO.** The frozen marginal-externality estimator achieved only **8/20 (40%)** correct directional predictions against a **60%** gate. The independent traffic-aware baseline versus cooperative **Test B was never run**. [Original Test A report](docs/EXPERIMENT_007_TEST_A_FINAL_SCIENTIFIC_REPORT.md).
+
+**E1-v1 and E1-v2 engineering succeeded, but development prediction qualification failed.** The latest connection-aware **E1-v2-J1** development study completed **60/60 SUMO arms**, **60,000 original tripinfo records** and 10 pre-outcome prediction locks. On development-check seeds **6111–6114**, E1-v2 externality MAE was **1,478.5625 network-seconds** versus **1,478.0625** for the zero-externality B0 reference; directional skill was **5/16 (31.25%)** versus the required **60%**. Frozen decision: **DEVELOPMENT_NOT_QUALIFIED**. Independent-validation seeds **6201–6212** and cooperative policy Test B seeds **6301–6312** remain unopened. [E1-v2 final scientific audit](docs/POST_EXP007_E1_V2_D1_FINAL_DEVELOPMENT_AUDIT_2026-11-04.md) · [Original evidence and SHA256 ledger](https://github.com/yonnastgetahun/cooperative_traffic_research/releases/tag/exp007-e1v2-d1-development-nogo-2026-11-04).
+
+**Current research stage:** Retrospective, **archive-only E1-v2 failure mechanism investigation F0–F5**, examining source-insertion/edge-entry timing, queue redistribution, priority-junction approach/discharge and nonadditive two-route interactions. [Merged prospective explanatory protocol (PR #85)](docs/POST_EXP007_E1_V2_D1_TIMING_QUEUE_DISCHARGE_BUNDLE_FAILURE_INVESTIGATION_PLAN_2026-11-04.md). This investigation is explanatory; it cannot retroactively qualify E1-v2, and five-second aggregate edge measurements are not exact vehicle trajectories. No fresh SUMO, estimator retuning, independent validation or policy Test B is authorized under it.
+
+**Long-term objective remains open:** Discover whether voluntary, collective routing can improve total traffic outcomes relative to an **equally informed independent traffic-aware baseline**, while measuring participant and nonparticipant harm. No successful cooperative advantage has been demonstrated. Findings are from a synthetic SUMO network, not observed public-road traffic.
+
+## Public research updates (historical; Experiments 003–006)
 
 **[We corrected a consequential routing flaw. But cooperation still didn't win.](docs/RESEARCH_UPDATE_EXPERIMENTS_003_TO_006.md)**
 
@@ -18,7 +28,7 @@ A concise, reader-friendly account of prediction improvements, the unexpected ro
 2. **Alongside that:** Continue measuring individual fairness, severe realized delays, consent/participation assumptions and spillover effects.
 3. **Later:** Consider quality of experience (comfort, calmness and perceived journey quality). These outcomes are **not active experiment objectives** and have not been measured by our SUMO studies. [Deferred exploration notes](docs/DEFERRED_QUALITY_OF_EXPERIENCE_RESEARCH_NOTES.md).
 
-**Experiment 007 has not been selected or launched.** The immediate direction is a bounded comparison of coordination mechanisms, not another automatic refinement of policy E or a quality-of-experience measurement program.
+**Historical direction note (November 1):** The comparative mechanism assessment led to Experiment 007. Its Test A has now run and failed; newer E1-v1/E1-v2 estimator development has also failed to qualify. See the current status above rather than treating this earlier planning state as current.
 
 ## Latest verified science — Experiments 001–006 (October 31, 2026)
 
