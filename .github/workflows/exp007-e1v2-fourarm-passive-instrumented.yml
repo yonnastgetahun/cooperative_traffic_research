@@ -1,0 +1,175 @@
+name: E1-v2 four passive vehicle-level replays (strict historical G0-G4)
+on:
+  pull_request:
+    paths:
+      - 'research/replay/e1v2_four_arm_instrumented.py'
+      - 'docs/POST_EXP007_E1_V2_FOUR_ARM_PASSIVE_REPLAY_FROZEN_EXECUTION_PROTOCOL_2026-11-05.md'
+      - '.github/workflows/exp007-e1v2-fourarm-passive-instrumented.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'research/replay/e1v2_four_arm_instrumented.py'
+      - 'docs/POST_EXP007_E1_V2_FOUR_ARM_PASSIVE_REPLAY_FROZEN_EXECUTION_PROTOCOL_2026-11-05.md'
+      - '.github/workflows/exp007-e1v2-fourarm-passive-instrumented.yml'
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  G0_G1_no_sumo_preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    container:
+      image: ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download original 60-arm immutable E1-v2 D1 archive
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 41966516110
+          github-token: ${{ github.token }}
+          name: exp007-e1v2-d1-original-frozen-60arm-evidence
+          path: original
+      - name: Download previously verified original 695-member SHA256 ledger
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 41969929377
+          github-token: ${{ github.token }}
+          name: exp007-e1v2-d1-no-go-audit-manifests
+          path: original-ledger
+      - name: No-SUMO full original member hashes and pinned SUMO instrument preflight
+        run: |
+          python3 -m py_compile research/replay/e1v2_four_arm_instrumented.py
+          python3 research/replay/e1v2_four_arm_instrumented.py preflight --root original --ledger original-ledger/SHA256_PER_MEMBER.csv --out preflight/G0_G1.json
+          grep -q '"G1": "PASS"' preflight/G0_G1.json
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e1v2-fourarm-G0-G1-provenance
+          path: preflight/
+          retention-days: 30
+          if-no-files-found: warn
+
+  four_original_only_passive_replays:
+    if: github.event_name == 'push' && github.run_attempt == 1
+    needs: G0_G1_no_sumo_preflight
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    container:
+      image: ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 41966516110
+          github-token: ${{ github.token }}
+          name: exp007-e1v2-d1-original-frozen-60arm-evidence
+          path: original
+      - name: Execute only original 6112 I/probe2 and 6113 I/probe2 once (never Test B)
+        run: |
+          mkdir -p replays
+          python3 research/replay/e1v2_four_arm_instrumented.py replay --root original --seed 6112 --arm I --out replays/replay-6112-I
+          python3 research/replay/e1v2_four_arm_instrumented.py replay --root original --seed 6112 --arm probe2 --out replays/replay-6112-probe2
+          python3 research/replay/e1v2_four_arm_instrumented.py replay --root original --seed 6113 --arm I --out replays/replay-6113-I
+          python3 research/replay/e1v2_four_arm_instrumented.py replay --root original --seed 6113 --arm probe2 --out replays/replay-6113-probe2
+      - name: Independent G2/G3 readback and retrospective G4 traffic analysis
+        run: |
+          python3 research/replay/e1v2_four_arm_instrumented.py aggregate --root original --replays replays --out findings
+          test -s findings/FINAL_SCIENTIFIC_REPORT.md
+          test -s findings/scientific_summary.json
+          cat findings/FINAL_SCIENTIFIC_REPORT.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Preserve all original four replay attempts and raw vehicle observations
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e1v2-fourarm-original-replays
+          path: replays/
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Preserve original analytical decision even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e1v2-fourarm-scientific-analysis
+          path: findings/
+          if-no-files-found: warn
+          retention-days: 30
+
+  permanent_raw_evidence_and_report_branch:
+    needs: four_original_only_passive_replays
+    if: github.event_name == 'push' && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: e1v2-fourarm-original-replays
+          path: replays
+      - uses: actions/download-artifact@v4
+        with:
+          name: e1v2-fourarm-scientific-analysis
+          path: findings
+      - name: Verify original instrumented members and construct immutable release package
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import csv,hashlib,zipfile
+          root=Path('replays');out=Path('release');out.mkdir()
+          ledger=[]
+          pairs=((6112,'I'),(6112,'probe2'),(6113,'I'),(6113,'probe2'))
+          for seed,arm in pairs:
+              folder=root/('replay-%d-%s'%(seed,arm))
+              assert folder.is_dir()
+              files=sorted(p for p in folder.iterdir() if p.is_file())
+              assert len(files)>=12,(folder,len(files))
+              fn='e1v2-passive-%d-%s.zip'%(seed,arm)
+              with zipfile.ZipFile(out/fn,'w',zipfile.ZIP_DEFLATED,compresslevel=3) as z:
+                  for f in files:
+                      data=f.read_bytes()
+                      ledger.append({'archive':fn,'member':f.name,'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest()})
+                      z.writestr(f.name,data)
+              with zipfile.ZipFile(out/fn) as z:
+                  for r in ledger:
+                      if r['archive']==fn:
+                          assert hashlib.sha256(z.read(r['member'])).hexdigest()==r['sha256']
+          with zipfile.ZipFile(out/'e1v2-fourarm-scientific-summary.zip','w',zipfile.ZIP_DEFLATED) as z:
+              for f in sorted(Path('findings').glob('*')):
+                  if f.is_file():
+                      data=f.read_bytes()
+                      ledger.append({'archive':'e1v2-fourarm-scientific-summary.zip','member':f.name,
+                                     'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest()})
+                      z.writestr(f.name,data)
+          with (out/'SHA256_PER_MEMBER.csv').open('w',newline='') as f:
+              w=csv.DictWriter(f,fieldnames=['archive','member','bytes','sha256']);w.writeheader();w.writerows(ledger)
+          with (out/'SHA256_RELEASE_ASSETS.txt').open('w') as f:
+              for p in sorted(out.glob('*.zip')):
+                  f.write(hashlib.sha256(p.read_bytes()).hexdigest()+'  '+p.name+'\n')
+          print('Verified four immutable replay packages plus scientific summary:',len(ledger),'member checksums')
+          PY
+      - name: Publish separate permanent evidence release (no changes to D1 evidence)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag=exp007-e1v2-fourarm-passive-vehicle-replay-2026-11-05
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "Evidence release exists; refuse original data overwrite"
+            exit 1
+          fi
+          gh release create "$tag" release/* --title "E1-v2 passive four-arm vehicle-level replay — original observations" --notes "Four original E1-v2 development-arm passive SUMO 1.28.0 replays: 6112 I/probe2 and 6113 I/probe2. Original trip outcomes, 1s FCD, vehroute exit times and 5s edge/lane streams, SHA256 per member and permanent scientific summary. Retrospective only; no estimator validation, no cooperative Test B, no causal bottleneck uniquely identified. E1-v2 D1 DEVELOPMENT_NOT_QUALIFIED remains."
+          gh release view "$tag" --json url,assets
+      - name: Commit scientific report and compact derived tables on a review branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          target="science/e1v2-fourarm-results-$GITHUB_RUN_ID"
+          mkdir -p docs/results/exp007_e1v2_fourarm_passive_2026_11_05
+          cp findings/FINAL_SCIENTIFIC_REPORT.md docs/POST_EXP007_E1_V2_FOUR_ARM_PASSIVE_REPLAY_FINAL_SCIENTIFIC_REPORT_2026-11-05.md
+          cp findings/*.csv findings/scientific_summary.json docs/results/exp007_e1v2_fourarm_passive_2026_11_05/
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$target"
+          git add docs/POST_EXP007_E1_V2_FOUR_ARM_PASSIVE_REPLAY_FINAL_SCIENTIFIC_REPORT_2026-11-05.md docs/results/exp007_e1v2_fourarm_passive_2026_11_05/
+          git commit -m "science: preserve original four-arm replay outcome and vehicle-level diagnostic results"
+          git push origin "$target"
