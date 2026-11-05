@@ -29,7 +29,7 @@ jobs:
           path: scientific
       - name: Install XML source compiler dependency and run all no-SUMO model tests
         run: |
-          python3 -m pip install --disable-pip-version-check --break-system-packages 'lxml==6.0.2'
+          python3 -m pip install --disable-pip-version-check 'lxml==6.0.2'
           python3 -m unittest discover -q research/externality_estimator_v2/tests
           python3 -m unittest discover -q research/externality_estimator/tests
           python3 -m py_compile research/e1_v2_development/driver.py research/e1_v2_development/selector.py
@@ -59,7 +59,7 @@ jobs:
           ref: be2e8d27c78c8b6de4891115d6d951edc877ac6e
           path: scientific
       - name: Install XML source dependency
-        run: python3 -m pip install --disable-pip-version-check --break-system-packages 'lxml==6.0.2'
+        run: python3 -m pip install --disable-pip-version-check 'lxml==6.0.2'
       - name: Lock all new predictions BEFORE 60 SUMO outcomes; report negative findings unchanged
         run: |
           python3 -m research.e1_v2_development.driver develop --scientific scientific --out development
