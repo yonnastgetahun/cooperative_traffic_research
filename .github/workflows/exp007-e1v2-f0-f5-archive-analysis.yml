@@ -1,0 +1,69 @@
+name: E1-v2 F0-F5 retrospective audit (archive only, NO SUMO)
+on:
+  pull_request:
+    paths: ['research/audits/e1_v2_post_failure/**', '.github/workflows/exp007-e1v2-f0-f5-archive-analysis.yml']
+  push:
+    branches: [main]
+    paths: ['research/audits/e1_v2_post_failure/**', '.github/workflows/exp007-e1v2-f0-f5-archive-analysis.yml']
+permissions:
+  contents: write
+  actions: read
+  pull-requests: write
+jobs:
+  retrospective-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download original 60-arm evidence without SUMO
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 41966516110
+          github-token: ${{ github.token }}
+          name: exp007-e1v2-d1-original-frozen-60arm-evidence
+          path: original
+      - name: Fetch original per-member checksum ledger
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p ledger
+          gh release download exp007-e1v2-d1-development-nogo-2026-11-04 --pattern SHA256_PER_MEMBER.csv --dir ledger
+          test -s ledger/SHA256_PER_MEMBER.csv
+      - name: Run F0-F5 retrospective analysis
+        run: |
+          python3 research/audits/e1_v2_post_failure/archive_analysis.py --root original --out results --ledger ledger/SHA256_PER_MEMBER.csv
+          test -s results/FINAL_F0_F5_REPORT.md
+          test -s results/F2_edge_5second.csv.gz
+          cat results/FINAL_F0_F5_REPORT.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Archive complete derived evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp007-e1v2-f0-f5-derived-evidence
+          path: results/
+          retention-days: 30
+          if-no-files-found: error
+      - name: Publish permanent derived evidence (main only)
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag=exp007-e1v2-f0-f5-archive-only-2026-11-05
+          if gh release view "$tag" >/dev/null 2>&1; then echo "Release already exists; refusing overwrite"; exit 1; fi
+          (cd results && sha256sum *.csv *.json *.md *.gz > DERIVED_ASSETS_SHA256.txt)
+          gh release create "$tag" results/* --title "E1-v2 F0-F5 archived mechanism evidence (no SUMO)" --notes "Retrospective diagnostic original-development archive only. E1-v2 DEVELOPMENT_NOT_QUALIFIED. Validation and Test B not run. Associations do not identify unique causal queue or junction mechanisms."
+      - name: Create peer-reviewable final-results PR (main only)
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          outbranch="science/e1v2-f0-f5-results-$GITHUB_RUN_ID"
+          mkdir -p docs/results/exp007_e1v2_f0_f5_2026_11_05
+          cp results/FINAL_F0_F5_REPORT.md docs/POST_EXP007_E1_V2_F0_F5_ARCHIVAL_MECHANISM_FINAL_REPORT_2026-11-05.md
+          cp results/F0_F5_summary.json results/F0_coverage.csv results/F1_effects.csv results/F3_junctions.csv results/F4_bundles.csv docs/results/exp007_e1v2_f0_f5_2026_11_05/
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$outbranch"
+          git add docs/POST_EXP007_E1_V2_F0_F5_ARCHIVAL_MECHANISM_FINAL_REPORT_2026-11-05.md docs/results/exp007_e1v2_f0_f5_2026_11_05/
+          git commit -m "science: publish measured E1-v2 F0-F5 archive-only findings"
+          git push origin "$outbranch"
+          gh pr create --title "Science: publish E1-v2 F0-F5 measured archive-only findings" --base main --head "$outbranch" --body "All 60 original archived arms analyzed without SUMO or estimator revision. Reconciliation, five-second edge state, 100 priority junctions, ten bundles, and causal limitations reported. Full derived edge table and checksums are in the evidence release."
