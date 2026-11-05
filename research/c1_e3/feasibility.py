@@ -219,9 +219,31 @@ def main(args):
         audit["C1_modified_semantic_diff"]=changes
         audit["C1_rule_verification"]=why
         if not ok:raise RuntimeError("DESIGN_NO_GO: "+why)
-        audit["selected_source_network_sha256"]=sha(orig)
-        audit["noop_network_sha256"]=sha(noop)
-        audit["modified_network_sha256"]=sha(mod)
+        audit["network_shas_by_seed"]={"6112":{
+            "source":sha(orig),"J0_noop":sha(noop),"J1_modified":sha(mod)}}
+        # Reuse the exact selected E3 pair and the identical plain-XML patch
+        # on seed 6113; do not reselect movements on that contrasting seed.
+        orig2=P(args.root)/"seed-6113"/"network.net.xml"
+        _,pair2=source_pair(orig2)
+        wanted=lambda m:(m.index,m.src,m.dst,m.via)
+        pair_lookup={(wanted(x),wanted(y)):(x,y) for x,y in pair2}
+        a2,b2=pair_lookup[(wanted(a),wanted(b))]
+        nop2=netout/"6113-J0.net.xml"
+        mod2=netout/"6113-J1.net.xml"
+        invoke(["netconvert","--sumo-net-file",str(orig2),"-o",str(nop2)],
+               out/"6113-no-op-netconvert.log")
+        nodiff2=semantic(orig2,nop2)
+        audit["C1_seed6113_noop_semantic_diff"]=nodiff2
+        if not no_op_equal(nodiff2):
+            raise RuntimeError("DESIGN_NO_GO: 6113 no-op conversion changes non-metadata physics")
+        invoke(["netconvert","--sumo-net-file",str(orig2),"--connection-files",str(patch),
+                "-o",str(mod2)],out/"6113-modified-E3-netconvert.log")
+        good2,delta2,why2=patch_single_pair_ok(orig2,nop2,mod2,a2,b2)
+        audit["C1_seed6113_modified_semantic_diff"]=delta2
+        if not good2:
+            raise RuntimeError("DESIGN_NO_GO: 6113 patch not isolated: "+why2)
+        audit["network_shas_by_seed"]["6113"]={
+            "source":sha(orig2),"J0_noop":sha(nop2),"J1_modified":sha(mod2)}
         audit["patch_sha256"]=sha(patch)
         audit["C1"]="PASS"
         audit["status"]="C0_C1_ELIGIBLE_TO_FREEZE_EXECUTABLE_PROTOCOL"
