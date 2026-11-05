@@ -1,0 +1,72 @@
+name: E1-v2 D1 fresh development-only paired counterfactuals (strict gates)
+
+on:
+  pull_request:
+    paths:
+      - 'research/e1_v2_development/**'
+      - '.github/workflows/exp007-e1v2-d1-frozen-development.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'research/e1_v2_development/**'
+      - '.github/workflows/exp007-e1v2-d1-frozen-development.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  no-sumo-simulation-preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    container:
+      image: ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb
+    steps:
+      - uses: actions/checkout@v4
+      - name: Obtain unchanged source for original synthetic demand generator
+        uses: actions/checkout@v4
+        with:
+          ref: be2e8d27c78c8b6de4891115d6d951edc877ac6e
+          path: scientific
+      - name: Install XML source compiler dependency and run all no-SUMO model tests
+        run: |
+          python3 -m pip install --disable-pip-version-check --break-system-packages 'lxml==6.0.2'
+          python3 -m unittest discover -q research/externality_estimator_v2/tests
+          python3 -m unittest discover -q research/externality_estimator/tests
+          python3 -m py_compile research/e1_v2_development/driver.py research/e1_v2_development/selector.py
+      - name: Freeze and verify all 10 new demand/route/prediction manifests without a SUMO simulation
+        run: |
+          python3 -m research.e1_v2_development.driver preflight --scientific scientific --out preflight
+      - name: Retain source and predecision manifests even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp007-e1v2-d1-all-seeds-predecision-manifests
+          path: preflight/
+          retention-days: 30
+
+  fresh-development-only:
+    if: github.event_name == 'push' && github.run_attempt == 1
+    needs: no-sumo-simulation-preflight
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    container:
+      image: ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb
+    steps:
+      - uses: actions/checkout@v4
+      - name: Obtain unchanged original synthetic demand generator
+        uses: actions/checkout@v4
+        with:
+          ref: be2e8d27c78c8b6de4891115d6d951edc877ac6e
+          path: scientific
+      - name: Install XML source dependency
+        run: python3 -m pip install --disable-pip-version-check --break-system-packages 'lxml==6.0.2'
+      - name: Lock all new predictions BEFORE 60 SUMO outcomes; report negative findings unchanged
+        run: |
+          python3 -m research.e1_v2_development.driver develop --scientific scientific --out development
+      - name: Retain complete frozen source, routes, model predictions, raw SUMO outputs and NO-GO decision
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp007-e1v2-d1-original-frozen-60arm-evidence
+          path: development/
+          retention-days: 30
