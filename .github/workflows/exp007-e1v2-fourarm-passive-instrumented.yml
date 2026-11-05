@@ -5,13 +5,6 @@ on:
       - 'research/replay/e1v2_four_arm_instrumented.py'
       - 'docs/POST_EXP007_E1_V2_FOUR_ARM_PASSIVE_REPLAY_FROZEN_EXECUTION_PROTOCOL_2026-11-05.md'
       - '.github/workflows/exp007-e1v2-fourarm-passive-instrumented.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'research/replay/e1v2_four_arm_instrumented.py'
-      - 'docs/POST_EXP007_E1_V2_FOUR_ARM_PASSIVE_REPLAY_FROZEN_EXECUTION_PROTOCOL_2026-11-05.md'
-      - '.github/workflows/exp007-e1v2-fourarm-passive-instrumented.yml'
-
 permissions:
   contents: write
   actions: read
