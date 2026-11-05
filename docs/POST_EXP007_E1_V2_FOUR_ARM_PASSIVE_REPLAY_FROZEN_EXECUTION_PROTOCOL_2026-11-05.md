@@ -18,7 +18,7 @@ Cooperative-routing efficacy would depend on forecasting how a change in one pla
 
 **SUMO:** Version 1.28.0; image ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb.
 
-**Approved code:** research/replay/e1v2_four_arm_instrumented.py, original source Git blob dd1b90719aba9949352e973581fc91c909f5e150; merge may update implementation solely to resolve verified pre-outcome defects with logs and unchanged science. Record executed checkout commit and actual file SHA.
+**Approved code:** research/replay/e1v2_four_arm_instrumented.py, original source Git blob c4c10fd7eb463f72eac6cb9685820b8d8b572121; the only pre-simulation repair so far changed the direct-script sibling helper import path, not the estimator, SUMO flags, study population, data, measurements or gates (PR #91 preflight run 42112414233 failed before SUMO with ModuleNotFoundError). Record the executing merge commit and actual script SHA. Record executed checkout commit and actual file SHA.
 
 **Input control:** Original network.net.xml, trips.xml, original I/probe2 routes and immutable predictions, unchanged network physics/car-following, right-of-way, random seed, timestep, vehicle classes, scheduled demand and all route assignments. The original source member ledger of 695 files must SHA-match. Only observational FCD, vehroute exitTimes, 5s edgeData and laneData output options are allowed. Do not invoke any demand generator, estimator, router or optimization intervention.
 
