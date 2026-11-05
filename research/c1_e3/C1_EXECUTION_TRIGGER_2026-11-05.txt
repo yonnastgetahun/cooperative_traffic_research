@@ -1,0 +1,7 @@
+ONE-SHOT AUTHORIZED — C1 controlled E3 original-priority versus precisely reversed-priority study.
+User approval: November 5, 2026, in this project conversation.
+Original study plan: docs/POST_EXP007_CONTROLLED_E3_JUNCTION_EFFECT_MODIFICATION_RESEARCH_PLAN_2026-11-05.md (PR #94).
+Frozen exact source pair, patch and four network SHA members: research/c1_e3/C1_FROZEN_INTERVENTION_LOCK.json, pre-outcome run 42125134835.
+Execution: exactly four J0 no-op controls on 6112 I/probe2 and 6113 I/probe2, with frozen historical G2 parity gates; ONLY IF ALL PASS, exactly four J1 modified-E3 priority arms. All eight have original 1,000 scheduled drivers and 1s FCD/5s detectors.
+No repeat, no model/route changes, no new seeds, no 6201-6212 independent validation, no 6301-6312 cooperative Test B, no social publishing.
+Only merger of this versioned trigger into main may dispatch the one-shot controlled C2/C3 workflow. Other code/doc changes cannot dispatch it.

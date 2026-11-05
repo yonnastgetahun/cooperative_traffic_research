@@ -1,0 +1,90 @@
+{
+  "study": "POST_EXP007_C1_E3_EFFECT_MODIFICATION",
+  "status": "FROZEN_BEFORE_ANY_C2_C3_SUMO_OUTCOME",
+  "selection_run": 42125134835,
+  "historical_source_run": 41966516110,
+  "original_replay_run": 42113107379,
+  "fixed_seeds": [
+    6112,
+    6113
+  ],
+  "fixed_arms": [
+    "I",
+    "probe2"
+  ],
+  "E3_junction": "E3",
+  "window_seconds": [
+    120,
+    300
+  ],
+  "co_presence_5s_bins": 35,
+  "chosen": {
+    "D3E3_index": 14,
+    "D3E3_from": "D3E3",
+    "D3E3_to": "E3E4",
+    "D3E3_via": ":E3_14_0",
+    "other_index": 1,
+    "other_from": "E4E3",
+    "other_to": "E3E2",
+    "other_via": ":E3_1_0",
+    "prohibited_by_original": {
+      "from": "D3E3",
+      "to": "E3E4"
+    },
+    "original_major": {
+      "from": "E4E3",
+      "to": "E3E2"
+    },
+    "new_prohibition": {
+      "prohibitor": "D3E3->E3E4",
+      "prohibited": "E4E3->E3E2"
+    }
+  },
+  "patch_sha256": "61bee718cc17e5a5fd5fd5ac1c87e88b9229cd6db22b237495c1cf6a7c2393af",
+  "networks": {
+    "6112": {
+      "source": "746b519a9e98ce7553ef6ad0261c31a0833372eff30ecbf30250e2f91d682c1c",
+      "J0_noop": "ae4d604ebebccd00f7eb9aef76e787ef459324e73a18f9e463a500887902e0ae",
+      "J1_modified": "7cdcd07756002086f104827b73dff0b395fdff467b0128f27415ff1bb7ff2a19"
+    },
+    "6113": {
+      "source": "ba31ae56f277898206dacdceef586ad4dea62603f0b4013d76cd0a3518764b12",
+      "J0_noop": "74957f071eab6fe64ebb18ea3d8a552fde2ca1b302db5f5c83bb77ca89571a40",
+      "J1_modified": "0e37b16ebfa46994f99923f43f083f8a6fd2efbc39a631b30a85bb62b8ce9737"
+    }
+  },
+  "allowable_derived_network_difference": {
+    "junctions_changed": [
+      "E3"
+    ],
+    "E3_request_bits": [
+      {
+        "request_index": 1,
+        "bit": 14,
+        "old": 0,
+        "new": 1
+      },
+      {
+        "request_index": 14,
+        "bit": 1,
+        "old": 1,
+        "new": 0
+      }
+    ],
+    "connection_state": [
+      {
+        "from": "E4E3",
+        "to": "E3E2",
+        "via": ":E3_1_0",
+        "old": "M",
+        "new": "m"
+      }
+    ],
+    "other_roads_or_connections_changed": 0
+  },
+  "protocol": "docs/POST_EXP007_CONTROLLED_E3_JUNCTION_EFFECT_MODIFICATION_RESEARCH_PLAN_2026-11-05.md",
+  "frozen_original_verdict": "DEVELOPMENT_NOT_QUALIFIED",
+  "independent_validation": "NOT_STARTED",
+  "Test_B": "NOT_RUN",
+  "note": "Selection and E3-only SUMO 1.28.0 netconvert patch are retrospective and only enable an 8-arm effect-modification case study. No change to estimator, source demand, routes, or reserved seeds."
+}
