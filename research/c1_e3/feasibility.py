@@ -150,13 +150,22 @@ def patch_single_pair_ok(orig,noop,modified,a,b):
         "old_response":orig_reqs[i][1],"new_response":adjusted_reqs[i][1]}
        for i in sorted(orig_reqs) if orig_reqs[i][1]!=adjusted_reqs[i][1]
     ]
-    if not diff["connections_equal"]:
-        return False,diff,"Priority edit changed connection fields; check C1_modified_semantic_diff.connection_changes for scope"
+    lower=a if b.index in a.yields_to else b
+    higher=b if lower==a else a
+    # SUMO netconvert must update the controlled connection's major/minor
+    # state when reversing priority. Permit exactly that semantic E3 state
+    # transition on the original major movement, and no geometry, flags,
+    # fields, lanes, or any other connection alterations.
+    expected_connection_change={
+        "from":higher.src,"to":higher.dst,"fromLane":"0","toLane":"0",
+        "via":higher.via,
+        "field_changes":{"state":{"from":"M","to":"m"}}
+    }
+    if differences!=[expected_connection_change]:
+        return False,diff,"C1 connection mutations exceed the one expected E3 major-to-minor state transition"
     original=request_bits(noop);adjusted=request_bits(modified)
     if original.keys()!=adjusted.keys():
         return False,diff,"E3 movement index set changed"
-    lower=a if b.index in a.yields_to else b
-    higher=b if lower==a else a
     changes=[]
     for idx in original:
         foes,resp,cont=original[idx]
