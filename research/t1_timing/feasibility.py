@@ -302,7 +302,13 @@ def development(seed, out, scientific, simulate):
         originals = {t["id"]: t["depart"] for t in data}
         realized = {}
         for arm, shifts in arms.items():
-            shifted = [dict(t, depart=t["depart"]+shifts[t["id"]]) for t in data]
+            shifted = sorted([dict(t, depart=t["depart"]+shifts[t["id"]]) for t in data],
+                             key=lambda t: (t["depart"], t["id"]))
+            if any(a["depart"] > b["depart"] for a, b in zip(shifted, shifted[1:])):
+                raise AssertionError("SUMO requested-departure records are not chronologically ordered")
+            # SUMO route files MUST be ordered by the *modified requested departure*.
+            # The prior failed development attempt iterated original preferred
+            # departure order after shifts and SUMO omitted late listed vehicles.
             obs = old.simulate(root, f"sumo_{arm}", common_routes, shifted, net, seed, adj)
             wanted = {v: obs[v]["total"] + shifts[v] for v in b.ids}
             if len(wanted) != 1000 or any(not math.isfinite(x) for x in wanted.values()):
