@@ -15,6 +15,21 @@ C(s,R,J) = sum over all 1,000 (arrival - original scheduled departure). D(s,J) =
 | 6112 | +3,219.0 | -4,359.0 | -7,578.0 | +2,731.0 → -1,947.0 | Yes, at recorded sampling |
 | 6113 | -3,883.0 | -23,863.0 | -19,980.0 | -1,972.0 → -13,182.0 | Yes, at recorded sampling |
 
+## Absolute network cost and fairness caution
+
+The difference-in-differences Psi describes **effect modification**, not an absolute improvement from installing the E3 priority reversal. The modified-priority setting raised **all-driver scheduled-to-arrival time** under both fixed routing assignments in both selected seeds:
+
+| Seed | J0 I cost | J1 I cost | J0 probe2 cost | J1 probe2 cost | Change in absolute network cost J1−J0, I / probe2 |
+|---|---:|---:|---:|---:|---:|
+| 6112 | 210,647 | 224,329 | 213,866 | 219,970 | **+13,682 / +6,104 network-s** |
+| 6113 | 209,676 | 246,842 | 205,793 | 222,979 | **+37,166 / +17,186 network-s** |
+
+Thus the negative Psi values reflect that a changed route is **relatively less harmful or more beneficial under an E3 rule that made these two network cases substantially slower overall**. Neither modified-E3 policy can be labeled a welfare-improving junction design on the basis of these figures. The result does not suggest deploying this priority reversal.
+
+Nonparticipants' route-swap externality changed from **+2,731 to −1,947 network-s** in seed 6112, and **−1,972 to −13,182 network-s** in seed 6113. However, within their respective modified-priority settings, **76/500** (seed 6112) and **70/500** (seed 6113) nonparticipants still suffered more than 30 seconds of added travel time under probe2 versus independent I. For all drivers the comparable counts were **133/1,000** and **146/1,000**. These are descriptive harms in this selected experiment, not the unexecuted Test B fairness gates.
+
+The pre-outcome selection and exact E3-only semantic patch are preserved under source lock **7a903174bf177a56789e531773b43d427dfd873f47a695ddcd4d9df0cceaebe2**. The priority change cannot uniquely identify E3 as the *original* bottleneck: the original vehicle trajectories diverged elsewhere earlier, and changing E3 may alter the downstream network sensitivity without being the initiating mechanism.
+
 ## Interpretation and original limitations
 The controlled factor can identify how the local E3 priority rule affects the *marginal response to a route swap* on the selected synthetic network, assuming the source and no-op identity gates hold. It does not randomize queue waiting or prove that E3 initiated the original network-wide divergence; in the original passive replay, the earliest driver divergence preceded the prominent D3E3 hotspot.
 The reported 10% of |D(6112,J0)| screen (about 322 network-seconds) is exploratory, not a population significance test, and does not substitute for development or independent validation. Inspect both directions, exceptions, speed/queue data, individual p90/p95 and nonparticipant effects. Waiting is not added twice to travel-time cost.
