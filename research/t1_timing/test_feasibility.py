@@ -49,6 +49,16 @@ class T1FeasibilityTests(unittest.TestCase):
                      {"lonely": (8.0, 1000000.0)}, seed=2101)
         for v in m.eligible:
             self.assertGreater(m.personal(v, 10), m.personal(v, 0) + 9.9)
+        # If congestion prediction is essentially unchanged, a departure
+        # penalty must not masquerade as a meaningful traffic forecast signal.
+        self.assertEqual(m.initial_sensitivity()["traffic_cost_spread_gt_0p5_s"], 0)
+
+    def test_forecast_traffic_signal_excludes_predeparture_penalty(self):
+        m = self.sample()
+        diagnostic = m.initial_sensitivity()
+        self.assertEqual(diagnostic["eligible"], 10)
+        self.assertEqual(diagnostic["different_edge_bin_footprints"], 10)
+        self.assertGreater(diagnostic["mean_traffic_cost_spread_s"], 0)
 
 
 if __name__ == "__main__":
