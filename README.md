@@ -4,6 +4,10 @@ Every day, drivers sit in traffic despite having powerful navigation apps. Those
 
 **What if we could bring some of the collective intelligence of tomorrow's autonomous transportation networks to today's human-driven roads?**
 
+## Next research direction — T1 cooperative departure timing (approved November 5, 2026)
+
+**Research direction approved, protocol not frozen; no new simulations authorized.** After the completed C1 junction effect-modification study and unsuccessful externality-estimator qualification, the next proposed scientific milestone shifts to **voluntary coordination of departure timing**. Compare a jointly coordinated timing policy with a **credible equally informed independent traffic-aware timing policy**, holding routes and information equal, and measuring all-driver preferred-departure-to-arrival cost plus participant and nonparticipant harms. The goal is to isolate a genuine coordination benefit from information sharing or simple delay shifting. Illustrative timing/participation values and the seed budget remain provisional. [Read the approved T1 direction and proposed experiment](docs/POST_C1_T1_COOPERATIVE_DEPARTURE_TIMING_RESEARCH_DIRECTION_2026-11-05.md).
+
 ## Current scientific status — Experiment 007 and E1-v2 (November 5, 2026)
 
 **Experiment 007 Test A: NO-GO.** The frozen marginal-externality estimator achieved only **8/20 (40%)** correct directional predictions against a **60%** gate. The independent traffic-aware baseline versus cooperative **Test B was never run**. [Original Test A report](docs/EXPERIMENT_007_TEST_A_FINAL_SCIENTIFIC_REPORT.md).
