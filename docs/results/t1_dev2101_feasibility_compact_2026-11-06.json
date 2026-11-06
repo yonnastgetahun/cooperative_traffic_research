@@ -1,0 +1,130 @@
+{
+  "study": "T1 cooperative departure timing source-and-development feasibility",
+  "status": "DEVELOPMENT_NO_GO_FOR_CURRENT_10S_PROXY",
+  "cohort": {
+    "seed": 2101,
+    "scientific_class": "previously_inspected_development_only",
+    "n_vehicles": 1000,
+    "eligible": 500,
+    "simulator": "SUMO 1.28.0 pinned",
+    "sumo_arms": [
+      "A",
+      "B",
+      "C"
+    ],
+    "independent_confirmatory_seeds_used": 0
+  },
+  "sources": {
+    "successful_actions_run": 42183640504,
+    "successful_artifact_id": 13486493479,
+    "artifact_sha256": "b524729226c44b722f2c8c157f017dee98181dcd8dfb97c2ec14401229184fae",
+    "failed_preparatory_runs": [
+      42183356993,
+      42183532863
+    ],
+    "failed_attempt_reason": "shifted SUMO input was not chronologically ordered; input presentation repaired, no scientific policy retuning"
+  },
+  "phase_results": [
+    {
+      "phase_s": 0,
+      "B_sweeps": 1,
+      "B_shifted": 0,
+      "B_residual_gain_s": 0,
+      "C_sweeps": 2,
+      "C_shifted": 12,
+      "C_total_shift_s": 120,
+      "eligible_traffic_cost_spread_gt0p5": 499,
+      "eligible_traffic_benefit_gt0p5": 347,
+      "eligible_net_own_cost_improvement_gt0p5": 0,
+      "mean_traffic_cost_spread_s": 3.715982721382286,
+      "predicted_B_network_s": 120980.22318215319,
+      "predicted_C_network_s": 120929.59683226126
+    },
+    {
+      "phase_s": 2.5,
+      "B_sweeps": 1,
+      "B_shifted": 0,
+      "B_residual_gain_s": 0,
+      "C_sweeps": 1,
+      "C_shifted": 8,
+      "C_total_shift_s": 80,
+      "eligible_traffic_cost_spread_gt0p5": 499,
+      "eligible_traffic_benefit_gt0p5": 352,
+      "eligible_net_own_cost_improvement_gt0p5": 0,
+      "mean_traffic_cost_spread_s": 3.7656587473002068,
+      "predicted_B_network_s": 120958.62491001525,
+      "predicted_C_network_s": 120923.07415407569
+    },
+    {
+      "phase_s": 5,
+      "B_sweeps": 1,
+      "B_shifted": 0,
+      "B_residual_gain_s": 0,
+      "C_sweeps": 2,
+      "C_shifted": 12,
+      "C_total_shift_s": 120,
+      "eligible_traffic_cost_spread_gt0p5": 498,
+      "eligible_traffic_benefit_gt0p5": 358,
+      "eligible_net_own_cost_improvement_gt0p5": 0,
+      "mean_traffic_cost_spread_s": 3.8909287257019365,
+      "predicted_B_network_s": 120940.26637869752,
+      "predicted_C_network_s": 120900.43916487464
+    },
+    {
+      "phase_s": 7.5,
+      "B_sweeps": 1,
+      "B_shifted": 0,
+      "B_residual_gain_s": 0,
+      "C_sweeps": 2,
+      "C_shifted": 8,
+      "C_total_shift_s": 80,
+      "eligible_traffic_cost_spread_gt0p5": 500,
+      "eligible_traffic_benefit_gt0p5": 369,
+      "eligible_net_own_cost_improvement_gt0p5": 0,
+      "mean_traffic_cost_spread_s": 3.721382289416845,
+      "predicted_B_network_s": 120934.86681066288,
+      "predicted_C_network_s": 120905.79553636482
+    }
+  ],
+  "predicted_phase0_C_minus_B_network_s": -50.62634989192884,
+  "realized_development": {
+    "A": {
+      "all_driver_preferred_to_arrival_network_s": 211051,
+      "mean_per_driver_s": 211.051,
+      "requested_predeparture_shift_s": 0,
+      "insertion_delay_s": 840,
+      "in_network_duration_s": 210211
+    },
+    "B": {
+      "all_driver_preferred_to_arrival_network_s": 211051,
+      "mean_per_driver_s": 211.051,
+      "requested_predeparture_shift_s": 0,
+      "insertion_delay_s": 840,
+      "in_network_duration_s": 210211
+    },
+    "C": {
+      "all_driver_preferred_to_arrival_network_s": 211669,
+      "mean_per_driver_s": 211.669,
+      "requested_predeparture_shift_s": 120,
+      "insertion_delay_s": 849,
+      "in_network_duration_s": 210700
+    },
+    "C_minus_B_network_s": 618,
+    "C_minus_B_mean_s": 0.618,
+    "matched_C_minus_B": {
+      "helped": 477,
+      "harmed": 481,
+      "unchanged": 42,
+      "harm_gt30_s": 205,
+      "eligible_mean_delta_s": 0.15,
+      "nonparticipant_mean_delta_s": 1.086,
+      "eligible_harm_gt30_s": 103,
+      "nonparticipant_harm_gt30_s": 102,
+      "changed_requested_departure_vehicles": 12,
+      "shifted_driver_sum_delta_network_s": 4,
+      "unchanged_departure_sum_delta_network_s": 614
+    },
+    "structured_safety_fields_zero_for_ABC": true
+  },
+  "scientific_boundary": "Observed development-only negative policy outcome, not independent estimator validation or final timing coordination hypothesis rejection. B mathematical convergence and numerical timing sensitivity did not establish physical forecast skill."
+}

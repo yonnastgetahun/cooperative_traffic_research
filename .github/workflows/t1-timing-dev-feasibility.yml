@@ -1,0 +1,51 @@
+name: T1 timing feasibility - development only (never confirmatory)
+on:
+  pull_request:
+    paths:
+      - 'research/t1_timing/**'
+      - '.github/workflows/t1-timing-dev-feasibility.yml'
+permissions:
+  contents: read
+jobs:
+  offline_unit:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Standard-library convergence, exact potential and 10s shift unit tests
+        run: python3 -m unittest discover -s research/t1_timing -p 'test_*.py' -v
+  previously_inspected_dev_seed_2101:
+    if: github.event_name == 'pull_request'
+    needs: offline_unit
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    container:
+      image: ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: be2e8d27c78c8b6de4891115d6d951edc877ac6e
+          path: scientific
+      - name: Qualify only T1 B convergence and 10-second signal on inspected 2101
+        run: |
+          python3 -m research.t1_timing.feasibility --seed 2101 --scientific scientific --out t1-development --simulate
+          python3 - <<'PY'
+          import json
+          d=json.load(open('t1-development/feasibility_summary.json'))
+          assert d['demand_seed']==2101
+          assert d['potential_identity_unit_check'] is True
+          assert len(d['phase_results'])==4
+          assert len(d['realized_dev_only'])==3
+          assert all(x['all_completed'] for x in d['realized_dev_only'].values())
+          print(json.dumps(d['feasibility'],indent=2))
+          PY
+      - name: Preserve development-only outcomes, including failure evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: t1-timing-feasibility-dev2101
+          path: t1-development/
+          retention-days: 30
+          if-no-files-found: warn
