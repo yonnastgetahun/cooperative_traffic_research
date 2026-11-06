@@ -1,0 +1,230 @@
+{
+  "C2": "PASS",
+  "C3": "PASS",
+  "C4": "PASS",
+  "Test_B": "NOT_RUN",
+  "arms_attempted": [
+    {
+      "arm": "I",
+      "g2": "PASS",
+      "seed": 6112,
+      "setting": "J0",
+      "status": "COMPLETE"
+    },
+    {
+      "arm": "probe2",
+      "g2": "PASS",
+      "seed": 6112,
+      "setting": "J0",
+      "status": "COMPLETE"
+    },
+    {
+      "arm": "I",
+      "g2": "PASS",
+      "seed": 6113,
+      "setting": "J0",
+      "status": "COMPLETE"
+    },
+    {
+      "arm": "probe2",
+      "g2": "PASS",
+      "seed": 6113,
+      "setting": "J0",
+      "status": "COMPLETE"
+    },
+    {
+      "arm": "I",
+      "g2": "NOT_APPLICABLE_CHANGED_PHYSICS",
+      "seed": 6112,
+      "setting": "J1",
+      "status": "COMPLETE"
+    },
+    {
+      "arm": "probe2",
+      "g2": "NOT_APPLICABLE_CHANGED_PHYSICS",
+      "seed": 6112,
+      "setting": "J1",
+      "status": "COMPLETE"
+    },
+    {
+      "arm": "I",
+      "g2": "NOT_APPLICABLE_CHANGED_PHYSICS",
+      "seed": 6113,
+      "setting": "J1",
+      "status": "COMPLETE"
+    },
+    {
+      "arm": "probe2",
+      "g2": "NOT_APPLICABLE_CHANGED_PHYSICS",
+      "seed": 6113,
+      "setting": "J1",
+      "status": "COMPLETE"
+    }
+  ],
+  "frozen_lock_sha256": "7a903174bf177a56789e531773b43d427dfd873f47a695ddcd4d9df0cceaebe2",
+  "original_verdict": "DEVELOPMENT_NOT_QUALIFIED",
+  "phase": "C4_AUDIT",
+  "result": {
+    "C0": "PASS",
+    "C1": "PASS",
+    "C2": "PASS",
+    "C3": "PASS",
+    "C4": "PASS",
+    "Test_B": "NOT_RUN",
+    "cases": [
+      {
+        "E3_first_stage_change_found": true,
+        "J0": {
+          "delta": 3219.0,
+          "external": 3215.0,
+          "harm_gt30": 195,
+          "nonparticipant_harm_gt30": 106,
+          "nonparticipants": 2731.0,
+          "p90_delta_s": 53.0,
+          "p95_delta_s": 75.0,
+          "self": 4.0,
+          "waiting_delta": 2775.0
+        },
+        "J1": {
+          "delta": -4359.0,
+          "external": -4362.0,
+          "harm_gt30": 133,
+          "nonparticipant_harm_gt30": 76,
+          "nonparticipants": -1947.0,
+          "p90_delta_s": 39.0,
+          "p95_delta_s": 65.0,
+          "self": 3.0,
+          "waiting_delta": -3487.0
+        },
+        "first_stage_evidence": [
+          {
+            "lane": ":E3_14_0",
+            "measurement": "sampled_entering_internal_lane",
+            "route": "I"
+          },
+          {
+            "lane": ":E3_1_0",
+            "measurement": "sampled_entering_internal_lane",
+            "route": "I"
+          },
+          {
+            "lane": "two approaches",
+            "measurement": "E3_approach_waiting",
+            "route": "I"
+          },
+          {
+            "lane": "two approaches",
+            "measurement": "E3_inbound_FCD_nearstop",
+            "route": "I"
+          },
+          {
+            "lane": ":E3_14_0",
+            "measurement": "sampled_entering_internal_lane",
+            "route": "probe2"
+          },
+          {
+            "lane": ":E3_1_0",
+            "measurement": "sampled_entering_internal_lane",
+            "route": "probe2"
+          },
+          {
+            "lane": "two approaches",
+            "measurement": "E3_approach_waiting",
+            "route": "probe2"
+          },
+          {
+            "lane": "two approaches",
+            "measurement": "E3_inbound_FCD_nearstop",
+            "route": "probe2"
+          }
+        ],
+        "materiality_screen_abs_psi_gte_10pct_6112": true,
+        "psi_network_s": -7578.0,
+        "seed": 6112
+      },
+      {
+        "E3_first_stage_change_found": true,
+        "J0": {
+          "delta": -3883.0,
+          "external": -3960.0,
+          "harm_gt30": 127,
+          "nonparticipant_harm_gt30": 61,
+          "nonparticipants": -1972.0,
+          "p90_delta_s": 35.0,
+          "p95_delta_s": 49.049999999999955,
+          "self": 77.0,
+          "waiting_delta": -3050.0
+        },
+        "J1": {
+          "delta": -23863.0,
+          "external": -23901.0,
+          "harm_gt30": 146,
+          "nonparticipant_harm_gt30": 70,
+          "nonparticipants": -13182.0,
+          "p90_delta_s": 41.10000000000002,
+          "p95_delta_s": 63.049999999999955,
+          "self": 38.0,
+          "waiting_delta": -22094.0
+        },
+        "first_stage_evidence": [
+          {
+            "lane": ":E3_14_0",
+            "measurement": "sampled_entering_internal_lane",
+            "route": "I"
+          },
+          {
+            "lane": ":E3_1_0",
+            "measurement": "sampled_entering_internal_lane",
+            "route": "I"
+          },
+          {
+            "lane": "two approaches",
+            "measurement": "E3_approach_waiting",
+            "route": "I"
+          },
+          {
+            "lane": "two approaches",
+            "measurement": "E3_inbound_FCD_nearstop",
+            "route": "I"
+          },
+          {
+            "lane": ":E3_14_0",
+            "measurement": "sampled_entering_internal_lane",
+            "route": "probe2"
+          },
+          {
+            "lane": ":E3_1_0",
+            "measurement": "sampled_entering_internal_lane",
+            "route": "probe2"
+          },
+          {
+            "lane": "two approaches",
+            "measurement": "E3_approach_waiting",
+            "route": "probe2"
+          },
+          {
+            "lane": "two approaches",
+            "measurement": "E3_inbound_FCD_nearstop",
+            "route": "probe2"
+          }
+        ],
+        "materiality_screen_abs_psi_gte_10pct_6112": "not_primary",
+        "psi_network_s": -19980.0,
+        "seed": 6113
+      }
+    ],
+    "causal_scope": "Only effect of frozen localized SUMO E3 priority intervention on route-swap response in two retrospectively chosen simulator cases",
+    "independent_validation": "NOT_STARTED",
+    "lock_sha256": "7a903174bf177a56789e531773b43d427dfd873f47a695ddcd4d9df0cceaebe2",
+    "new_sumo_arms": 8,
+    "not_identified": "Unique waiting, junction or queue mediator; population accuracy; cooperative policy efficacy",
+    "original_e1v2_d1": "DEVELOPMENT_NOT_QUALIFIED",
+    "source_seeds": [
+      6112,
+      6113
+    ],
+    "status": "CASE_LEVEL_EFFECT_MODIFICATION_DESCRIPTIVE"
+  },
+  "status": "CASE_LEVEL_EFFECT_MODIFICATION_DESCRIPTIVE",
+  "validation": "NOT_STARTED"
+}
