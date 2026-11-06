@@ -195,19 +195,29 @@ class Schedule:
                 "history": history}
 
     def initial_sensitivity(self):
-        affected, substantive, improving, unique_cost = 0, 0, 0, []
+        # Crucially exclude chosen departure shifts when measuring the
+        # *traffic forecast* signal. A raw total cost spread of >=30 seconds
+        # is automatic from the 0/10/20/30s schedule options and proves nothing.
+        affected, traffic_substantive, traffic_benefit, net_improving = 0, 0, 0, 0
+        spreads = []
         for vid in self.order:
             profiles = {tuple(sorted(self.profile(vid, k).items())) for k in SHIFTS}
-            costs = [self.personal(vid, k) for k in SHIFTS]
+            total = [self.personal(vid, k) for k in SHIFTS]
+            traffic = [total[j] - sh for j, sh in enumerate(SHIFTS)]
+            spread = max(traffic) - min(traffic)
             affected += len(profiles) > 1
-            substantive += max(costs) - min(costs) > 0.5
-            improving += min(costs) + 0.5 < costs[0]
-            unique_cost.append(max(costs) - min(costs))
+            traffic_substantive += spread > 0.5
+            traffic_benefit += min(traffic[1:]) < traffic[0] - 0.5
+            net_improving += min(total[1:]) < total[0] - 0.5
+            spreads.append(spread)
         return {
-            "eligible": len(self.order), "different_edge_bin_footprints": affected,
-            "cost_spread_gt_0p5_s": substantive, "improvement_over_zero_gt_0p5_s": improving,
-            "mean_candidate_cost_spread_s": sum(unique_cost)/max(1,len(unique_cost)),
-            "max_candidate_cost_spread_s": max(unique_cost) if unique_cost else 0
+            "eligible": len(self.order),
+            "different_edge_bin_footprints": affected,
+            "traffic_cost_spread_gt_0p5_s": traffic_substantive,
+            "traffic_benefit_over_zero_gt_0p5_s": traffic_benefit,
+            "total_cost_improvement_over_zero_gt_0p5_s": net_improving,
+            "mean_traffic_cost_spread_s": sum(spreads)/max(1,len(spreads)),
+            "max_traffic_cost_spread_s": max(spreads) if spreads else 0
         }
 
     def audit(self):
@@ -271,7 +281,7 @@ def development(seed, out, scientific, simulate):
         if phase == 0:
             selected = (b, c)
     main = phase_results[0]
-    max_prevalence = [r["initial_sensitivity"]["cost_spread_gt_0p5_s"] for r in phase_results]
+    max_prevalence = [r["initial_sensitivity"]["traffic_cost_spread_gt_0p5_s"] for r in phase_results]
     summary = {"classification": "DEVELOPMENT_ONLY_NO_INDEPENDENT_CONFIRMATION",
                "demand_seed": seed, "routes_frozen_across_arms": True,
                "sources": {"route_policy": "Experiment 007 independent traffic-aware I", "forecast": "T1 10s nominal-edge assigned demand"},
@@ -282,7 +292,7 @@ def development(seed, out, scientific, simulate):
                    "B_converged_all_phases": all(p["B"]["stable"] for p in phase_results),
                    "C_converged_all_phases": all(p["C"]["stable"] for p in phase_results),
                    "offset_profiles_distinguished_all_phases": all(p["initial_sensitivity"]["different_edge_bin_footprints"] == len(selected[0].order) for p in phase_results),
-                   "nontrivial_cost_signal_all_phases": min(max_prevalence) >= 1,
+                   "nontrivial_traffic_signal_all_phases": min(max_prevalence) >= 1,
                    "phase_robust_outcome_not_established": True,
                    "forecast_real_world_accuracy_not_established": True
                }}
