@@ -49,7 +49,7 @@ You must have rights to manage GitHub repository Actions Secrets. Check their *n
 The approved five-page LinkedIn document is `cooperative_traffic_pivot_linkedin_carousel.pdf`, with **exact SHA256**:
 
 ```
-b2afa02ce6e90e0931b9e8c6bbc1d76ce27f062b1ba41ab5d240aa0def4e0a26
+60df1741d718cccb8dabf2f4052ac4dabfb237daa04887a207226deaacbc05df
 ```
 
 After downloading that PDF from this conversation, upload it in the GitHub website to **exactly** `social/linkedin/traffic_pivot_carousel.pdf`, preserving the original bytes. GitHub Actions verifies the hash and **refuses to publish a different or missing PDF**. The approved caption is versioned separately at `social/linkedin/traffic_pivot_announcement.txt`.
