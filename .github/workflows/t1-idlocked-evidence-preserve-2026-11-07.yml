@@ -1,0 +1,67 @@
+# Preservation-only workflow: reads completed run 42348701379.
+# No SUMO, no new vehicle runs, no scientific change; uses GitHub-hosted Ubuntu GH CLI.
+name: T1 id-locked development evidence immutable GitHub release
+on:
+  push:
+    branches: [research/t1-idlocked-dev2101-2026-11-06]
+    paths: ['.github/workflows/t1-idlocked-evidence-preserve-2026-11-07.yml']
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: t1-idlocked-dev2101-permanent-evidence-release
+  cancel-in-progress: false
+jobs:
+  preserve-completed-evidence:
+    if: github.event_name == 'push' && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch completed experiment evidence, no simulation
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 42348701379
+          github-token: ${{ github.token }}
+          name: t1-idlocked-dev2101-Bstar-Cstar-evidence
+          path: evidence
+      - name: Validate complete original/development/observations and package SHA manifests
+        run: |
+          set -eu
+          python3 - <<'PY'
+          from pathlib import Path
+          import json,hashlib,tarfile
+          root=Path('evidence')
+          for p in ['source-original','idlocked-inputs','idlocked-observation']:
+              assert (root/p).is_dir(),p
+          d=json.loads((root/'idlocked-observation/consolidated_diagnostics.json').read_text())
+          assert d['classification']=='VALID_SINGLE_SEED_DEVELOPMENT_WITH_RESIDUAL_STOCHASTIC_UNCERTAINTY'
+          assert d['seed']==2101
+          assert d['primary_Cstar_minus_Bstar_network_s']==2131.0
+          assert all(g['status']=='CONTROL_PASS' for g in d['control_gates'].values())
+          manifest=[]
+          for f in sorted(root.rglob('*')):
+              if f.is_file():
+                  h=hashlib.sha256(f.read_bytes()).hexdigest()
+                  manifest.append(f'{h}  {f.relative_to(root).as_posix()}')
+          assert len(manifest)>=40
+          Path('SHA256_MEMBER_MANIFEST.txt').write_text('\n'.join(manifest)+'\n')
+          with tarfile.open('t1-idlocked-dev2101-complete-evidence.tar.gz','w:gz') as tar:
+              for folder in ['source-original','idlocked-inputs','idlocked-observation']:
+                  tar.add(root/folder,arcname=folder)
+          ziphash=hashlib.sha256(Path('t1-idlocked-dev2101-complete-evidence.tar.gz').read_bytes()).hexdigest()
+          Path('SHA256_RELEASE_ASSETS.txt').write_text(ziphash+'  t1-idlocked-dev2101-complete-evidence.tar.gz\n')
+          print('Validated',len(manifest),'files; archive digest:',ziphash)
+          PY
+      - name: Publish completed experimental raw evidence release, not a social post
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eu
+          tag=t1-idlocked-dev2101-2026-11-07
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo 'Existing release tag: refuse overwrite'; exit 1
+          fi
+          gh release create "$tag" t1-idlocked-dev2101-complete-evidence.tar.gz SHA256_MEMBER_MANIFEST.txt SHA256_RELEASE_ASSETS.txt \
+            --title 'T1 B*/C* ID-locked development — Original and controlled evidence' \
+            --notes 'Development seed 2101: exactly two new SUMO arms B* and C*, original twelve departure adjustments, original B-per-ID speedFactors fixed across both arms. Both 1,000-trip control gates passed, C*−B* = +2,131 network-seconds. This release contains archived original inputs, fixed characteristic manifests, complete raw SUMO FCD/vehroute/tripinfo and fairness/physical diagnostics plus SHA256 manifests. One seed only: residual event-order stochasticity, no real-world or confirmatory cooperative efficacy. Original T1 development NO-GO preserved.'
