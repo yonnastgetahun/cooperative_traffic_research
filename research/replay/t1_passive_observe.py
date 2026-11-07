@@ -377,7 +377,7 @@ def analyze(root, obs):
         fail("Original B/C fairness and network bridge did not reproduce")
     ordered=sorted((rc[k][0],k) for k in shifted)
     source_divergences=sorted(
-        (float(ic[k]["depart"])-float(ib[k]["depart"]),k,
+        (min(float(ic[k]["depart"]),float(ib[k]["depart"])),k,
          float(ib[k]["depart"]),float(ic[k]["depart"]))
         for k in preferred if k not in shifted and
         float(ic[k]["depart"]) != float(ib[k]["depart"]))
