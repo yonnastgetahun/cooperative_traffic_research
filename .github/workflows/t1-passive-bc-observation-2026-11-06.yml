@@ -1,0 +1,67 @@
+# User-authorized 2026-11-06: exactly TWO passive replays of original T1 dev2101 B/C.
+# Single-use, branch-specific trigger. Do not manually rerun this workflow.
+name: T1 2101 single-use passive physical B-C observation
+on:
+  push:
+    branches:
+      - science/t1-passive-bc-observation-2026-11-06
+    paths:
+      - '.github/workflows/t1-passive-bc-observation-2026-11-06.yml'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: t1-dev2101-one-approved-physical-observation
+  cancel-in-progress: false
+
+jobs:
+  historical-bc-passive:
+    if: github.event_name == 'push' && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    container:
+      image: ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch original source-locked T1 evidence, not regenerate demand
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 42183640504
+          github-token: ${{ github.token }}
+          name: t1-timing-feasibility-dev2101
+          path: t1-development
+      - name: Offline syntax, original artifact fingerprint and SUMO version/flag preflight
+        run: |
+          set -euo pipefail
+          python3 -m py_compile research/replay/t1_passive_observe.py
+          python3 research/replay/t1_passive_observe.py preflight --root t1-development --out observed
+      - name: Authorized physical observation ARM B ONLY
+        run: |
+          set -euo pipefail
+          python3 research/replay/t1_passive_observe.py run --arm B --root t1-development --out observed
+      - name: Gate 1 - exact archived B per-driver outcome and safety parity (stop on failure)
+        run: |
+          set -euo pipefail
+          python3 research/replay/t1_passive_observe.py parity --arm B --root t1-development --out observed
+      - name: Authorized physical observation ARM C ONLY
+        run: |
+          set -euo pipefail
+          python3 research/replay/t1_passive_observe.py run --arm C --root t1-development --out observed
+      - name: Gate 2 - exact archived C per-driver outcome and safety parity (stop on failure)
+        run: |
+          set -euo pipefail
+          python3 research/replay/t1_passive_observe.py parity --arm C --root t1-development --out observed
+      - name: Descriptive all-driver edge clock, earliest movement and fairness analysis
+        run: |
+          set -euo pipefail
+          python3 research/replay/t1_passive_observe.py analyze --root t1-development --out observed
+      - name: Preserve original-input provenance, both passive traces and all parity evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: t1-dev2101-passive-B-C-original-replay-evidence
+          path: observed/
+          retention-days: 30
+          if-no-files-found: warn
