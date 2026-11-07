@@ -1,0 +1,31 @@
+Why we're changing the next phase of Cooperative Traffic Research.
+
+The question has never been whether we can make a traffic simulator produce a favorable result.
+
+It's whether voluntary coordination among drivers can improve overall traffic compared with equally informed independent decisions, without imposing unacceptable costs on people who never agreed to participate.
+
+Our latest development experiment gave us a reason to rethink how we test that question.
+
+In a synthetic network of 1,000 drivers, just 12 changed their departure times by 10 seconds. In a revised comparison that held each driver's speed factor constant, the coordinated schedule produced 2,131 additional network-seconds of travel cost relative to independent decisions.
+
+The 988 drivers who didn't change their departures experienced a combined 2,177 additional seconds.
+
+But the investigation revealed something equally important about our experimental environment.
+
+Our original comparison had inadvertently assigned different driving characteristics to 380 vehicles. We corrected that. Further inspection of SUMO's source code revealed that geographically distant lanes can share random-number streams used in driving behavior.
+
+That creates a plausible source of simulation-wide interactions that cannot yet be separated quantitatively from physical traffic propagation.
+
+So we're changing direction.
+
+Rather than build another forecasting model or keep adjusting one simulator, our next research milestone is to evaluate independently developed traffic simulation frameworks.
+
+SUMO remains a valuable reference. The objective is to determine whether the phenomena we're observing persist under different models of traffic behavior—and whether the conditions for a fair comparison can be maintained.
+
+We're not announcing a breakthrough in cooperative traffic.
+
+We're documenting what it will take to establish one credibly.
+
+Research findings: https://github.com/yonnastgetahun/cooperative_traffic_research/blob/main/docs/POST_T1_SUMO_RNG_EVENT_ORDER_AND_PHYSICAL_PROPAGATION_SOURCE_AUDIT_FINAL_REPORT_2026-11-07.md
+
+#TrafficResearch #TransportationScience #OpenScience
