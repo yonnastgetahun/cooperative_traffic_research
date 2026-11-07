@@ -1,0 +1,100 @@
+# Explicit user authorization: new B*/C* id-locked, previously inspected development seed 2101.
+# One branch-specific workflow trigger. No auto rerun, no additional seed/arm.
+name: T1 ID-locked Bstar/Cstar controlled development comparison
+on:
+  push:
+    branches:
+      - research/t1-idlocked-dev2101-2026-11-06
+    paths:
+      - '.github/workflows/t1-idlocked-controlled-dev2101-2026-11-07.yml'
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: t1-idlocked-previously-inspected-2101-single-execution
+  cancel-in-progress: false
+jobs:
+  preflight-bstar-cstar:
+    if: github.event_name == 'push' && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    container:
+      image: ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb
+    steps:
+      - uses: actions/checkout@v4
+      - name: Recover only original T1 source, routes and B tripinfo
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 42183640504
+          github-token: ${{ github.token }}
+          name: t1-timing-feasibility-dev2101
+          path: source-original
+      - name: Offline original SHA control, ID-locked canonical manifest and pinned SUMO option preflight
+        run: |
+          set -eu
+          python3 -m py_compile research/t1_timing/idlocked_comparison.py
+          python3 research/t1_timing/idlocked_comparison.py preflight --source source-original --prepared idlocked-inputs
+      - name: One authorized controlled development SUMO arm Bstar
+        run: |
+          set -eu
+          python3 research/t1_timing/idlocked_comparison.py run --source source-original --prepared idlocked-inputs --observed idlocked-observation --arm Bstar
+      - name: Hard gate on Bstar all-driver immutable characteristics, trip clocks and exceptions
+        run: |
+          set -eu
+          python3 research/t1_timing/idlocked_comparison.py gate --source source-original --prepared idlocked-inputs --observed idlocked-observation --arm Bstar
+      - name: One authorized controlled development SUMO arm Cstar
+        run: |
+          set -eu
+          python3 research/t1_timing/idlocked_comparison.py run --source source-original --prepared idlocked-inputs --observed idlocked-observation --arm Cstar
+      - name: Hard gate on Cstar all-driver immutable characteristics, trip clocks and exceptions
+        run: |
+          set -eu
+          python3 research/t1_timing/idlocked_comparison.py gate --source source-original --prepared idlocked-inputs --observed idlocked-observation --arm Cstar
+      - name: All-driver cost, fairness, physical first-divergence and nominal clock analysis
+        run: |
+          set -eu
+          python3 research/t1_timing/idlocked_comparison.py analyze --source source-original --prepared idlocked-inputs --observed idlocked-observation
+      - name: Preserve all original, canonical and observed files in run artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: t1-idlocked-dev2101-Bstar-Cstar-evidence
+          path: |
+            source-original/
+            idlocked-inputs/
+            idlocked-observation/
+          retention-days: 30
+          if-no-files-found: warn
+      - name: Long-term GitHub evidence release only after valid completion
+        if: success() && github.run_attempt == 1
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eu
+          tag='t1-idlocked-dev2101-2026-11-07'
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo 'Evidence release already exists; refuse to overwrite.'
+            exit 1
+          fi
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,tarfile
+          paths=[Path('source-original'),Path('idlocked-inputs'),Path('idlocked-observation')]
+          assert all(p.is_dir() for p in paths)
+          with tarfile.open('t1-idlocked-dev2101-evidence.tar.gz','w:gz') as f:
+              for p in paths:
+                  f.add(p,arcname=p.name)
+          files=[]
+          for p in paths:
+              for x in sorted(p.rglob('*')):
+                  if x.is_file():
+                      files.append(f'{hashlib.sha256(x.read_bytes()).hexdigest()}  {x.as_posix()}')
+          Path('SHA256_PER_MEMBER.txt').write_text('\n'.join(files)+'\n')
+          Path('SHA256_RELEASE.txt').write_text(
+              hashlib.sha256(Path('t1-idlocked-dev2101-evidence.tar.gz').read_bytes()).hexdigest()+
+              '  t1-idlocked-dev2101-evidence.tar.gz\n')
+          print('Preserving',len(files),'files with SHA256 records')
+          PY
+          gh release create "$tag" t1-idlocked-dev2101-evidence.tar.gz SHA256_PER_MEMBER.txt SHA256_RELEASE.txt \
+            --title "T1 Bstar/Cstar — Driver-ID-locked seed-2101 development evidence" \
+            --notes "Previously inspected seed 2101, exactly two development arms Bstar and Cstar with original B per-driver speedFactor locked in both. Includes exact original inputs, fixed canonical manifests, SUMO FCD/vehroute traces, tripinfo, numerical cost/fairness audit and SHA256 manifests. Historical T1 development NO-GO unchanged. This does not establish real-world benefits or independent validation."
