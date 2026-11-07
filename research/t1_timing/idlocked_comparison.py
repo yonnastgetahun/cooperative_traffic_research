@@ -165,7 +165,7 @@ def sumo_flags():
     version=subprocess.check_output(["sumo","--version"],text=True)
     require("1.28.0" in version,"incorrect pinned SUMO build "+version)
     help=subprocess.check_output(["sumo","--help"],text=True)
-    for flag in ("--fcd-output", "--vehroute-output", "--vehroute-output.exit-times"):
+    for flag in ("--fcd-output", "--fcd-output.attributes", "--vehroute-output", "--vehroute-output.exit-times"):
         require(flag in help, "SUMO pinned binary missing "+flag)
     return version.splitlines()[0]
 
@@ -191,11 +191,12 @@ def simulate(source,prepared,obs,arm):
          "--collision-output",str(out/"collisions.xml"),
          "--seed","2101","--no-step-log","true","--log",str(out/"sumo.log"),
          "--fcd-output",str(out/"fcd.xml"),
+         "--fcd-output.attributes","x,y,angle,type,speed,lane,pos",
          "--vehroute-output",str(out/"vehroute.xml"),
          "--vehroute-output.exit-times","true"]
     save(out/"command.json",{"command":cmd,"version":version,
         "changed_nonoutput_input":"explicit identical per-ID speedFactor and original B/C departures",
-        "passive_additions":["--fcd-output","--vehroute-output","--vehroute-output.exit-times"]})
+        "passive_additions":["--fcd-output","--fcd-output.attributes","--vehroute-output","--vehroute-output.exit-times"]})
     with (out/"run.log").open("w") as log:
         subprocess.run(cmd,check=True,stdout=log,stderr=subprocess.STDOUT)
     for name in ("tripinfo.xml","statistics.xml","collisions.xml","fcd.xml","vehroute.xml"):
