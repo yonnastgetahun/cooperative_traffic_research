@@ -1,0 +1,58 @@
+# LinkedIn publication is NEVER triggered by pushes, merges, PRs or schedules.
+# Manual operation only; reruns disabled for idempotency.
+name: LinkedIn personal profile - verify or publish approved research document
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Choose validate (offline), verify (read-only OAuth), or publish'
+        required: true
+        type: choice
+        options:
+          - validate
+          - verify
+          - publish
+        default: validate
+      confirmation:
+        description: 'For publishing only: type YES_PUBLISH_APPROVED_LINKEDIN_DOCUMENT'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: linkedin-research-personal-publisher
+  cancel-in-progress: false
+
+jobs:
+  linkedin:
+    if: github.event_name == 'workflow_dispatch' && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate publisher syntax and staged approved copy (no credentials)
+        run: |
+          python3 -m py_compile social/linkedin/publish_linkedin.py social/linkedin/authorize_local.py
+          python3 social/linkedin/publish_linkedin.py --action validate
+      - name: Verify LinkedIn member OAuth (READ ONLY, never posts)
+        if: inputs.action == 'verify'
+        env:
+          LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
+          LINKEDIN_PERSON_URN: ${{ secrets.LINKEDIN_PERSON_URN }}
+        run: |
+          python3 social/linkedin/publish_linkedin.py --action verify
+      - name: Publish the single approved PDF document post (manual approval required)
+        if: inputs.action == 'publish' && inputs.confirmation == 'YES_PUBLISH_APPROVED_LINKEDIN_DOCUMENT'
+        env:
+          LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
+          LINKEDIN_PERSON_URN: ${{ secrets.LINKEDIN_PERSON_URN }}
+          MANUAL_CONFIRMATION: ${{ inputs.confirmation }}
+        run: |
+          python3 social/linkedin/publish_linkedin.py --action publish --confirmation "$MANUAL_CONFIRMATION"
+      - name: Reject unconfirmed publication
+        if: inputs.action == 'publish' && inputs.confirmation != 'YES_PUBLISH_APPROVED_LINKEDIN_DOCUMENT'
+        run: |
+          echo 'Publication blocked: exact manual confirmation was not provided.'
+          exit 1
