@@ -8,11 +8,12 @@ Neither client secret nor access token is printed, committed or stored to disk.
 """
 import getpass
 import json
+import re
 import secrets
 import shutil
 import subprocess
 import sys
-from urllib.parse import urlencode, urlsplit, parse_qs
+from urllib.parse import urlencode, urlsplit, parse_qs, unquote_plus
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
 import webbrowser
@@ -24,6 +25,55 @@ SCOPES = "openid profile w_member_social"
 
 def stop(message):
     raise RuntimeError(message)
+
+
+def parse_scopes(raw):
+    """Normalize LinkedIn OAuth and introspection scope formats.
+
+    Token responses may contain URL-encoded space-delimited scopes; token
+    introspection represents them as comma-delimited scopes. This function
+    never logs or inspects the access token itself.
+    """
+    if raw is None:
+        return set()
+    if isinstance(raw, (list, tuple)):
+        return set().union(*(parse_scopes(item) for item in raw))
+    if not isinstance(raw, str):
+        return set()
+    decoded = raw
+    for _ in range(2):
+        next_value = unquote_plus(decoded)
+        if next_value == decoded:
+            break
+        decoded = next_value
+    return set(filter(None, re.split(r"[,\\s]+", decoded)))
+
+
+def inspect_token_scopes(token, client_id, client_secret):
+    """Read-only token inspection; do not print credentials or token contents."""
+    form = urlencode({
+        "client_id": client_id,
+        "client_secret": client_secret,
+        "token": token,
+    }).encode("utf-8")
+    request = Request(
+        "https://www.linkedin.com/oauth/v2/introspectToken",
+        data=form,
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+        method="POST",
+    )
+    try:
+        with urlopen(request, timeout=30) as response:
+            result = json.loads(response.read(50000))
+    except HTTPError as exc:
+        stop("LinkedIn token scope verification returned HTTP %s; no secret stored" % exc.code)
+    except URLError:
+        stop("LinkedIn token scope verification could not connect; no secret stored")
+    if result.get("active") is not True:
+        stop("LinkedIn token inspection reports the token is inactive; no secret stored")
+    if result.get("client_id") and result["client_id"] != client_id:
+        stop("LinkedIn token is for a different developer app; no secret stored")
+    return parse_scopes(result.get("scope"))
 
 
 def check_gh():
@@ -96,9 +146,20 @@ def main():
     token = token_response.get("access_token")
     if not token:
         stop("LinkedIn token endpoint returned no access token")
-    granted = set(token_response.get("scope", "").split())
-    if granted and not set(SCOPES.split()).issubset(granted):
-        stop("LinkedIn token lacks required permissions; no secret stored")
+    required = set(SCOPES.split())
+    granted = parse_scopes(token_response.get("scope"))
+    if not required.issubset(granted):
+        # Some token endpoints report scopes in a different form or omit them.
+        # Check the token's actual permissions before saving it; fail closed.
+        granted = inspect_token_scopes(token, client_id, client_secret)
+    missing = sorted(required - granted)
+    if missing:
+        stop(
+            "LinkedIn token is missing these permissions: " + ", ".join(missing)
+            + ". Reported permissions: " + (", ".join(sorted(granted)) or "(none)")
+            + ". Check the app's Auth > OAuth 2.0 scopes and authorize again. "
+              "No secret stored."
+        )
     info_request = Request("https://api.linkedin.com/v2/userinfo",
                            headers={"Authorization": "Bearer " + token}, method="GET")
     try:
