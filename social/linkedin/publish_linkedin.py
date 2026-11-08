@@ -18,7 +18,7 @@ from urllib.request import Request, urlopen
 API = "https://api.linkedin.com"
 VERSION = "202609"
 PUBLISH_CONFIRM = "YES_PUBLISH_APPROVED_LINKEDIN_DOCUMENT"
-PDF_SHA256 = "60df1741d718cccb8dabf2f4052ac4dabfb237daa04887a207226deaacbc05df"
+PDF_SHA256 = "0f0042b44a08ca4c726e94a71cbc3506375d3e1d00035e0ba38a6773a14ff34d"
 CAPTION = Path(__file__).parent / "traffic_pivot_announcement.txt"
 PDF = Path(__file__).parent / "traffic_pivot_carousel.pdf"
 DOC_TITLE = "Cooperative Traffic Research - Why We're Evaluating Independent Simulators"
