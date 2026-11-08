@@ -44,6 +44,13 @@ def approved_content(require_pdf):
         "evaluate independently developed traffic simulation frameworks",
     ):
         must(anchor in caption, "Approved caption anchor missing: " + anchor)
+    required_hashtags = (
+        "#TrafficResearch", "#TransportationScience", "#AI", "#BuildInPublic",
+        "#AIResearch", "#AIStartups", "#MultiAgentSystems",
+        "#ProductManagement", "#OpenSource"
+    )
+    must(all(tag in caption.split() for tag in required_hashtags),
+         "Approved LinkedIn research hashtags are missing; NO POST")
     if require_pdf:
         must(PDF.is_file(), "Approved five-page carousel PDF has not been uploaded to GitHub")
         must(5000 < PDF.stat().st_size <= 100_000_000, "PDF is missing or oversized")

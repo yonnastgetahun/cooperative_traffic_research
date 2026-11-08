@@ -1,0 +1,5 @@
+T1 pivot: +2,131 network-s in one SUMO development case; shared lane RNGs complicate attribution. Next: assess independent simulators.
+
+https://github.com/yonnastgetahun/cooperative_traffic_research/blob/main/docs/POST_T1_SUMO_RNG_EVENT_ORDER_AND_PHYSICAL_PROPAGATION_SOURCE_AUDIT_FINAL_REPORT_2026-11-07.md
+
+#AI #BuildInPublic #AIResearch #AIStartups #MultiAgentSystems #ProductManagement #OpenSource #TrafficResearch
