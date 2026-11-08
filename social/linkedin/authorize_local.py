@@ -46,7 +46,7 @@ def parse_scopes(raw):
         if next_value == decoded:
             break
         decoded = next_value
-    return set(filter(None, re.split(r"[,\\s]+", decoded)))
+    return set(filter(None, re.split(r"[,\s]+", decoded)))
 
 
 def inspect_token_scopes(token, client_id, client_secret):
