@@ -1,0 +1,85 @@
+# User explicitly approved publication November 8, 2026.
+# PR: source/media preflight only. On the one approved marker merge to main:
+# publish one LinkedIn PDF post + one X four-image post. No retries.
+name: Publish approved Cooperative Traffic Research pivot - LinkedIn and X
+on:
+  pull_request:
+    paths:
+      - 'social/t1_pivot/**'
+      - 'social/linkedin/traffic_pivot_announcement.txt'
+      - 'social/linkedin/publish_linkedin.py'
+      - '.github/workflows/publish-t1-pivot-approved-linkedin-x-2026-11-08.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'social/t1_pivot/approved-publish-marker-2026-11-08.json'
+permissions:
+  contents: read
+concurrency:
+  group: approved-t1-pivot-publish-once-2026-11-08
+  cancel-in-progress: false
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install media validators
+        run: python3 -m pip install --disable-pip-version-check Pillow pypdf
+      - name: Validate approved captions and exact LinkedIn PDF and four X PNG byte hashes
+        run: python3 social/t1_pivot/publish_assets.py --action preflight
+      - name: Check approved single-use marker
+        if: github.event_name == 'push'
+        run: |
+          python3 - <<'PY'
+          import json
+          d=json.load(open('social/t1_pivot/approved-publish-marker-2026-11-08.json'))
+          assert d=={
+             'approved_by_user':True,
+             'approved_for':['linkedin_personal_profile_document','x_single_post_four_images'],
+             'date':'2026-11-08',
+             'linkedin_document_sha256':'0f0042b44a08ca4c726e94a71cbc3506375d3e1d00035e0ba38a6773a14ff34d',
+             'status':'PUBLISH_ONCE'
+          }
+          print('PASS: explicit approved one-time publication marker')
+          PY
+
+  linkedin:
+    needs: preflight
+    if: >-
+      github.event_name == 'push'
+      && github.run_attempt == 1
+      && startsWith(github.event.head_commit.message, 'social: publish approved pivot to LinkedIn and X once')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --disable-pip-version-check Pillow pypdf
+      - name: Retrieve SHA-verified original five-panel LinkedIn PDF
+        run: python3 social/t1_pivot/publish_assets.py --action prepare-linkedin
+      - name: Verify OAuth and publish approved LinkedIn document once
+        env:
+          LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
+          LINKEDIN_PERSON_URN: ${{ secrets.LINKEDIN_PERSON_URN }}
+        run: |
+          python3 social/linkedin/publish_linkedin.py --action verify
+          python3 social/linkedin/publish_linkedin.py --action publish --confirmation YES_PUBLISH_APPROVED_LINKEDIN_DOCUMENT
+
+  x:
+    needs: preflight
+    if: >-
+      github.event_name == 'push'
+      && github.run_attempt == 1
+      && startsWith(github.event.head_commit.message, 'social: publish approved pivot to LinkedIn and X once')
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --disable-pip-version-check Pillow pypdf requests requests-oauthlib
+      - name: Publish approved X post with four SHA-verified research panels
+        env:
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
+        run: python3 social/t1_pivot/publish_x.py
