@@ -55,7 +55,7 @@ Update your local repository with `git pull origin main`, then run `python3 soci
 The approved five-page LinkedIn document is `cooperative_traffic_pivot_linkedin_carousel.pdf`, with **exact SHA256**:
 
 ```
-60df1741d718cccb8dabf2f4052ac4dabfb237daa04887a207226deaacbc05df
+0f0042b44a08ca4c726e94a71cbc3506375d3e1d00035e0ba38a6773a14ff34d
 ```
 
 After downloading that PDF from this conversation, upload it in the GitHub website to **exactly** `social/linkedin/traffic_pivot_carousel.pdf`, preserving the original bytes. GitHub Actions verifies the hash and **refuses to publish a different or missing PDF**. The approved caption is versioned separately at `social/linkedin/traffic_pivot_announcement.txt`.
@@ -80,3 +80,7 @@ The underlying publisher is `social/linkedin/publish_linkedin.py` (Python standa
 - LinkedIn profile posting is independent of Metricool. X stays on the separate existing GitHub-to-X workflow.
 - Do not present T1 as a demonstration of positive cooperative traffic benefits or assert SUMO is invalid. The experimental findings show confounding and a source-supported random-stream coupling mechanism, but not its proven numerical causal share.
 - The next research direction is a **feasibility assessment of independent simulation frameworks**, not an independently validated cross-model result already achieved.
+
+### Approved November 8, 2026 cross-platform publication
+
+The current approved PDF is also hosted as a hash-verified Adobe Creative Cloud asset, downloaded by the one-shot workflow `.github/workflows/publish-t1-pivot-approved-linkedin-x-2026-11-08.yml`. Its SHA256 is pinned above; **if the downloaded bytes differ, the post is blocked**. This workflow is scoped to an explicit once-only marker path, not a general-purpose auto-publishing change; it is separate from the reusable manual-only workflow documented here. Its approval covers one research-pivot announcement on LinkedIn and one on X, not future posts.
