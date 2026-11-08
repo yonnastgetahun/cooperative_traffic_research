@@ -1,4 +1,4 @@
-# CI on PR only. No LinkedIn credentials, network access or publication.
+# CI on PR only. No LinkedIn credentials, network access, or publication.
 name: LinkedIn publisher offline validation
 on:
   pull_request:
@@ -16,6 +16,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Check Python syntax (no credentials)
         run: python3 -m py_compile social/linkedin/publish_linkedin.py social/linkedin/authorize_local.py
+      - name: Test LinkedIn OAuth scope formats without contacting LinkedIn
+        run: python3 -m unittest discover -s social/linkedin -p 'test_*.py' -v
       - name: Check staged LinkedIn research caption offline
         run: python3 social/linkedin/publish_linkedin.py --action validate
       - name: Confirm publisher is manual-only
@@ -24,11 +26,6 @@ jobs:
           from pathlib import Path
           s=Path('.github/workflows/linkedin-manual-personal-document.yml').read_text()
           assert 'workflow_dispatch:' in s
-          assert '
-  push:' not in s
-          assert '
-  pull_request:' not in s
-          assert '
-  schedule:' not in s
+          assert not any(line.startswith(('  push:', '  pull_request:', '  schedule:')) for line in s.splitlines())
           print('PASS: manual-only publication workflow')
           PY
