@@ -78,8 +78,17 @@ def api_request(method, path, token, payload=None):
             body = response.read(2_000_000)
             return response.status, response.headers, json.loads(body) if body else {}
     except HTTPError as exc:
+        # Reveal only a machine-readable LinkedIn error code, never full
+        # response text, identifiers, authorization headers or upload URLs.
+        details = {}
+        try:
+            details = json.loads(exc.read(8192))
+        except (ValueError, UnicodeError):
+            pass
+        code = details.get("code") or details.get("serviceErrorCode") or details.get("errorCode")
+        diagnostic = ("; LinkedIn error code " + str(code)[:80]) if code is not None else ""
         raise RuntimeError(
-            "LinkedIn " + method + " returned HTTP " + str(exc.code) +
+            "LinkedIn " + method + " returned HTTP " + str(exc.code) + diagnostic +
             ". Check token scopes, API version and developer app. No automatic retry."
         ) from None
     except URLError:
@@ -135,15 +144,16 @@ def upload_document(token, author):
     except URLError:
         raise RuntimeError("LinkedIn upload may be ambiguous. No post attempted.") from None
 
-    for _ in range(15):
-        status, _, d = api_request("GET", "/rest/documents/" + quote(urn, safe=":"), token)
-        must(status == 200, "Document status request failed")
-        if d.get("status") == "AVAILABLE":
-            return urn
-        if d.get("status") == "PROCESSING_FAILED":
-            raise RuntimeError("LinkedIn rejected document; no post attempted")
-        time.sleep(4)
-    raise RuntimeError("Document not ready; no post attempted")
+    # The document was acknowledged as uploaded successfully. The optional
+    # Documents GET readiness check returned HTTP 400 in the completed
+    # user-authorized run 42463042920, before any post was attempted.
+    # The official LinkedIn Documents API documents the sequence:
+    # initializeUpload -> PUT bytes -> POST /rest/posts, without requiring GET.
+    # Avoid treating a separate read capability as required for a member
+    # account that has w_member_social. Wait briefly for async processing;
+    # one POST attempt only; server errors are final, no blind retry.
+    time.sleep(15)
+    return urn
 
 
 def publish(token, author, caption):

@@ -1,0 +1,9 @@
+{
+  "approved_by_user": true,
+  "post_to": "linkedin_personal_profile_document_only",
+  "retry_reason": "first_approved_linkedin_attempt_stopped_at_optional_document_GET_before_post",
+  "initial_run_id": 42463042920,
+  "x_already_published_post_id": "2119346244766031969",
+  "linkedin_pdf_sha256": "0f0042b44a08ca4c726e94a71cbc3506375d3e1d00035e0ba38a6773a14ff34d",
+  "status": "ONE_NEW_LINKEDIN_POST_ATTEMPT"
+}

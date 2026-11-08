@@ -1,0 +1,70 @@
+# One-time recovery for approved LinkedIn pivot only. X was already published
+# with all four verified images in run 42463042920; do not repost X.
+name: Complete approved LinkedIn T1 pivot document after optional GET 400
+on:
+  pull_request:
+    paths:
+      - 'social/linkedin/publish_linkedin.py'
+      - '.github/workflows/publish-t1-pivot-linkedin-after-get400-2026-11-08.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'social/t1_pivot/linkedin-only-approved-recovery-2026-11-08.json'
+permissions:
+  contents: read
+concurrency:
+  group: t1-approved-linkedin-document-completion-2026-11-08
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install validation dependencies (no credentials)
+        run: python3 -m pip install --disable-pip-version-check Pillow pypdf
+      - name: Validate publisher syntax and scientific caption
+        run: |
+          python3 -m py_compile social/linkedin/publish_linkedin.py
+          python3 social/linkedin/publish_linkedin.py --action validate
+      - name: Validate the exact approved five-page PDF
+        run: python3 social/t1_pivot/publish_assets.py --action prepare-linkedin
+      - name: Verify the exact LinkedIn-only recovery marker
+        if: github.event_name == 'push'
+        run: |
+          python3 - <<'PY'
+          import json
+          d=json.load(open('social/t1_pivot/linkedin-only-approved-recovery-2026-11-08.json'))
+          assert d == {
+            'approved_by_user': True,
+            'post_to': 'linkedin_personal_profile_document_only',
+            'retry_reason': 'first_approved_linkedin_attempt_stopped_at_optional_document_GET_before_post',
+            'initial_run_id': 42463042920,
+            'x_already_published_post_id': '2119346244766031969',
+            'linkedin_pdf_sha256':'0f0042b44a08ca4c726e94a71cbc3506375d3e1d00035e0ba38a6773a14ff34d',
+            'status':'ONE_NEW_LINKEDIN_POST_ATTEMPT'
+          }
+          print('PASS: explicit LinkedIn-only recovery scope; X must not rerun')
+          PY
+
+  linkedin:
+    needs: validate
+    if: >-
+      github.event_name == 'push'
+      && github.run_attempt == 1
+      && startsWith(github.event.head_commit.message, 'social: complete approved LinkedIn pivot publication once')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --disable-pip-version-check Pillow pypdf
+      - name: Download the identical verified original five-page PDF
+        run: python3 social/t1_pivot/publish_assets.py --action prepare-linkedin
+      - name: Verify OAuth and attempt approved LinkedIn document post once
+        env:
+          LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
+          LINKEDIN_PERSON_URN: ${{ secrets.LINKEDIN_PERSON_URN }}
+        run: |
+          python3 social/linkedin/publish_linkedin.py --action verify
+          python3 social/linkedin/publish_linkedin.py --action publish --confirmation YES_PUBLISH_APPROVED_LINKEDIN_DOCUMENT
