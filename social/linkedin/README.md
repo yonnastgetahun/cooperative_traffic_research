@@ -44,6 +44,12 @@ You must have rights to manage GitHub repository Actions Secrets. Check their *n
 
 **Security:** Do not put secrets in a README, an issue, pull-request diff, public workflow input, copied shell command, or chat. Authorization codes expire rapidly and can be used only once. LinkedIn access tokens generally last **60 days**; rerun the user-owned local authorization when needed. Programmatic refresh is not automatically available to self-service applications. If Postman callback consent or a product permission is unavailable, stop and inspect the app's Auth tab rather than using workarounds.
 
+### Troubleshooting: `LinkedIn token lacks required permissions`
+
+This was previously possible even when LinkedIn granted all three scopes, because the original helper only split the access-token scope string on literal spaces. The current helper normalizes URL-encoded and comma-delimited scopes, optionally checks missing grants through LinkedIn's read-only token introspection endpoint, and **still refuses to store credentials if a required permission is absent**. Only permission *names* (not token or secret values) may be displayed for diagnosis.
+
+Update your local repository with `git pull origin main`, then run `python3 social/linkedin/authorize_local.py` again. The previous authorization code was already exchanged, so a fresh browser consent/redirect is required. Do **not** share the callback URL, code, Client Secret, or access token in a chat or GitHub issue. If the new helper reports a genuinely missing permission such as `w_member_social`, confirm it is available under the *same* LinkedIn Developer app's Auth tab; the app having a Product enabled does not itself prove that a particular access token contains the permission.
+
 ## 3. The approved visual carousel
 
 The approved five-page LinkedIn document is `cooperative_traffic_pivot_linkedin_carousel.pdf`, with **exact SHA256**:
