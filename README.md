@@ -4,9 +4,17 @@ Every day, drivers sit in traffic despite having powerful navigation apps. Those
 
 **What if we could bring some of the collective intelligence of tomorrow's autonomous transportation networks to today's human-driven roads?**
 
-## Research announcements: LinkedIn direct publishing (manual-only setup)
 
-A [GitHub-based LinkedIn personal-profile publisher](social/linkedin/README.md) is now available as a **manual-only integration**, avoiding a recurring Metricool subscription. It supports read-only OAuth verification and a five-page document post with exact approved-media checksum verification; the [manual workflow](.github/workflows/linkedin-manual-personal-document.yml) never publishes from pushes or pull requests. **User action is still required:** create/authorize a LinkedIn Developer app, store encrypted credentials via the local authorization helper, and upload the approved carousel PDF before publication. **No LinkedIn post has been made.** Existing GitHub-to-X workflows remain separate.
+## Next scientific planning milestone — BOTH UXsim AND CityFlow (November 8, 2026)
+
+**Approved scientific direction: two independent simulator feasibility assessments, not one selected replacement.** Evaluate **[UXsim](https://github.com/toruseo/UXsim) AND [CityFlow](https://github.com/cityflow-project/CityFlow)** in parallel against the same immutable original T1 1,000-driver identities, preferred and requested departure schedules, fixed original edge routes, meaningful junction constraints and original-preference-to-arrival all-driver cost. **SUMO remains the documented reference, not the sole scientific authority.** Initial source inspection identifies candidate identity/route support in both, but flags UXsim's packet and time-step representation and CityFlow's integer flow start times plus generated vehicle IDs as material fidelity risks. No experimental equivalence or future policy benefit is claimed.
+
+**Scope: planning and read-only source evidence only. NO new SUMO, UXsim or CityFlow runs, model implementations, new seeds, adapter executions, or social publication.** Existing T1 / Experiment 007 / E1-v2 NO-GO findings remain unchanged. The two tracks must both be completed and transparently classified, including blocked or unsupported requirements; one model may not silently replace the other. **[Read the dual-framework milestone plan](docs/POST_T1_DUAL_INDEPENDENT_SIMULATOR_FEASIBILITY_PLAN_2026-11-08.md).**
+
+
+## Recent public research-pivot announcements (November 8 UTC)
+
+The approved research-pivot update was **published and independently verified** on [LinkedIn as a five-page PDF document post](https://www.linkedin.com/feed/update/urn:li:ugcPost:7525113243074252800/) and [X as a single post with four research panels](https://x.com/yonnastgetahun/status/2119346244766031969), without Metricool. [Read the GitHub publication record](social/t1_pivot/PUBLICATION_RECORD_2026-11-08.md). The [reusable manual-only LinkedIn publisher](social/linkedin/README.md) remains available for future separately authorized announcements; this new UXsim + CityFlow planning milestone **does not authorize another social post**.
 
 ## Latest scientific finding — T1 shared lane RNG coupling (November 7, 2026 UTC)
 
