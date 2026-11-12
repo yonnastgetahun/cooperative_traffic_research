@@ -1,0 +1,68 @@
+# Single-use publication. PRs only validate; only the explicitly approved merge
+# that first adds the exact marker to main can publish. No retries or text-only fallback.
+name: Publish approved scientific direction - LinkedIn PDF and X 3 images
+on:
+  pull_request:
+    paths:
+      - "social/scientific_direction_2026_11/**"
+      - ".github/workflows/publish-scientific-direction-3panel-2026-11-11.yml"
+  push:
+    branches: [main]
+    paths:
+      - "social/scientific_direction_2026_11/approved-publish-marker.json"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: scientific-direction-3panel-publish-once-2026-11-11
+  cancel-in-progress: false
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install media and OAuth validation dependencies
+        run: python3 -m pip install --disable-pip-version-check Pillow pypdf requests-oauthlib
+      - name: Validate exact approval, both captions, three-page PDF and three attached PNGs
+        run: python3 social/scientific_direction_2026_11/publish.py --action preflight
+
+  linkedin:
+    needs: preflight
+    if: >-
+      github.event_name == 'push'
+      && github.run_attempt == 1
+      && startsWith(github.event.head_commit.message, 'social: publish approved 3-panel scientific direction once')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install required read/validation dependencies
+        run: python3 -m pip install --disable-pip-version-check Pillow pypdf requests-oauthlib
+      - name: Verify LinkedIn member and create one approved 3-page document post
+        env:
+          LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
+          LINKEDIN_PERSON_URN: ${{ secrets.LINKEDIN_PERSON_URN }}
+        run: python3 social/scientific_direction_2026_11/publish.py --action linkedin
+
+  x:
+    needs: preflight
+    if: >-
+      github.event_name == 'push'
+      && github.run_attempt == 1
+      && startsWith(github.event.head_commit.message, 'social: publish approved 3-panel scientific direction once')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install required read/validation dependencies
+        run: python3 -m pip install --disable-pip-version-check Pillow pypdf requests-oauthlib
+      - name: Create one X post with all three approved PNGs and verify media readback
+        env:
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
+        run: python3 social/scientific_direction_2026_11/publish.py --action x
