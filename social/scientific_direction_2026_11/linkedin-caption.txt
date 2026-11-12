@@ -1,0 +1,9 @@
+We made our traffic research more sophisticated. But were we getting closer to the central question?
+
+Our early cooperative routing policies did not establish an advantage. Better predictions did not automatically produce better collective decisions. And individual fairness remained a serious problem.
+
+So we’re refocusing: before building another prediction engine or selecting another simulator, we want a cleaner investigation of whether beneficial, voluntary cooperation can create value beyond equally informed independent choices.
+
+That is a change in method, not a claim of success. We’re preserving the negative and inconclusive results. No new experiment has been authorized.
+
+Research record and direction: https://yonnastgetahun.github.io/cooperative_traffic_research/site/#direction

@@ -1,0 +1,11 @@
+{
+  "approved_by_user": true,
+  "approval_scope": [
+    "linkedin_personal_profile_document_three_pages",
+    "x_one_post_three_images"
+  ],
+  "status": "PUBLISH_ONCE",
+  "landing": "https://yonnastgetahun.github.io/cooperative_traffic_research/site/#direction",
+  "linkedin_pdf_sha256": "6ca2e85d69da4725832975213a6a89e36d4cbe01fe9fb982e6af43febfeddbf1",
+  "x_zip_sha256": "4235db95beeb21166e3cc993db2c2aed78fee63c64007da9120decbe58f8ab86"
+}
