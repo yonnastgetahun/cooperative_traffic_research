@@ -5,6 +5,12 @@ Every day, drivers sit in traffic despite having powerful navigation apps. Those
 **What if we could bring some of the collective intelligence of tomorrow's autonomous transportation networks to today's human-driven roads?**
 
 
+## Current scientific direction — Direction B (November 12, 2026)
+
+**Foundational hypothesis first:** Can voluntarily coordinated decisions create a fair, system-wide traffic advantage beyond equally informed and capable independent decisions? The recent simulator investigation is closed at [PR #115](https://github.com/yonnastgetahun/cooperative_traffic_research/pull/115), **EVIDENCE INSUFFICIENT** for faithful original T1 cross-framework replication; that result does not disqualify the broader hypothesis or either simulator architecture.
+
+**[Read the Direction B scientific checkpoint and alternative next milestones](docs/DIRECTION_B_FOUNDATIONAL_COOPERATION_SCIENTIFIC_CHECKPOINT_2026-11-12.md).** It distinguishes (1) collective opportunity, (2) voluntary stability and fairness, and (3) practical discovery; reviews the original negative/inconclusive experiments and recent literature; and compares several defensible *conceptual* next milestones rather than prematurely selecting an experiment. **No new traffic simulation, model implementation, reserved cohorts, or external publication is authorized by this document.**
+
 ## Next scientific planning milestone — BOTH UXsim AND CityFlow (November 8, 2026)
 
 **Approved scientific direction: two independent simulator feasibility assessments, not one selected replacement.** Evaluate **[UXsim](https://github.com/toruseo/UXsim) AND [CityFlow](https://github.com/cityflow-project/CityFlow)** in parallel against the same immutable original T1 1,000-driver identities, preferred and requested departure schedules, fixed original edge routes, meaningful junction constraints and original-preference-to-arrival all-driver cost. **SUMO remains the documented reference, not the sole scientific authority.** Initial source inspection identifies candidate identity/route support in both, but flags UXsim's packet and time-step representation and CityFlow's integer flow start times plus generated vehicle IDs as material fidelity risks. No experimental equivalence or future policy benefit is claimed.
