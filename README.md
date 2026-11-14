@@ -11,6 +11,8 @@ Every day, drivers sit in traffic despite having powerful navigation apps. Those
 
 **[Read the Direction B scientific checkpoint and alternative next milestones](docs/DIRECTION_B_FOUNDATIONAL_COOPERATION_SCIENTIFIC_CHECKPOINT_2026-11-12.md).** It distinguishes (1) collective opportunity, (2) voluntary stability and fairness, and (3) practical discovery; reviews the original negative/inconclusive experiments and recent literature; and compares several defensible *conceptual* next milestones rather than prematurely selecting an experiment. **No new traffic simulation, model implementation, reserved cohorts, or external publication is authorized by this document.**
 
+**B-H1 execution-readiness review (November 14, 2026):** The [pre-execution scientific gate](docs/DIRECTION_B_BH1_EXECUTION_READINESS_GATE_2026-11-14.md) found all four mandatory design-qualification gates **NOT READY**. User authorization advances prospective protocol qualification, **not an unqualified traffic run**; no simulations or empirical outcomes have been produced.
+
 **Current design-only B-H1 plan (November 14, 2026):** [Minimum distinguishing spillback cooperation test — prospective plan](docs/DIRECTION_B_BH1_SPILLBACK_MINIMUM_DISTINGUISHING_TEST_PROSPECTIVE_PLAN_2026-11-14.md). It defines the equally informed independent comparator, voluntary timing intervention, no-spillback negative control, all-driver cost/fairness outcomes, and falsification gates. **Not frozen or executable; no simulation or implementation is approved.**
 
 ## Next scientific planning milestone — BOTH UXsim AND CityFlow (November 8, 2026)
