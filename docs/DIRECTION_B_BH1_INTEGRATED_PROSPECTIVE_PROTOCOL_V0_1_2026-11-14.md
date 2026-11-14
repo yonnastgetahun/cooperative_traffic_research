@@ -90,7 +90,7 @@ For the six willing IDs, consider at most one individual's schedule change at a 
 - Shift choice \(\{0,+5,+10\}\) relative to p_i, no early travel;
 - A strictly positive predicted all-driver improvement greater than **0.1s**;
 - Previously declined driver schedules stay identical to I;
-- At most 12 accepted individual revisions across all sweeps (a computation/coordination budget cap). Stop sooner when no eligible accepted improving revision remains.
+- At most **one accepted revision per willing driver** (thus at most six actual schedule revisions); ties favor retaining the current schedule and then the smaller requested delay. Stop sooner when no eligible accepted improving revision remains.
 
 **Refusal is honored:** no recommendation is forced or assigned to a decliner. If no offers are accepted, V collapses to I and that is a valid null result. A prespecified sensitivity comparison must include **zero willingness** and **all 12 eligible willing**; neither is evidence that real people would accept.
 
