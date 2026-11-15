@@ -43,6 +43,8 @@ jobs:
         run: python3 research/bh1_stage1/contract.py check-networks --out bh1-stage1-static
       - name: Evaluate equal-information decision and opt-out contracts (NO SUMO)
         run: python3 research/bh1_stage1/contract.py check-policy --out bh1-stage1-static
+      - name: Emit and validate four prospective arm route files (NO SUMO)
+        run: python3 research/bh1_stage1/make_arms.py make --out bh1-stage1-static
       - name: Preserve static evidence regardless of gate outcome
         if: always()
         uses: actions/upload-artifact@v4
