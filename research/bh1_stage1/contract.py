@@ -310,6 +310,9 @@ def check_net(outdir: Path):
         j = [n for n in root.findall("junction") if n.attrib.get("id") == "J"]
         if len(j) != 1 or len(j[0].attrib.get("incLanes", "").split()) < 2:
             raise AssertionError("Cross-traffic junction not compiled as a crossing")
+        conflicts = [q.attrib.get("foes", "") for q in j[0].findall("request")]
+        if len(conflicts) < 2 or not any("1" in foes for foes in conflicts):
+            raise AssertionError("Compiled J has no explicit competing crossing movements")
         for edge in root.iter("connection"):
             edge.attrib.pop("keepClear", None)
         normalized[physical] = ET.tostring(root)
