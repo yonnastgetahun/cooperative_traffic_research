@@ -1,0 +1,66 @@
+name: B-H1 one-template development-only physical verification (NOT confirmatory)
+
+on:
+  pull_request:
+    paths:
+      - 'research/bh1_stage1/run_development.py'
+      - '.github/workflows/bh1-stage2-development.yml'
+      - 'docs/DIRECTION_B_BH1_FROZEN_DEVELOPMENT_ONLY_PHYSICAL_VALIDATION_2026-11-14.md'
+
+permissions:
+  contents: read
+
+jobs:
+  source-static-preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container:
+      image: ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb
+    steps:
+      - uses: actions/checkout@v4
+      - name: Stage-1 static source and decision checks (no SUMO traffic)
+        run: |
+          python3 -m py_compile research/bh1_stage1/*.py
+          python3 research/bh1_stage1/contract.py generate --out bh1-preflight
+          for MODE in S N; do
+            netconvert --node-files bh1-preflight/bh1.nod.xml \
+              --edge-files bh1-preflight/bh1.edg.xml \
+              --connection-files bh1-preflight/bh1_$MODE.con.xml \
+              --tllogic-files bh1-preflight/bh1.tll.xml \
+              --output-file bh1-preflight/bh1_$MODE.net.xml \
+              --no-internal-links false
+          done
+          python3 research/bh1_stage1/contract.py check-networks --out bh1-preflight
+          python3 research/bh1_stage1/contract.py check-policy --out bh1-preflight
+          python3 research/bh1_stage1/make_arms.py make --out bh1-preflight
+          python3 research/bh1_stage1/measurement_contract.py test
+          python3 research/bh1_stage1/spillback_observation.py test
+      - name: Preserve stage-1 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bh1-dev-preflight-static-only
+          path: bh1-preflight/
+          if-no-files-found: warn
+          retention-days: 30
+
+  one-template-development:
+    if: needs.source-static-preflight.result == 'success'
+    needs: source-static-preflight
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    container:
+      image: ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb
+    steps:
+      - uses: actions/checkout@v4
+      - name: Execute ONLY four fixed B-H1 development arms and fail-closed records
+        run: |
+          python3 research/bh1_stage1/run_development.py all --out bh1-dev-only
+      - name: Preserve complete original physical development attempt, including failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bh1-development-9101-SI-SV-NI-NV
+          path: bh1-dev-only/
+          if-no-files-found: warn
+          retention-days: 30
