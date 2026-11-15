@@ -1,0 +1,59 @@
+name: B-H1 Stage 1 static contracts only (NO traffic simulation)
+
+on:
+  pull_request:
+    paths:
+      - 'research/bh1_stage1/**'
+      - '.github/workflows/bh1-stage1-static.yml'
+      - 'docs/DIRECTION_B_BH1_STAGE1_STATIC_QUALIFICATION_2026-11-14.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  static-qualification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container:
+      image: ghcr.io/eclipse-sumo/sumo@sha256:b1298d1fd18244022db4da6498a2e842295c8014147ec78102270eaeb24449cb
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify stage-1 Python only
+        run: python3 -m py_compile research/bh1_stage1/contract.py
+      - name: Generate the fixed candidate network (plain XML only)
+        run: python3 research/bh1_stage1/contract.py generate --out bh1-stage1-static
+      - name: Compile S network with netconvert (NOT a traffic simulation)
+        run: |
+          netconvert --node-files bh1-stage1-static/bh1.nod.xml \
+            --edge-files bh1-stage1-static/bh1.edg.xml \
+            --connection-files bh1-stage1-static/bh1_S.con.xml \
+            --tllogic-files bh1-stage1-static/bh1.tll.xml \
+            --output-file bh1-stage1-static/bh1_S.net.xml \
+            --no-internal-links false
+      - name: Compile N network with netconvert (NOT a traffic simulation)
+        run: |
+          netconvert --node-files bh1-stage1-static/bh1.nod.xml \
+            --edge-files bh1-stage1-static/bh1.edg.xml \
+            --connection-files bh1-stage1-static/bh1_N.con.xml \
+            --tllogic-files bh1-stage1-static/bh1.tll.xml \
+            --output-file bh1-stage1-static/bh1_N.net.xml \
+            --no-internal-links false
+      - name: Inspect compiled crossing, signal, and isolated keep-clear difference
+        run: python3 research/bh1_stage1/contract.py check-networks --out bh1-stage1-static
+      - name: Evaluate equal-information decision and opt-out contracts (NO SUMO)
+        run: python3 research/bh1_stage1/contract.py check-policy --out bh1-stage1-static
+      - name: Emit and validate four prospective arm route files (NO SUMO)
+        run: python3 research/bh1_stage1/make_arms.py make --out bh1-stage1-static
+      - name: Validate full-driver tripinfo cost parser using fictitious unit records only
+        run: python3 research/bh1_stage1/measurement_contract.py test
+      - name: Validate pinned FCD lane-observation contract using fictitious records only
+        run: python3 research/bh1_stage1/spillback_observation.py test
+      - name: Preserve static evidence regardless of gate outcome
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bh1-stage1-static-only
+          path: bh1-stage1-static/
+          if-no-files-found: warn
+          retention-days: 30
