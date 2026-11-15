@@ -34,3 +34,16 @@
 - If future physical traffic measures cannot include all 96 preferred-to-arrival costs, arrival and insertion times, crossing-obstruction observations, severe harms and nonparticipants, **do not begin the primary B-H1 comparison**.
 
 **Research status:** Historical Experiment 004/006/007 and T1 decisions, PR #115's EVIDENCE INSUFFICIENT outcome, and Direction B's voluntary-participation constraints are unchanged. There is no claim of an observed traffic benefit or even an observed spillback incident in this document.
+
+
+## Source/static execution evidence (no SUMO traffic)
+
+The single candidate configuration was evaluated by GitHub Actions using the pinned SUMO container, **netconvert only**, and standard-library decision-contract checks:
+
+- [Static network + policy/route validation, run 43665601656](https://github.com/yonnastgetahun/cooperative_traffic_research/actions/runs/43665601656): **SUCCESS**. S and N compiled with J internal lanes and K's exact red/green program. The compiled XML is byte-equivalent after removing the single intended keepClear setting. Both I rules achieved **0.0 seconds predicted maximum remaining unilateral gain** in one sweep; all four 96-ID arm route files passed sorted-departure, route legality and refusal/ineligibility checks.
+- [Tripinfo accounting contract + FCD diagnostic unit checks, run 43665865715](https://github.com/yonnastgetahun/cooperative_traffic_research/actions/runs/43665865715): **SUCCESS**. Fictitious-record tests detect missing trips, incorrect requested/actual admission timing and missing microscopic lane attributes. These are *test fixtures*, not driver observations.
+- The frozen paper forecast proposes **one** 10-second voluntary shift in S (driver m031, predicted individual cost change +3s), and **no** shift in N. Its predicted total-cost differences are **not evidence** of physical spillback reduction or traffic welfare improvement. A no-shift V outcome would also be a valid study result.
+
+**Important distinction:** The checks establish that the experimental inputs and measurement interfaces are statically *expressible*. They do **not** show physical obstruction, actual take-up, physical baseline quality, complete physical trip outcomes or any statistically qualified gain.
+
+**Stage-1 preflight interpretation:** G1–G4 have source/static *candidate implementations* and safety assertions sufficient to specify a single, separately bounded **development-only verification**. The *empirical* G1–G4 outcome gates remain open. If one physical run fails a blocked-crossing observation, a complete driver ledger, matched conditions, or the strong-independent benchmark, it is a **qualification failure**, not something to retune to achieve a desired result.
