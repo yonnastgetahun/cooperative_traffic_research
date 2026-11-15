@@ -299,8 +299,9 @@ def check_net(outdir: Path):
                if c.attrib.get("from") == "m_in" and c.attrib.get("to") == "pocket"]
         if len(con) != 1:
             raise AssertionError("Missing main crossing movement")
-        cc = con[0].attrib.get("keepClear", "true")
-        if cc != ("false" if physical == "S" else "true"):
+        cc = con[0].attrib.get("keepClear", "true").lower()
+        expected = {"false", "0"} if physical == "S" else {"true", "1"}
+        if cc not in expected:
             raise AssertionError(f"J keep-clear mismatch {physical}: {cc}")
         traffic = [t for t in root.findall("tlLogic") if t.attrib.get("id") == "K"]
         if len(traffic) != 1 or {p.attrib.get("state") for p in traffic[0].findall("phase")} != {"r", "G"}:
