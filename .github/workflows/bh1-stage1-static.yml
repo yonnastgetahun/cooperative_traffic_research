@@ -47,6 +47,8 @@ jobs:
         run: python3 research/bh1_stage1/make_arms.py make --out bh1-stage1-static
       - name: Validate full-driver tripinfo cost parser using fictitious unit records only
         run: python3 research/bh1_stage1/measurement_contract.py test
+      - name: Validate pinned FCD lane-observation contract using fictitious records only
+        run: python3 research/bh1_stage1/spillback_observation.py test
       - name: Preserve static evidence regardless of gate outcome
         if: always()
         uses: actions/upload-artifact@v4
