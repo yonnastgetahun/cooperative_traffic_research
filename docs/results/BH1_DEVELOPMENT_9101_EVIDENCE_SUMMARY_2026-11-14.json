@@ -1,0 +1,119 @@
+{
+  "classification": "DEVELOPMENT_ONLY_ONE_PREINSPECTED_SYNTHETIC_TEMPLATE_NOT_CONFIRMATORY",
+  "record_date": "2026-11-14 Pacific",
+  "scientific_disposition": "TESTED_VOLUNTARY_POLICY_UNFAVORABLE_IN_THIS_SINGLE_DEVELOPMENT_CASE; PHYSICAL_MEDIATOR_NOT_CAUSALLY_QUALIFIED",
+  "original_authorization": "B-H1 integrated four-gate source-static PASS for bounded development only",
+  "github": {
+    "pr": "https://github.com/yonnastgetahun/cooperative_traffic_research/pull/123",
+    "commit": "bca819f31c847122345b0a01b5734897bd013376",
+    "actions_run": "https://github.com/yonnastgetahun/cooperative_traffic_research/actions/runs/43666351039",
+    "full_evidence_artifact": "https://github.com/yonnastgetahun/cooperative_traffic_research/actions/runs/43666351039/artifacts/14141239895",
+    "evidence_artifact_zip_sha256": "dd52dee16e7108ad95710a065b88cfbeefc7f6569b0611fb9c42eda104d5739a"
+  },
+  "fixed_design": {
+    "simulator": "SUMO 1.28.0 original pinned container",
+    "seed": 9101,
+    "N": 96,
+    "main": 48,
+    "cross": 48,
+    "eligible": 12,
+    "willing_assumed": 6,
+    "decliners_assumed": 6,
+    "ineligible": 84,
+    "nonparticipants_ineligible_plus_decliners": 90,
+    "accepted_offers_S": 1,
+    "accepted_offers_N": 0,
+    "adjusted_driver": "m031",
+    "requested_shift_seconds": 10,
+    "predicted_own_cost_change_seconds": 3,
+    "no_real_world_behavior_evidence": true
+  },
+  "physical_conditions": {
+    "S_I": {
+      "complete_trips": 96,
+      "all_driver_preferred_to_arrival_seconds": 8838,
+      "max_arrival_seconds": 334,
+      "main_internal_J_stopped_FCD_samples": 14,
+      "simultaneous_main_J_stopped_and_cross_waiting_samples": 14,
+      "cross_waiting_on_approach_FCD_samples": 259,
+      "pocket_E2_max_jam_m": 39,
+      "cross_tripinfo_waiting_seconds": 3540,
+      "main_tripinfo_waiting_seconds": 399
+    },
+    "S_V": {
+      "complete_trips": 96,
+      "all_driver_preferred_to_arrival_seconds": 8876,
+      "max_arrival_seconds": 334,
+      "main_internal_J_stopped_FCD_samples": 17,
+      "simultaneous_main_J_stopped_and_cross_waiting_samples": 17,
+      "cross_waiting_on_approach_FCD_samples": 259,
+      "pocket_E2_max_jam_m": 39,
+      "cross_tripinfo_waiting_seconds": 3503,
+      "main_tripinfo_waiting_seconds": 430
+    },
+    "N_I": {
+      "complete_trips": 96,
+      "all_driver_preferred_to_arrival_seconds": 6088,
+      "max_arrival_seconds": 296,
+      "main_internal_J_stopped_FCD_samples": 2,
+      "simultaneous_main_J_stopped_and_cross_waiting_samples": 2,
+      "cross_waiting_on_approach_FCD_samples": 225,
+      "pocket_E2_max_jam_m": 35,
+      "cross_tripinfo_waiting_seconds": 1180,
+      "main_tripinfo_waiting_seconds": 413
+    },
+    "N_V": {
+      "complete_trips": 96,
+      "all_driver_preferred_to_arrival_seconds": 6088,
+      "max_arrival_seconds": 296,
+      "main_internal_J_stopped_FCD_samples": 2,
+      "simultaneous_main_J_stopped_and_cross_waiting_samples": 2,
+      "cross_waiting_on_approach_FCD_samples": 225,
+      "pocket_E2_max_jam_m": 35,
+      "cross_tripinfo_waiting_seconds": 1180,
+      "main_tripinfo_waiting_seconds": 413
+    }
+  },
+  "contrasts": {
+    "delta_S_network_seconds": 38,
+    "delta_N_network_seconds": 0,
+    "psi_network_seconds": 38,
+    "main_drivers_sum_delta_seconds": 48,
+    "cross_drivers_sum_delta_seconds": -10,
+    "eligible_sum_delta_seconds": 40,
+    "willing_sum_delta_seconds": 38,
+    "ineligible_sum_delta_seconds": -2,
+    "decliner_sum_delta_seconds": 2,
+    "all_nonparticipants_90_sum_delta_seconds": 0,
+    "all_nonparticipants_90_harmed_count": 8,
+    "all_nonparticipants_90_max_individual_harm_seconds": 2,
+    "all_drivers_harmed_count": 12,
+    "all_drivers_benefited_count": 1,
+    "all_drivers_unchanged_count": 83,
+    "negative_control_all_96_unchanged": true
+  },
+  "nonzero_individual_deltas_S_V_minus_S_I_seconds": {
+    "m031": 33,
+    "m035": 2,
+    "m039": 2,
+    "m033": 2,
+    "m038": 2,
+    "m041": 2,
+    "m037": 2,
+    "x012": 1,
+    "x032": 1,
+    "m034": 1,
+    "m040": 1,
+    "m036": 1,
+    "x011": -12
+  },
+  "limitations": [
+    "A single synthetic development seed is not an independent replication or a statistically inferential estimate.",
+    "FCD stopped-internal-J and stopped cross-approach co-occurrence does not prove causal blocking by physical spillback; priority interactions may confound attribution.",
+    "The N keep-clear control still showed two stalled main-internal-J samples; it did not eliminate all stopped junction occupancy.",
+    "A shared forecast with identical information is not necessarily a physically accurate or strong contemporary traffic-aware independent policy.",
+    "Even with locked per-ID attributes and one SUMO seed, policy-dependent event ordering can affect residual stochastic behavior.",
+    "Six willingness assumptions and a predicted +5s concession cap do not establish human voluntary acceptance; m031's realized +33s harm is not an accepted real-driver cost.",
+    "No cohort extension, respecification, physical retuning, or confirmatory claims are authorized from this result."
+  ]
+}
