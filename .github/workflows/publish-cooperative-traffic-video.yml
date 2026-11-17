@@ -1,0 +1,95 @@
+# Manual-only video publication. Never triggered by pushes, merges, PRs or schedules.
+name: Publish Cooperative Traffic Research video
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: Choose validate, verify, or publish
+        required: true
+        type: choice
+        options:
+          - validate
+          - verify
+          - publish
+        default: validate
+      confirmation:
+        description: For publishing only, type the exact video confirmation phrase
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cooperative-traffic-video-publication
+  cancel-in-progress: false
+
+jobs:
+  preflight:
+    if: github.event_name == 'workflow_dispatch' && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install X OAuth dependency
+        run: python3 -m pip install --disable-pip-version-check requests-oauthlib
+      - name: Validate publisher syntax and exact approved media/copy
+        run: |
+          python3 -m py_compile social/linkedin/publish_linkedin_video.py social/x_cooperative_traffic_video.py
+          python3 social/linkedin/publish_linkedin_video.py --action validate
+          python3 social/x_cooperative_traffic_video.py --action validate
+
+  verify:
+    needs: preflight
+    if: inputs.action == 'verify' && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install X OAuth dependency
+        run: python3 -m pip install --disable-pip-version-check requests-oauthlib
+      - name: Verify LinkedIn member OAuth without posting
+        env:
+          LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
+          LINKEDIN_PERSON_URN: ${{ secrets.LINKEDIN_PERSON_URN }}
+        run: python3 social/linkedin/publish_linkedin_video.py --action verify
+      - name: Verify X OAuth without posting
+        env:
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
+        run: python3 social/x_cooperative_traffic_video.py --action verify
+
+  linkedin:
+    needs: preflight
+    if: inputs.action == 'publish' && inputs.confirmation == 'YES_PUBLISH_APPROVED_COOPERATIVE_TRAFFIC_VIDEO' && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install X OAuth dependency
+        run: python3 -m pip install --disable-pip-version-check requests-oauthlib
+      - name: Publish and verify LinkedIn native video attachment
+        env:
+          LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
+          LINKEDIN_PERSON_URN: ${{ secrets.LINKEDIN_PERSON_URN }}
+        run: python3 social/linkedin/publish_linkedin_video.py --action publish --confirmation YES_PUBLISH_APPROVED_COOPERATIVE_TRAFFIC_LINKEDIN_VIDEO
+
+  x:
+    needs: preflight
+    if: inputs.action == 'publish' && inputs.confirmation == 'YES_PUBLISH_APPROVED_COOPERATIVE_TRAFFIC_VIDEO' && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install X OAuth dependency
+        run: python3 -m pip install --disable-pip-version-check requests-oauthlib
+      - name: Publish and verify X native video attachment
+        env:
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
+        run: python3 social/x_cooperative_traffic_video.py --action publish --confirmation YES_PUBLISH_APPROVED_COOPERATIVE_TRAFFIC_X_VIDEO
