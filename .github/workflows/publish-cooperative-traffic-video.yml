@@ -13,6 +13,15 @@ on:
           - verify
           - publish
         default: validate
+      platform:
+        description: For publishing, choose both platforms or one recovery target
+        required: false
+        type: choice
+        options:
+          - both
+          - linkedin
+          - x
+        default: both
       confirmation:
         description: For publishing only, type the exact video confirmation phrase
         required: false
@@ -70,7 +79,7 @@ jobs:
 
   linkedin:
     needs: preflight
-    if: inputs.action == 'publish' && inputs.confirmation == 'YES_PUBLISH_APPROVED_COOPERATIVE_TRAFFIC_VIDEO' && github.run_attempt == 1
+    if: inputs.action == 'publish' && (inputs.platform == 'both' || inputs.platform == 'linkedin') && inputs.confirmation == 'YES_PUBLISH_APPROVED_COOPERATIVE_TRAFFIC_VIDEO' && github.run_attempt == 1
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -88,7 +97,7 @@ jobs:
 
   x:
     needs: preflight
-    if: inputs.action == 'publish' && inputs.confirmation == 'YES_PUBLISH_APPROVED_COOPERATIVE_TRAFFIC_VIDEO' && github.run_attempt == 1
+    if: inputs.action == 'publish' && (inputs.platform == 'both' || inputs.platform == 'x') && inputs.confirmation == 'YES_PUBLISH_APPROVED_COOPERATIVE_TRAFFIC_VIDEO' && github.run_attempt == 1
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
