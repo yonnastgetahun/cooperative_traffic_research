@@ -32,8 +32,11 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - name: Install X OAuth dependency
-        run: python3 -m pip install --disable-pip-version-check requests-oauthlib
+      - name: Install media and X dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes ffmpeg
+          python3 -m pip install --disable-pip-version-check requests-oauthlib
       - name: Validate publisher syntax and exact approved media/copy
         run: |
           python3 -m py_compile social/linkedin/publish_linkedin_video.py social/x_cooperative_traffic_video.py
@@ -47,8 +50,11 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - name: Install X OAuth dependency
-        run: python3 -m pip install --disable-pip-version-check requests-oauthlib
+      - name: Install media and X dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes ffmpeg
+          python3 -m pip install --disable-pip-version-check requests-oauthlib
       - name: Verify LinkedIn member OAuth without posting
         env:
           LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
@@ -69,8 +75,11 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - name: Install X OAuth dependency
-        run: python3 -m pip install --disable-pip-version-check requests-oauthlib
+      - name: Install media and X dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes ffmpeg
+          python3 -m pip install --disable-pip-version-check requests-oauthlib
       - name: Publish and verify LinkedIn native video attachment
         env:
           LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
@@ -84,8 +93,11 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - name: Install X OAuth dependency
-        run: python3 -m pip install --disable-pip-version-check requests-oauthlib
+      - name: Install media and X dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes ffmpeg
+          python3 -m pip install --disable-pip-version-check requests-oauthlib
       - name: Publish and verify X native video attachment
         env:
           X_API_KEY: ${{ secrets.X_API_KEY }}
