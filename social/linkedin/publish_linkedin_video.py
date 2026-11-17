@@ -10,6 +10,7 @@ uploaded video URN. No automatic publication retry is allowed.
 import argparse
 import hashlib
 import json
+import os
 import subprocess
 import sys
 import time
@@ -31,6 +32,22 @@ MAX_VIDEO_BYTES = 5_000_000_000
 def must(condition, message):
     if not condition:
         raise RuntimeError(message)
+
+
+def configured_identity():
+    """Use the existing member identity without requiring OpenID userinfo.
+
+    The established document publisher already stores the approved personal
+    member URN in LINKEDIN_PERSON_URN. Some member-publishing tokens can retain
+    w_member_social while denying the separate /v2/userinfo read capability;
+    video publication should therefore authenticate the actual publishing call
+    without changing the existing document publisher.
+    """
+    token = os.environ.get("LINKEDIN_ACCESS_TOKEN", "").strip()
+    owner = os.environ.get("LINKEDIN_PERSON_URN", "").strip()
+    must(token and owner, "Missing LINKEDIN_ACCESS_TOKEN or LINKEDIN_PERSON_URN GitHub secret")
+    must(owner.startswith("urn:li:person:") and len(owner) < 150, "Invalid personal author URN")
+    return token, owner
 
 
 def sha256(path):
@@ -211,7 +228,7 @@ def main():
         print("PASS: LinkedIn member OAuth authenticated; NO POST")
         return
     must(args.confirmation == PUBLISH_CONFIRM, "Manual publication confirmation mismatch")
-    token, owner = base.identity()
+    token, owner = configured_identity()
     publish(token, owner, caption)
 
 
