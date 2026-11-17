@@ -93,3 +93,13 @@ jobs:
           X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
           X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
         run: python3 social/x_cooperative_traffic_video.py --action publish --confirmation YES_PUBLISH_APPROVED_COOPERATIVE_TRAFFIC_X_VIDEO
+
+  reject-unconfirmed-publish:
+    needs: preflight
+    if: inputs.action == 'publish' && inputs.confirmation != 'YES_PUBLISH_APPROVED_COOPERATIVE_TRAFFIC_VIDEO' && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    steps:
+      - name: Reject unconfirmed publication
+        run: |
+          echo 'Publication blocked: exact video confirmation was not provided.'
+          exit 1
