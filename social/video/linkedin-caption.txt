@@ -1,0 +1,20 @@
+I've been deliberate about showing not just what I build, but how I decide what deserves more work.
+
+This project started with an everyday question: can drivers voluntarily coordinate to make traffic better for everyone, beyond what they could achieve by making their own informed decisions?
+
+As a solo builder, I used an AI-assisted workflow: start with voice exploration, use multiple agents for literature, experimental design, engineering, analysis, and critical review, then set the controls, challenge assumptions, inspect the evidence, and decide whether the idea earns another iteration.
+
+That process produced a small synthetic development experiment with 96 simulated drivers. Our prediction suggested a collective benefit. The result was worse: the voluntary-style condition was 38 network-seconds higher than the equally informed independent comparison. For one shifted driver, the predicted personal cost was +3 seconds; the realized cost was +33 seconds.
+
+That does not prove voluntary cooperation cannot work. It did support a development NO-GO for the tested B-H1 policy.
+
+The important part for me is what happened next: we preserved the evidence rather than keep tweaking toward a favorable result. New experiments are paused while we assess whether a genuinely different mechanism is worth investigating.
+
+This is what AI makes newly possible for an independent builder: exploring questions that might once have required a larger research team. But AI does not replace scientific rigor, independent verification, or product judgment. I direct the question, orchestrate the work, challenge assumptions, and decide what comes next.
+
+The code, methods, results, and research decisions are documented openly so others can inspect and challenge the work.
+
+Full research and results:
+https://github.com/yonnastgetahun/cooperative_traffic_research/blob/main/docs/DIRECTION_B_BH1_DEVELOPMENT_9101_FINAL_SCIENTIFIC_REPORT_2026-11-14.md
+
+#TrafficResearch #TransportationScience #AI #BuildInPublic #AIResearch #AIStartups #MultiAgentSystems #ProductManagement #OpenSource #ChatGPT #Claude
